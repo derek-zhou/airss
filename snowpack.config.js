@@ -1,10 +1,12 @@
 /** @type {import("snowpack").SnowpackUserConfig } */
 module.exports = {
   mount: {
-    /* ... */
+      "src": "/"
   },
   plugins: [
-    /* ... */
+      /* ... */
+      "@snowpack/plugin-svelte",
+      "@snowpack/plugin-postcss"
   ],
   routes: [
     /* Enable an SPA Fallback in development: */
