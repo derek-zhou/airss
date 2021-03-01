@@ -10,14 +10,7 @@ module.exports = {
 	"public": {url: "/", static: true, resolve: false}
     },
     plugins: [
-	/* ... */
-	[
-	    "@snowpack/plugin-svelte", {
-		compilerOptions: {
-		    customElement: true
-		}
-	    }
-	],
+	"@snowpack/plugin-svelte",
 	"@snowpack/plugin-postcss"
     ],
     routes: [

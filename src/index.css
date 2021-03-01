@@ -97,3 +97,45 @@
         }
     }
 }
+
+@layer components {
+    .viewport {
+	@apply relative;
+	.header {
+	    @apply p-4;
+	    .brand-title {
+                @apply text-3xl text-green-500 font-bold;
+                img {
+                    @apply inline-block;
+                }
+	    }
+	}
+	.footer {
+	    @apply text-xs text-gray-700 border-t border-gray-200 mt-2 py-3 flex flex-col text-center;
+	    .copyright {
+                @apply flex-auto text-right;
+            }
+	    .attribute {
+		@apply text-gray-400 flex-auto;
+		a {
+		     @apply text-blue-300;
+		}
+	    }
+	}
+    }
+    @screen md {
+	.viewport {
+            @apply max-w-screen-md mx-auto;
+	}
+    }
+    @screen lg {
+	.viewport {
+            @apply max-w-screen-lg;
+	}
+    }
+    @screen xl {
+	.viewport {
+            @apply max-w-screen-xl;
+	}
+    }
+}
