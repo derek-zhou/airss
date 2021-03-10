@@ -5,9 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="AirSS reader" />
     <link rel="stylesheet" type="text/css" href="/dist/index.css" />
-    <script type="module" src="/dist/index.js"></script>
     <title>AirSS Reader</title>
   </head>
   <body>
+    <script type="module">
+     import App from "/dist/App.svelte.js";
+     const app = new App({
+	 target: document.body
+     });
+    </script>
   </body>
 </html>
