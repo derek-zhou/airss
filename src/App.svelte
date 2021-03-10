@@ -1,6 +1,10 @@
 <script>
 
- import * from './airss_controller.js';
+ // stores
+ import {length, cursor, alertText, alertClass, currentItem, running} from './airss_controller.js';
+
+ // functions
+ import {forwardItem, backwardItem, subscribe, unsubscribe} from  './airss_controller.js';
 
  // constants
  // screen is fundimental content shown in the window
@@ -35,22 +39,23 @@
  }
 
  function browseTouchMove(evt) {
-    if ( ! xDown || ! yDown ) {
-        return;
-    }
+     if ( ! xDown || ! yDown ) {
+         return;
+     }
      var xUp = evt.touches[0].clientX;
      var yUp = evt.touches[0].clientY;
      var xDiff = xDown - xUp;
      var yDiff = yDown - yUp;
 
-     if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {/*most significant*/
-         if ( xDiff > 0 ) {
-             /* left swipe */
-             forwardItem();
-         } else {
-             /* right swipe */
-             backwardItem();
-         }
+     /*most significant*/
+     if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {
+	 if ( xDiff > 0 ) {
+	     /* left swipe */
+	     forwardItem();
+	 } else {
+	     /* right swipe */
+	     backwardItem();
+	 }
      }
      /* reset values */
      xDown = null;
