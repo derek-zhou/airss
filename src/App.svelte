@@ -141,10 +141,12 @@
 		 href={roastPrefix + encodeURIComponent($currentItem.url)}>roast!</a>
 	  </div>
       {:else}
-	  <h2>No news is bad news. How about
+	  <h4>
+	      No news is bad news. How about
 	      <button class="button"
 		      on:click={clickSubscribe}>subscribe</button>
-	      something?</h2>
+	      something?
+	  </h4>
       {/if}
       </div>
   {:else if screen == Screens.shutdown}
@@ -177,7 +179,7 @@
   {:else if screen == Screens.subscribe}
       <div class="box">
 	  <form on:submit|preventDefault={clickSubmitSubscribe}>
-	      <input bind:value={subscribeUrl}
+	      <input type="text" bind:value={subscribeUrl}
 		     placeholder="enter the url to subscribe">
 	      <input class="button" type="submit" value="submit">
 	      <input class="button" type="reset" value="cancel"

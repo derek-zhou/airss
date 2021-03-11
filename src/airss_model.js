@@ -8,7 +8,6 @@
 import {openDB} from 'idb';
 import * as Feeds from './feeds.js';
 import * as Items from './items.js';
-import * as Configs from './configs.js';
 
 // exported client side functions. all return promises or null
 export {currentState, reinit,
@@ -136,7 +135,10 @@ async function init() {
     });
     await Feeds.load(db);
     await Items.load(db);
-    emitItemsLoaded([Items.length(), Items.readingCursor()]);
+    emitItemsLoaded({
+	length: Items.length(),
+	cursor: Items.readingCursor()
+    });
 }
 
 function shouldLoadMore() {
@@ -172,7 +174,10 @@ async function loadFeed(feedId) {
 	}
 	Feeds.rotate();
 	if (num > 0)
-	    emitItemsLoaded([Items.length(), Items.readingCursor()]);
+	    emitItemsLoaded({
+		length: Items.length(),
+		cursor: Items.readingCursor()
+	    });
     }
     return num;
 }

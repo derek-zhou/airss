@@ -20,8 +20,8 @@ export const Store = "items";
 
 // items is an array of item ids in ascending order
 let items = [];
-let readingCursor = -1;
-let knownCursor = -1;
+let reading = -1;
+let known = -1;
 
 // public apis
 export {upgrade, load, length, markRead,
@@ -46,34 +46,34 @@ function parseJSONItem(json) {
 }
 
 function readingCursor() {
-    return readingCursor;
+    return reading;
 }
 
 function knownCursor() {
-    return knownCursor;
+    return known;
 }
 
 function unreadCount() {
-    return items.length() - knownCursor - 1;
+    return items.length - known - 1;
 }
 
 function forwardCursor() {
-    if (readingCursor >= items.length() - 1)
+    if (reading >= items.length - 1)
 	return false;
-    readingCursor ++;
-    if (knownCursor < readingCursor)
-	knownCursor = readingCursor;
+    reading ++;
+    if (known < reading)
+	known = reading;
     return true;
 }
 
 function backwardCursor() {
-    if (readingCursor <= 0)
+    if (reading <= 0)
 	return false;
-    readingCursor --;
+    reading --;
 }
 
 function length() {
-    return items.length();
+    return items.length;
 }
 
 async function markRead(db, item) {
@@ -84,7 +84,7 @@ async function markRead(db, item) {
 }
 
 function getCurrentItem(db) {
-    return db.get(Store, items[readingCursor]);
+    return db.get(Store, items[reading]);
 }
 
 async function pushItem(db, item) {
@@ -106,14 +106,14 @@ async function load(db) {
     let cursor = await store.openCursor();
 
     items = [];
-    knownCursor = -1;
+    known = -1;
     while (cursor) {
 	// items from the beginning up to a point are read
 	if (cursor.value.read)
-	    knownCursor ++;
+	    known ++;
 	items.push(cursor.key);
 	cursor = await cursor.continue();
     }
     // point both cursor at the last read item
-    readingCursor = knownCursor;
+    reading = known;
 }

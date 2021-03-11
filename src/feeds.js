@@ -114,7 +114,7 @@ async function sanitize(url) {
     feed.lastLoadTime = 0;
     switch (mime) {
     case "application/json":
-    case "application/feed+json";
+    case "application/feed+json":
 	feed.type = FeedType.json;
 	break;
     case "application/atom+xml":
