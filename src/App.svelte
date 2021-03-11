@@ -27,8 +27,8 @@
  let yDown = null;
 
  // derived state
- $: leftDisabled = ($cursor <= 0) || (screen != "browse");
- $: rightDisabled = ($cursor >= $length - 1) || (screen != "browse");
+ $: leftDisabled = ($cursor <= 0) || (screen != Screens.browse);
+ $: rightDisabled = ($cursor >= $length - 1) || (screen != Screens.browse);
  $: screen = !$running ? Screens.shutdown : screen;
 
  // view functions
@@ -105,7 +105,7 @@
       <button class="button"
 	      disabled={leftDisabled}
 	      on:click={backwardItem}>&#x276e;</button>
-      {$cursor}/{$length}
+      {$cursor+1}/{$length}
       <button class="button"
 	      disabled={rightDisabled}
 	      on:click={forwardItem}>&#x276f;</button>

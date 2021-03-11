@@ -54,12 +54,12 @@ async function load(db) {
 }
 
 function first() {
-    feeds.length() > 0 ? feeds[0] : null;
+    return feeds.length > 0 ? feeds[0] : null;
 }
 
 function parseJSONFeed(feed, json) {
     let now = new Date();
-    let newFeed = feed.clone();
+    let newFeed = {...feed};
     newFeed.lastLoadTime = now;
     newFeed.title = json.title;
     newFeed.feedUrl = json.feed_url;
@@ -83,9 +83,9 @@ async function loadItems(db, feed) {
     switch (feed.type) {
     case FeedType.json:
 	let json = await response.json();
-	let feed = parseJSONFeed(feed, json);
-	let items = parseJSONItems(feed, json);
-	db.put(Store, feed);
+	let updated = parseJSONFeed(feed, json);
+	let items = parseJSONItems(updated, json);
+	db.put(Store, updated);
 	return items;
     default:
 	throw "Unkonwn feed type";
@@ -93,7 +93,7 @@ async function loadItems(db, feed) {
 }
 
 function rotate() {
-    if (feeds.length() == 0)
+    if (feeds.length == 0)
 	return;
     let feedId = feeds.shift();
     feeds.push(feedId);
@@ -132,9 +132,9 @@ async function sanitize(url) {
 }
 
 async function addFeed(db, feed) {
-    await db.put(Store, feed);
-    // id is auto gen from put. New feed is insert at the beginning to be load
-    feeds = [feed.id, ...feeds];
+    let id = await db.add(Store, feed);
+    console.log("added feed " + feed.feedUrl + " with id: " + id);
+    feeds = [id, ...feeds];
 }
 
 async function removeFeed(db, id) {

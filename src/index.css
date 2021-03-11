@@ -136,7 +136,7 @@
 	.header {
 	    @apply p-4 flex;
 	    .brand-title {
-                @apply flex-auto text-3xl text-green-500 font-bold;
+                @apply flex-auto text-3xl text-indigo-500 font-bold;
                 img {
                     @apply inline-block;
                 }

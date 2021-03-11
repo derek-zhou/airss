@@ -39,10 +39,11 @@ function parseJSONItem(json) {
     else
 	throw "Malformed JSON";
     item.url = json.url;
-    item.imageUrl = json.image_url;
+    item.imageUrl = json.image;
     item.title = json.title;
     item.tags = json.tags;
     item.authors = json.authors;
+    return item;
 }
 
 function readingCursor() {
@@ -70,6 +71,7 @@ function backwardCursor() {
     if (reading <= 0)
 	return false;
     reading --;
+    return true;
 }
 
 function length() {
@@ -84,14 +86,17 @@ async function markRead(db, item) {
 }
 
 function getCurrentItem(db) {
-    return db.get(Store, items[reading]);
+    if (reading >= 0)
+	return db.get(Store, items[reading]);
+    else
+	return null;
 }
 
 async function pushItem(db, item) {
     // it may throw, which will be catch outside
-    await db.put(Store, item);
-    // the id is auto-generated
-    items.push(item.id);
+    let id = await db.add(Store, item);
+    console.log("added item " + item.url + " with id: " + id);
+    items.push(id);
 }
 
 function upgrade(db) {
