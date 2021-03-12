@@ -95,7 +95,6 @@ function getCurrentItem(db) {
 async function pushItem(db, item) {
     // it may throw, which will be catch outside
     let id = await db.add(Store, item);
-    console.log("added item " + item.url + " with id: " + id);
     items.push(id);
 }
 

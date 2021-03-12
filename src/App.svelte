@@ -125,10 +125,14 @@
 	  </div>
 	  <h4 class="title"><a href={$currentItem.url}
 			       target="item">{$currentItem.title}</a></h4>
-	  <h5 class="site">
-	      {$currentItem.feedTitle} |
-	      {$currentItem.datePublished.toLocaleString()}
-	      {#each $currentItem.tags as tag}| {tag}{/each}
+	  <h5 class="tag-line">
+	      <span class="site">{$currentItem.feedTitle}</span>
+	      <span class="site">
+		  | {$currentItem.datePublished.toLocaleString()}
+	      </span>
+	      {#each $currentItem.tags as tag}
+		  <span class="site"> | {tag} </span>
+	      {/each}
 	  </h5>
 	  <p class="desc">
 	      {@html $currentItem.contentHtml}
@@ -136,7 +140,6 @@
 	  <div class="toolbar">
 	      <button class="button button-danger"
 		      on:click={clickUnsubscribe}>unsubscribe</button>
-	      <div class="spacer"></div>
 	      <a class="button" target="roast"
 		 href={roastPrefix + encodeURIComponent($currentItem.url)}>roast!</a>
 	  </div>

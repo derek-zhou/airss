@@ -101,7 +101,6 @@ async function cb_backwardItem(prev) {
 async function cb_loadMore(prev) {
     await prev;
     if (shouldLoadMore()) {
-	console.log("Start loading");
 	await loadMore();
     }
 }
@@ -173,8 +172,6 @@ async function loadFeed(feedId) {
     let now = new Date();
     let feed = await Feeds.get(db, feedId);
     let num = -1;
-    console.log("inspecting feed " + feedId + " last load at " +
-		feed.lastLoadTime.toLocaleString());
     if (feed.lastLoadTime <= now - MinReloadWait) {
 	try {
 	    let newItems = await Feeds.loadItems(db, feed);
@@ -184,19 +181,13 @@ async function loadFeed(feedId) {
 		try {
 		    await Items.pushItem(db, newItems[i]);
 		} catch(e) {
-		    if (e instanceof TypeError)
-			throw e;
-		    else
-			emitModelInfo(newItems[i].url + " skipped");
+		    // it is common that an item cannot be add
 		}
 	    }
 	    num = Items.length() - oldCount;
 	} catch (e) {
-	    if (e instanceof TypeError)
-		throw e;
-	    else
-		emitModelWarning("feed '" + feed.feedUrl +
-				 "' loading failed: " + e);
+	    emitModelWarning("feed '" + feed.feedUrl +
+			     "' loading failed: " + e);
 	}
 	Feeds.rotate();
 	if (num > 0)

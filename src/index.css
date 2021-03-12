@@ -144,7 +144,7 @@
             .nav {
                 @apply flex-auto text-right;
                 .button {
-                    @apply text-xl ml-1 py-1 my-1 px-4;
+                    @apply text-xl ml-1 py-1 my-1 px-1;
                 }
             }
 	}
@@ -167,33 +167,32 @@
 	    .box {
                 @apply flow-root bg-white p-2 mb-2 border border-gray-200 rounded;
                 .thumbnail {
-                    @apply float-left mr-2;
                     img {
-                        @apply w-auto max-w-full h-24;
+                        @apply w-auto max-w-full h-48;
                     }
                 }
                 .thumbnail-missing {
                     @apply float-left mr-2;
                     img {
-                        @apply w-20 h-20;
+                        @apply w-24 h-24;
                     }
                 }
                 .title {
-                    @apply font-bold mb-2 text-base leading-tight;
+                    @apply font-bold my-2 text-base leading-tight w-full;
                 }
-                .url {
-                    @apply text-xs pt-2 leading-tight overflow-hidden whitespace-nowrap w-full block;
-                }
-                .site {
-                    @apply text-sm text-gray-400 whitespace-nowrap;
-                }
+		.tag-line {
+		    @apply leading-tight;
+                    .site {
+			@apply text-sm text-gray-400 whitespace-nowrap;
+                    }
+		}
                 .desc {
                     @apply text-sm leading-tight mb-2;
                 }
 		.toolbar {
-                    @apply flex flex-wrap clear-both w-full;
+                    @apply flex flex-wrap justify-between w-full;
                     .button {
-			@apply text-white bg-purple-600 mt-2 mr-1;
+			@apply text-white bg-purple-600 mt-2;
                     }
                     .button-danger {
 			@apply bg-pink-600;
@@ -213,6 +212,13 @@
     }
     @screen sm {
 	.viewport {
+	    .header {
+		.nav {
+                    .button {
+			@apply px-4;
+                    }
+		}
+	    }
 	    .content {
                 form {
                     label {
@@ -230,12 +236,10 @@
                 }
 		.box {
                     .title {
-                        @apply text-2xl;
+                        @apply text-2xl w-auto;
                     }
                     .thumbnail {
-                        img {
-                            @apply h-32;
-                        }
+			@apply float-right ml-2;
                     }
                     .url {
                         @apply text-base;
@@ -243,6 +247,12 @@
                     .desc {
                         @apply text-base leading-snug;
                     }
+		    .toolbar {
+			@apply w-auto justify-start;
+			.button {
+			    @apply mr-1;
+			}
+		    }
                 }
 	    }
 	}
@@ -254,7 +264,7 @@
 		.box {
 		    .thumbnail {
                         img {
-                            @apply h-48;
+                            @apply h-64;
                         }
                     }
                     .url {
@@ -274,7 +284,7 @@
                     }
                     .thumbnail {
                         img {
-                            @apply h-64;
+                            @apply h-96;
                         }
                     }
 		}
