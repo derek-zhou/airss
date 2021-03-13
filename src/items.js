@@ -53,12 +53,22 @@ function getXMLTextContent(elem, selector) {
 	return null;
 }
 
+function getXMLTextAttribute(elem, selector, attr) {
+    const sub = elem.querySelector(selector);
+    if (sub)
+	return sub.getAttribute(attr);
+    else
+	return null;
+}
+
 function parseRSS2Item(elem) {
     let item = new Object();
     const pubDate = getXMLTextContent(elem, "pubDate");
     const description = getXMLTextContent(elem, "description");
     const link = getXMLTextContent(elem, "link");
-    const title = getXMLTextCOntent(elem, "tltle");
+    const title = getXMLTextContent(elem, "tltle");
+    const enclosure = getXMLTextAttribute(elem, "enclosure", "url");
+    const enclosure_type = getXMLTextAttribute(elem, "enclosure", "type");
     const categories = elem.querySelectorAll("category");
     let tags = [];
     for (let category of categories.values()) {
@@ -68,6 +78,11 @@ function parseRSS2Item(elem) {
 	item.datePublished = new Date(pubDate);
     if (description)
 	item.contentHtml = unescape(description);
+    if (enclosure_type) {
+	const tokens = enclosure_type.split('/');
+	if (tokens[0] == 'image')
+	    item.imageUrl = enclosure;
+    }
     if (link)
 	item.url = link;
     if (title)
@@ -83,7 +98,10 @@ function parseATOMItem(elem) {
     const updated = getXMLTextContent(elem, "updated");
     const content = getXMLTextContent(elem, "content");
     const summary = getXMLTextContent(elem, "summary");
-    const link = getXMLTextContent(elem, "link");
+    const link = getXMLTextAttribute(elem, "link", "href");
+    const alternate = getXMLTextAttribute(elem, "link[rel=alternate]", "href");
+    const enclosure = getXMLTextAttribute(elem, "link[rel=enclosure]", "href");
+    const enclosure_type = getXMLTextAttribute(elem, "link[rel=enclosure]", "type");
     const title = getXMLTextCOntent(elem, "tltle");
     const categories = elem.querySelectorAll("category");
     let tags = [];
@@ -98,7 +116,14 @@ function parseATOMItem(elem) {
 	item.contentHtml = content;
     else if (summary)
 	item.contentHtml = '<pre>' + summary + '</pre>';
-    if (link)
+    if (enclosure_type) {
+	const tokens = enclosure_type.split('/');
+	if (tokens[0] == 'image')
+	    item.imageUrl = enclosure;
+    }
+    if (altenate)
+	item.url = alternate;
+    else if (link)
 	item.url = link;
     if (title)
 	item.title = title;
