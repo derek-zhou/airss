@@ -72,7 +72,7 @@ function parseJSONItems(feed, json) {
 	// duplicate info for the front end
 	item.feedTitle = feed.title;
 	item.feedId = feed.id;
-	items = [..items, item];
+	items = [...items, item];
 	if (items.length >= MaxKeptItems)
 	    break;
     }
@@ -100,7 +100,7 @@ function parseRSS2Items(feed, channel) {
 	// duplicate info for the front end
 	item.feedTitle = feed.title;
 	item.feedId = feed.id;
-	items = [..items, item];
+	items = [...items, item];
 	if (items.length >= MaxKeptItems)
 	    break;
     }
@@ -128,7 +128,7 @@ function parseATOMItems(feed, channel) {
 	// duplicate info for the front end
 	item.feedTitle = feed.title;
 	item.feedId = feed.id;
-	items = [..items, item];
+	items = [...items, item];
 	if (items.length >= MaxKeptItems)
 	    break;
     }
@@ -152,32 +152,40 @@ function getXMLTextAttribute(elem, selector, attr) {
 }
 
 async function loadItems(db, feed) {
-    let response = await fetch(feed.feedUrl);
+    let response = await fetch(feed.feedUrl, {mode: 'no-cors'});
+    if (response.status != 200)
+	throw "loading failed in load";
     let updated = {...feed};
     let items = [];
     let now = new Date();
-    const parser = new DOMParser();
+    let json, xml, parser, doc, channel;
     updated.lastLoadTime = now;
 
     switch (feed.type) {
     case FeedType.json:
-	const json = await response.json();
+	json = await response.json();
 	updated = parseJSONFeed(updated, json);
 	items = parseJSONItems(updated, json);
 	break;
     case FeedType.rss2:
-	const xml = await response.text();
-	const doc = parser.parseFromString(xml, "application/xml");
-	const channel = doc.querySelector("channel");
+	xml = await response.text();
+	parser = new DOMParser();
+	doc = parser.parseFromString(xml, "application/xml");
+	channel = doc.querySelector("channel");
+	if (!channel)
+	    throw "Malformed RSS2";
 	updated = parseRSS2Feed(updated, channel);
 	items = parseRSS2Items(updated, channel);
 	break;
     case FeedType.atom:
-	const xml = await response.text();
-	const doc = parser.parseFromString(xml, "application/xml");
-	const channel = doc.querySelector("feed");
+	xml = await response.text();
+	parser = new DOMParser();
+	doc = parser.parseFromString(xml, "application/xml");
+	channel = doc.querySelector("feed");
+	if (!channel)
+	    throw "Malformed ATOM";
 	updated = parseATOMFeed(updated, channel);
-	const items = parseATOMItems(updated, channel);
+	items = parseATOMItems(updated, channel);
 	break;
     default:
 	throw "Unkonwn feed type";
@@ -218,13 +226,15 @@ function mimeToType(mime) {
 async function sanitize(url) {
     let feed = new Object();
     let response = await fetch(url);
+    if (response.status != 200)
+	throw "loading failed in sanitize";
     let mime = response.headers.get('Content-Type');
     let parts = mime.split(/\s*;\s*/);
     mime = parts[0];
     feed.feedUrl = url;
     feed.lastLoadTime = 0;
     feed.type = mimeToType(mime);
-    if (feed.type)
+    if (feed.type != null)
 	return feed;
 
     switch (mime) {
@@ -237,11 +247,11 @@ async function sanitize(url) {
 	for (let link of links.values()) {
 	    feed.feedUrl = link.getAttribute("href");
 	    feed.type = mimeToType(link.getAttribute("type"));
-	    if (feed.feedUrl && feed.type)
+	    if (feed.feedUrl && (feed.type != null))
 		return feed;
 	}
     }
-    throw("Unrecognized mime");
+    throw "Unrecognized mime";
 }
 
 async function addFeed(db, feed) {

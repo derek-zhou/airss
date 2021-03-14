@@ -1,7 +1,7 @@
 /*
  * The items schema, based on jsonfeed
  */
-import {unescape} from 'html-escaper';
+// import {unescape} from 'html-escaper';
 
 const SampleItem = {
     id: 0,
@@ -35,10 +35,13 @@ function parseJSONItem(json) {
     if (json.content_html !== undefined)
 	item.contentHtml = json.content_html;
     else if (json.content_text !== undefined)
-	item.contentHtml = '<pre>' + json.content_text + '</pre>';
+	item.contentHtml = '<p>' + json.content_text + '</p>';
     else
 	throw "Malformed JSON";
-    item.url = json.url;
+    if (json.url)
+	item.url = json.url;
+    else
+	throw "Malformed JSON";
     item.imageUrl = json.image;
     item.title = json.title;
     item.tags = json.tags;
@@ -66,7 +69,7 @@ function parseRSS2Item(elem) {
     const pubDate = getXMLTextContent(elem, "pubDate");
     const description = getXMLTextContent(elem, "description");
     const link = getXMLTextContent(elem, "link");
-    const title = getXMLTextContent(elem, "tltle");
+    const title = getXMLTextContent(elem, "title");
     const enclosure = getXMLTextAttribute(elem, "enclosure", "url");
     const enclosure_type = getXMLTextAttribute(elem, "enclosure", "type");
     const categories = elem.querySelectorAll("category");
@@ -77,7 +80,9 @@ function parseRSS2Item(elem) {
     if (pubDate)
 	item.datePublished = new Date(pubDate);
     if (description)
-	item.contentHtml = unescape(description);
+	item.contentHtml = '<p>' + description + '</p>';
+    else
+	throw "Malformed RSS2";
     if (enclosure_type) {
 	const tokens = enclosure_type.split('/');
 	if (tokens[0] == 'image')
@@ -85,6 +90,8 @@ function parseRSS2Item(elem) {
     }
     if (link)
 	item.url = link;
+    else
+	throw "Malformed RSS2";
     if (title)
 	item.title = title;
     if (tags)
@@ -102,7 +109,7 @@ function parseATOMItem(elem) {
     const alternate = getXMLTextAttribute(elem, "link[rel=alternate]", "href");
     const enclosure = getXMLTextAttribute(elem, "link[rel=enclosure]", "href");
     const enclosure_type = getXMLTextAttribute(elem, "link[rel=enclosure]", "type");
-    const title = getXMLTextCOntent(elem, "tltle");
+    const title = getXMLTextCOntent(elem, "title");
     const categories = elem.querySelectorAll("category");
     let tags = [];
     for (let category of categories.values()) {
@@ -116,6 +123,8 @@ function parseATOMItem(elem) {
 	item.contentHtml = content;
     else if (summary)
 	item.contentHtml = '<pre>' + summary + '</pre>';
+    else
+	throw "Malformed ATOM";
     if (enclosure_type) {
 	const tokens = enclosure_type.split('/');
 	if (tokens[0] == 'image')
@@ -125,6 +134,8 @@ function parseATOMItem(elem) {
 	item.url = alternate;
     else if (link)
 	item.url = link;
+    else
+	throw "Malformed ATOM";
     if (title)
 	item.title = title;
     if (tags)

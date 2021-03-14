@@ -72,7 +72,7 @@ async function cb_shutdown(prev) {
     db = null;
     emitShutDown();
     // throw in case someone is awaiting on me
-    throw("The backend already shutdown");
+    throw "The backend already shutdown";
 }
 
 async function cb_currentItem(prev) {
@@ -118,13 +118,21 @@ async function cb_subscribe(prev, url) {
     try {
 	feed = await Feeds.sanitize(url);
     } catch (e) {
-	emitModelError("The feed '" + url + "'is not valid");
-	return;
+	if (typeof e === 'string' || (e instanceof TypeError)) {
+	    emitModelError("The feed '" + url + "' is not valid: " + e);
+	    return;
+	} else {
+	    throw e;
+	}
     }
     try {
 	await Feeds.addFeed(db, feed);
     } catch (e) {
-	emitModelError("The feed '" + url + "'is already subscribed");
+	if (e instanceof DOMException) {
+	    emitModelError("The feed '" + url + "' is already subscribed");
+	} else {
+	    throw e;
+	}
     }
 }
 
@@ -134,7 +142,11 @@ async function cb_unsubscribe(prev, id) {
 	await Feeds.removeFeed(db, id);
 	emitModelInfo("Feed unsubscribed");
     } catch (e) {
-	emitModelError("Feed not found");
+	if (e instanceof DOMException) {
+	    emitModelError("Feed not found");
+	} else {
+	    throw e;
+	}
     }
 }
 
@@ -181,13 +193,21 @@ async function loadFeed(feedId) {
 		try {
 		    await Items.pushItem(db, newItems[i]);
 		} catch(e) {
-		    // it is common that an item cannot be add
+		    if (e instanceof DOMException) {
+			// it is common that an item cannot be add
+		    } else {
+			throw e;
+		    }
 		}
 	    }
 	    num = Items.length() - oldCount;
 	} catch (e) {
-	    emitModelWarning("feed '" + feed.feedUrl +
-			     "' loading failed: " + e);
+	    if (typeof e === 'string' || (e instanceof TypeError)) {
+		emitModelWarning("feed '" + feed.feedUrl +
+				 "' loading failed: " + e);
+	    } else {
+		throw e;
+	    }
 	}
 	Feeds.rotate();
 	if (num > 0)
