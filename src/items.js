@@ -26,8 +26,19 @@ let known = -1;
 // public apis
 export {upgrade, load, length,
 	readingCursor, knownCursor, forwardCursor, backwardCursor, unreadCount,
-	markRead, getCurrentItem, pushItem,
-	parseJSONItem, parseRSS2Item, parseATOMItem};
+	markRead, getCurrentItem, deleteCurrentItem, pushItem,
+	parseJSONItem, parseRSS2Item, parseATOMItem, oopsItem};
+
+function oopsItem() {
+    let item = new Object();
+    item.datePublished = new Date();
+    item.contentHtml = "If you see this, this feed failed loading";
+    // just fake something to satisfy constrains
+    item.url = Math.random().toString(36).substring(2, 15);
+    item.title = "Oops...";
+    item.tags = [];
+    return item;
+}
 
 function parseJSONItem(json) {
     let item = new Object();
@@ -44,7 +55,10 @@ function parseJSONItem(json) {
 	return null;
     item.imageUrl = json.image;
     item.title = json.title;
-    item.tags = json.tags;
+    if (json.tags)
+	item.tags = json.tags;
+    else
+	item.tags = [];
     return item;
 }
 
@@ -52,14 +66,6 @@ function getXMLTextContent(elem, selector) {
     const sub = elem.querySelector(selector);
     if (sub)
 	return sub.textContent;
-    else
-	return null;
-}
-
-function getXMLCDATASection(elem, selector) {
-    const sub = elem.querySelector(selector);
-    if (sub && sub.childNodes.length > 0)
-	return sub.childNodes[0].data;
     else
 	return null;
 }
@@ -78,7 +84,7 @@ function parseRSS2Item(elem) {
     const description = getXMLTextContent(elem, "description");
     // there is no way to select XML namespace.
     // Hopefully there is no other encoded than content:encoded
-    const content = getXMLCDATASection(elem, "*|encoded");
+    const content = getXMLTextContent(elem, "*|encoded");
     const link = getXMLTextContent(elem, "link");
     const title = getXMLTextContent(elem, "title");
     const enclosure = getXMLTextAttribute(elem, "enclosure", "url");
@@ -107,8 +113,7 @@ function parseRSS2Item(elem) {
 	return null;
     if (title)
 	item.title = title;
-    if (tags)
-	item.tags = tags;
+    item.tags = tags;
     return item;
 }
 
@@ -151,8 +156,7 @@ function parseATOMItem(elem) {
 	return null;
     if (title)
 	item.title = title;
-    if (tags)
-	item.tags = tags;
+    item.tags = tags;
     return item;
 }
 
@@ -200,6 +204,16 @@ function getCurrentItem(db) {
 	return db.get(Store, items[reading]);
     else
 	return null;
+}
+
+async function deleteCurrentItem(db) {
+    if (reading < 0)
+	return false;
+    await db.delete(Store, items[reading]);
+    items = items.slice(0, reading).concat(items.slice(reading + 1));
+    reading--;
+    known--;
+    return true;
 }
 
 async function pushItem(db, item) {

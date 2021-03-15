@@ -11,7 +11,7 @@ import * as Items from './items.js';
 
 // exported client side functions. all return promises or null
 export {currentState, reinit, shutdown,
-	forwardItem, backwardItem, currentItem,
+	forwardItem, backwardItem, deleteItem, currentItem,
 	subscribe, unsubscribe};
 
 // when the cursor is this close to the end I load more
@@ -69,10 +69,9 @@ let db = null;
 async function cb_shutdown(prev) {
     await prev;
     await db.close();
+    // so database is safe. future db operation will crash
     db = null;
     emitShutDown();
-    // throw in case someone is awaiting on me
-    throw "The backend already shutdown";
 }
 
 async function cb_currentItem(prev) {
@@ -96,6 +95,11 @@ async function cb_backwardItem(prev) {
 	return null;
     }
     return Items.getCurrentItem(db);
+}
+
+async function cb_deleteItem(prev) {
+    await prev;
+    return Items.deleteCurrentItem(db);
 }
 
 async function cb_loadMore(prev) {
@@ -185,36 +189,34 @@ async function loadFeed(feedId) {
     let feed = await Feeds.get(db, feedId);
     let num = -1;
     if (feed.lastLoadTime <= now - MinReloadWait) {
-	try {
-	    let newItems = await Feeds.loadItems(db, feed);
-	    let oldCount = Items.length();
-	    // push newItems in reverse order
-	    for(let i = newItems.length - 1; i>= 0; i--) {
-		try {
-		    await Items.pushItem(db, newItems[i]);
-		} catch(e) {
-		    if (e instanceof DOMException) {
-			// it is common that an item cannot be add
-		    } else {
-			throw e;
-		    }
+	console.log("loading feed '" + feed.feedUrl + "' ...");
+	let newItems = await Feeds.loadItems(db, feed);
+	let oldCount = Items.length();
+	// push newItems in reverse order
+	for(let i = newItems.length - 1; i>= 0; i--) {
+	    try {
+		await Items.pushItem(db, newItems[i]);
+	    } catch(e) {
+		if (e instanceof DOMException) {
+		    // it is common that an item cannot be add
+		} else {
+		    throw e;
 		}
 	    }
-	    num = Items.length() - oldCount;
-	} catch (e) {
-	    if (typeof e === 'string' || (e instanceof TypeError)) {
-		emitModelWarning("feed '" + feed.feedUrl +
-				 "' loading failed: " + e);
-	    } else {
-		throw e;
-	    }
 	}
+	num = Items.length() - oldCount;
+	console.log("with " + num + " items");
 	Feeds.rotate();
 	if (num > 0)
 	    emitItemsLoaded({
 		length: Items.length(),
 		cursor: Items.readingCursor()
 	    });
+    }
+    else {
+	console.log("not loading feed '" + feed.feedUrl +
+		    "' because load time was: " +
+		    feed.lastLoadTime.toLocaleString());
     }
     return num;
 }
@@ -251,6 +253,13 @@ function forwardItem() {
 // to display or null if nothing changed
 function backwardItem() {
     state = cb_backwardItem(state);
+    return state;
+}
+
+// delete the item under cursor. 
+// return a promise that resolve to true/false
+function deleteItem() {
+    state = cb_deleteItem(state);
     return state;
 }
 

@@ -3,16 +3,18 @@
  // stores
  import {length, cursor, alertText, alertClass, currentItem, running} from './airss_controller.js';
 
+ import { afterUpdate } from 'svelte';
+ 
  // functions
- import {forwardItem, backwardItem, subscribe, unsubscribe} from  './airss_controller.js';
+ import {forwardItem, backwardItem, deleteItem, subscribe, unsubscribe} from  './airss_controller.js';
 
  // constants
  // screen is fundimental content shown in the window
  const Screens = {
      browse: 1,
-     shutdown: 2,
+     shuutdown: 2,
      subscribe: 3,
-     unsubscribe: 4,
+     trash: 4,
      airtable: 5
  };
  const UnknownImage = "/images/unknown_link.png";
@@ -23,7 +25,8 @@
 
  // form value
  let subscribeUrl = "";
-
+ let shouldUnsubscribe = false;
+ 
  let xDown = null;
  let yDown = null;
 
@@ -31,6 +34,21 @@
  $: leftDisabled = ($cursor <= 0) || (screen != Screens.browse);
  $: rightDisabled = ($cursor >= $length - 1) || (screen != Screens.browse);
  $: screen = !$running ? Screens.shutdown : screen;
+
+ // view functions
+
+ afterUpdate(() => {
+     let container = document.querySelector("#content_html");
+     if (!container)
+	 return;
+     let baseUrl = $currentItem.url;
+     // fix up all img's href
+     for (let img of container.querySelectorAll("img").values()) {
+	 let href = img.getAttribute("src");
+	 let absUrl = new URL(href, baseUrl);
+	 img.setAttribute("src", absUrl.toString());
+     }
+ });
 
  // view functions
 
@@ -87,13 +105,15 @@
      screen = Screens.subscribe;
  }
 
- function clickUnsubscribe() {
+ function clickTrash() {
      $alertText = "";
-     screen = Screens.unsubscribe;
+     screen = Screens.trash;
  }
 
- function clickConfirmUnsubscribe() {
-     unsubscribe($currentItem.feedId);
+ function clickConfirmDelete() {
+     if (shouldUnsubscribe)
+	 unsubscribe($currentItem.feedId);
+     deleteItem();
      screen = Screens.browse;
  }
 
@@ -113,10 +133,10 @@
   <div class="header">
     <a class="brand-title" href="/">AirSS</a>
     <div class="nav">
+	<button class="button"
+		on:click={clickCloud}>&#127785;</button>
       <button class="button"
-	      on:click={clickCloud}>☁</button>
-      <button class="button"
-	      on:click={clickSubscribe}>☑</button>
+	      on:click={clickSubscribe}>&#127868;</button>
       <button class="button"
 	      disabled={leftDisabled}
 	      on:click={clickLeft}>&#x276e;</button>
@@ -145,18 +165,15 @@
 	      <span class="site">
 		  | {$currentItem.datePublished.toLocaleString()}
 	      </span>
-	      {#each $currentItem.tags as tag}
-		  <span class="site"> | {tag} </span>
-	      {/each}
 	  </h5>
-	  <p class="desc">
+	  <p id="content_html" class="desc">
 	      {@html $currentItem.contentHtml}
 	  </p>
 	  <div class="toolbar">
 	      <button class="button button-danger"
-		      on:click={clickUnsubscribe}>unsubscribe</button>
+		      on:click={clickTrash}>&#128465;</button>
 	      <a class="button" target="roast"
-		 href={roastPrefix + encodeURIComponent($currentItem.url)}>roast!</a>
+		 href={roastPrefix + encodeURIComponent($currentItem.url)}>&#128293;</a>
 	  </div>
       {:else}
 	  <h4>
@@ -172,14 +189,22 @@
 	  <button class="button"
 		  on:click={clickReload}>Reload</button>
       </div>
-  {:else if screen == Screens.unsubscribe}
+  {:else if screen == Screens.trash}
       <div class="box">
 	  <p>
-	      Are you sure you want to unsubscribe {$currentItem.feedTitle}?
+	      Are you sure you want to delete this item?
 	  </p>
-	  <form on:submit|preventDefault={clickConfirmUnsubscribe}>
-	      <input class="button" type="submit" value="unsubscribe">
-	      <input class="button" type="reset" value="cancel"
+	  <form on:submit|preventDefault={clickConfirmDelete}>
+	      <div class="line">
+		  <input type="checkbox" id="check-unsubscribe"
+			 name="ckeck-unsubscribe"
+			 bind:checked={shouldUnsubscribe}>
+		  <label for="check-unsubscribe">
+		      Unsubscribe <span class="focus">{$currentItem.feedTitle}</span> too
+		  </label>
+	      </div>
+	      <input class="button" type="submit" value="&#128076;">
+	      <input class="button" type="reset" value="&#128078;"
 		     on:click="{clickCancel}">
 	  </form>
       </div>
@@ -190,7 +215,7 @@
 	  </p>
 	  <div class="toolbar">
 	      <button class="button button-danger"
-		      on:click={clickCancel}>cancel</button>
+		      on:click={clickCancel}>&#128078;</button>
 	  </div>
       </div>
   {:else if screen == Screens.subscribe}
@@ -198,8 +223,8 @@
 	  <form on:submit|preventDefault={clickSubmitSubscribe}>
 	      <input type="text" bind:value={subscribeUrl}
 		     placeholder="enter the url to subscribe">
-	      <input class="button" type="submit" value="submit">
-	      <input class="button" type="reset" value="cancel"
+	      <input class="button" type="submit" value="&#128076;">
+	      <input class="button" type="reset" value="&#128078;"
 		     on:click="{clickCancel}">
 	  </form>
       </div>

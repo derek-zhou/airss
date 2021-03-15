@@ -2,7 +2,7 @@
  * The feeds schema, based on jsonfeed
  */
 
-import {parseJSONItem, parseRSS2Item, parseATOMItem} from './items.js';
+import {parseJSONItem, parseRSS2Item, parseATOMItem, oopsItem} from './items.js';
 
 // keep at most 100 items from feed
 const MaxKeptItems = 100;
@@ -80,8 +80,6 @@ function processItems(rawItems, feed, parseFunc) {
 function parseJSONFeed(feed, json) {
     let newFeed = {...feed};
     newFeed.title = json.title;
-    if (json.feed_url)
-	newFeed.feedUrl = json.feed_url;
     if (json.home_page_url)
 	newFeed.homePageUrl = json.home_page_url;
     return newFeed;
@@ -91,12 +89,9 @@ function parseRSS2Feed(feed, channel) {
     let newFeed = {...feed};
     const title = getXMLTextContent(channel, "title");
     const link = getXMLTextContent(channel, "link");
-    const feedUrl = getXMLTextAttribute(channel, "*|link[rel=self]", "href");
     newFeed.title = title;
     if (link)
 	newFeed.homePageUrl = link;
-    if (feedUrl)
-	newFeed.feedUrl = feedUrl;
     return newFeed;
 }
 
@@ -104,12 +99,9 @@ function parseATOMFeed(feed, channel) {
     let newFeed = {...feed};
     const title = getXMLTextContent(channel, "title");
     const link = getXMLTextAttribute(channel, "link[rel=alternate]", "href");
-    const feedUrl = getXMLTextAttribute(channel, "link[rel=self]", "href");
     newFeed.title = title;
     if (link)
 	newFeed.homePageUrl = link;
-    if (feedUrl)
-	newFeed.feedUrl = feedUrl;
     return newFeed;
 }
 
@@ -130,6 +122,22 @@ function getXMLTextAttribute(elem, selector, attr) {
 }
 
 async function loadItems(db, feed) {
+    try {
+	return await loadItemsThrow(db, feed);
+    } catch (e) {
+	if (typeof e === 'string' || (e instanceof TypeError)) {
+	    // fake a item
+	    let oops = oopsItem();
+	    oops.feedTitle = feed.title;
+	    oops.feedId = feed.id;
+	    return [oops];
+	} else {
+	    throw e;
+	}
+    }
+}
+
+async function loadItemsThrow(db, feed) {
     let rawItems, updated, parseFunc;
     let response = await fetch(feed.feedUrl);
     if (response.status != 200)
@@ -197,6 +205,11 @@ function mimeToType(mime) {
 
 // return a feed object if url is ok, or throw
 async function sanitize(url) {
+    // first we need to make sure it is a valid url. If not,
+    // the next line will throw
+    let urlObject = new URL(url);
+    if (urlObject.protocol != 'http:' && urlObject.protocol != 'https:')
+	throw "Only http(s) is supported";
     let feed = new Object();
     let response = await fetch(url);
     if (response.status != 200)

@@ -76,19 +76,16 @@
             }
         }
         blockquote {
-            @apply mb-4 border-l-4 border-gray-400 text-gray-800 p-2;
+            @apply mb-4 border-l-4 border-gray-400 p-2;
             p {
                 @apply mb-0;
             }
         }
         pre {
-            @apply mb-4 border-l-4 border-purple-500 bg-gray-200 p-2;
+            @apply mb-4 border-l-4 border-purple-500 p-2;
             > code {
                 @apply whitespace-pre;
             }
-        }
-        code {
-            @apply bg-gray-200 whitespace-nowrap;
         }
         dd,
         dt,
@@ -119,17 +116,14 @@
         @apply hidden;
     }
     .button {
-        @apply flex-none px-6 py-2 text-purple-600 inline-block rounded appearance-none
-        font-bold whitespace-nowrap text-sm text-center uppercase tracking-wide;
+        @apply flex-none px-6 py-1 text-purple-600 inline-block rounded appearance-none
+        font-bold whitespace-nowrap text-lg text-center uppercase;
     }
     .button:focus, .button:hover {
         @apply text-gray-600;
     }
     .button[disabled] {
         @apply cursor-default opacity-50;
-    }
-    .flipH {
-	transform: scale(-1, 1);
     }
     .viewport {
 	@apply relative;
@@ -151,17 +145,23 @@
 	.content {
 	    form {
 		@apply flex flex-wrap mt-1 mb-2;
+		.line {
+		    @apply w-full mb-2;
+		}
                 label {
                     @apply ml-2 leading-relaxed;
+		    .focus {
+			@apply font-bold italic;
+		    }
                 }
                 input[type="text"] {
                     @apply flex-none w-full mb-2 leading-relaxed border rounded border-gray-600;
                 }
                 .button[type="reset"] {
-                    @apply text-white bg-pink-600 mr-1;
+                    @apply cursor-pointer text-white bg-pink-600 mr-1;
                 }
                 .button[type="submit"] {
-                    @apply text-white bg-purple-600 mr-1;
+                    @apply cursor-pointer text-white bg-purple-600 mr-1;
                 }
 	    }
 	    .box {

@@ -61,6 +61,15 @@ export async function backwardItem() {
     }
 }
 
+export async function deleteItem() {
+    actionPreamble();
+    if (await Model.deleteItem()) {
+	length.update(n => n - 1);
+	cursor.update(n => n - 1);
+ 	currentItem.set(await Model.currentItem());
+    }
+}
+
 export function unsubscribe(id) {
     actionPreamble();
     Model.unsubscribe(id);
@@ -70,7 +79,6 @@ export function subscribe(url) {
     actionPreamble();
     Model.subscribe(url);
 }
-
 
 document.addEventListener("AirSSModelItemsLoaded", e => {
     length.set(e.detail.length);
