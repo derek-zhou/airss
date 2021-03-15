@@ -134,7 +134,7 @@
     .viewport {
 	@apply relative;
 	.header {
-	    @apply p-4 flex;
+	    @apply sticky top-0 bg-gray-200 p-2 flex;
 	    .brand-title {
                 @apply flex-auto text-3xl text-indigo-500 font-bold;
                 img {
@@ -144,7 +144,7 @@
             .nav {
                 @apply flex-auto text-right;
                 .button {
-                    @apply text-xl ml-1 py-1 my-1 px-1;
+                    @apply text-xl ml-1 py-1 mt-1 px-1;
                 }
             }
 	}
@@ -152,7 +152,7 @@
 	    form {
 		@apply flex flex-wrap mt-1 mb-2;
                 label {
-                    @apply flex-none w-full mb-2 leading-relaxed;
+                    @apply ml-2 leading-relaxed;
                 }
                 input[type="text"] {
                     @apply flex-none w-full mb-2 leading-relaxed border rounded border-gray-600;
@@ -165,7 +165,7 @@
                 }
 	    }
 	    .box {
-                @apply flow-root bg-white p-2 mb-2 border border-gray-200 rounded;
+                @apply flow-root bg-white p-2 mb-2 border border-gray-200;
                 .thumbnail {
                     img {
                         @apply w-auto max-w-full h-48;
@@ -174,7 +174,7 @@
                 .thumbnail-missing {
                     @apply float-left mr-2;
                     img {
-                        @apply w-24 h-24;
+                        @apply w-16 h-16;
                     }
                 }
                 .title {
@@ -204,7 +204,7 @@
 	    }
 	}
 	.footer {
-	    @apply text-xs text-gray-700 mt-2 py-3 flex flex-col text-center;
+	    @apply text-xs text-gray-700 mt-2 py-2 flex flex-col text-center;
 	    .copyright {
                 @apply flex-auto text-right;
             }
@@ -221,9 +221,6 @@
 	    }
 	    .content {
                 form {
-                    label {
-                        @apply w-auto flex-grow mb-0 mr-1;
-                    }
                     input[type="text"] {
                         @apply w-auto flex-grow mb-0 mr-1;
                     }

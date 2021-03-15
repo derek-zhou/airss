@@ -9,11 +9,11 @@
  // constants
  // screen is fundimental content shown in the window
  const Screens = {
-     browse: 0,
-     shutdown: 1,
-     subscribe: 2,
-     unsubscribe: 3,
-     airtable: 4
+     browse: 1,
+     shutdown: 2,
+     subscribe: 3,
+     unsubscribe: 4,
+     airtable: 5
  };
  const UnknownImage = "/images/unknown_link.png";
  const roastPrefix = "https://roastidio.us/roast?url=";
@@ -21,6 +21,7 @@
  // fundimental states of the app
  let screen = Screens.browse;
 
+ // form value
  let subscribeUrl = "";
 
  let xDown = null;
@@ -32,6 +33,16 @@
  $: screen = !$running ? Screens.shutdown : screen;
 
  // view functions
+
+ function clickLeft() {
+     window.scrollTo({ top: 0, behavior: 'smooth' });
+     backwardItem();
+ }
+
+ function clickRight() {
+     window.scrollTo({ top: 0, behavior: 'smooth' });
+     forwardItem();
+ }
 
  function browseTouchStart(evt) {
      xDown = evt.touches[0].clientX;
@@ -67,14 +78,17 @@
  }
 
  function clickCloud() {
+     $alertText = "";
      screen = Screens.airtable;
  }
 
  function clickSubscribe() {
+     $alertText = "";
      screen = Screens.subscribe;
  }
 
  function clickUnsubscribe() {
+     $alertText = "";
      screen = Screens.unsubscribe;
  }
 
@@ -89,6 +103,7 @@
  }
 
  function clickCancel() {
+     $alertText = "";
      screen = Screens.browse;
  }
 
@@ -104,11 +119,11 @@
 	      on:click={clickSubscribe}>☑</button>
       <button class="button"
 	      disabled={leftDisabled}
-	      on:click={backwardItem}>&#x276e;</button>
+	      on:click={clickLeft}>&#x276e;</button>
       {$cursor+1}/{$length}
       <button class="button"
 	      disabled={rightDisabled}
-	      on:click={forwardItem}>&#x276f;</button>
+	      on:click={clickRight}>&#x276f;</button>
     </div>
   </div>
   <p class={$alertClass} role="alert">{$alertText}</p>
@@ -162,12 +177,11 @@
 	  <p>
 	      Are you sure you want to unsubscribe {$currentItem.feedTitle}?
 	  </p>
-	  <div class="toolbar">
-	      <button class="button"
-		      on:click={clickConfirmUnsubscribe}>unsubscribe</button>
-	      <button class="button button-danger"
-		      on:click={clickCancel}>cancel</button>
-	  </div>
+	  <form on:submit|preventDefault={clickConfirmUnsubscribe}>
+	      <input class="button" type="submit" value="unsubscribe">
+	      <input class="button" type="reset" value="cancel"
+		     on:click="{clickCancel}">
+	  </form>
       </div>
   {:else if screen == Screens.airtable}
       <div class="box">

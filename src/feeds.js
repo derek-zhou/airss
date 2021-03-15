@@ -6,11 +6,12 @@ import {parseJSONItem, parseRSS2Item, parseATOMItem} from './items.js';
 
 // keep at most 100 items from feed
 const MaxKeptItems = 100;
+// keep at most 180 days back
+const MaxKeptPeriod = 180*24*3600*1000;
 
 const FeedType = {
-    json: 0,
-    rss2: 1,
-    atom: 2
+    json: 1,
+    xml: 2
 }
 
 const SampleFeed = {
@@ -57,54 +58,46 @@ function first() {
     return feeds.length > 0 ? feeds[0] : null;
 }
 
-function parseJSONFeed(feed, json) {
-    let newFeed = {...feed};
-    newFeed.title = json.title;
-    newFeed.feedUrl = json.feed_url;
-    newFeed.homePageUrl = json.home_page_url;
-    return newFeed;
-}
-
-function parseJSONItems(feed, json) {
+function processItems(rawItems, feed, parseFunc) {
+    let now = new Date();
     let items = [];
-    for (let item of json.items.values()) {
-	item = parseJSONItem(item);
-	// duplicate info for the front end
-	item.feedTitle = feed.title;
-	item.feedId = feed.id;
-	items = [...items, item];
-	if (items.length >= MaxKeptItems)
+    let count = 0;
+    for (let item of rawItems.values()) {
+	item = parseFunc(item);
+	if (item && (now - item.datePublished <= MaxKeptPeriod)) {
+	    // duplicate info for simple access
+	    item.feedTitle = feed.title;
+	    item.feedId = feed.id;
+	    items = [...items, item];
+	}
+	count++;
+	if (count >= MaxKeptItems)
 	    break;
     }
     return items;
+}
+
+function parseJSONFeed(feed, json) {
+    let newFeed = {...feed};
+    newFeed.title = json.title;
+    if (json.feed_url)
+	newFeed.feedUrl = json.feed_url;
+    if (json.home_page_url)
+	newFeed.homePageUrl = json.home_page_url;
+    return newFeed;
 }
 
 function parseRSS2Feed(feed, channel) {
     let newFeed = {...feed};
     const title = getXMLTextContent(channel, "title");
     const link = getXMLTextContent(channel, "link");
-    const feedUrl = getXMLTextAttribute(channel, "atom:link[rel=self]", "href");
-    if (title)
-	newFeed.title = title;
+    const feedUrl = getXMLTextAttribute(channel, "*|link[rel=self]", "href");
+    newFeed.title = title;
     if (link)
 	newFeed.homePageUrl = link;
     if (feedUrl)
 	newFeed.feedUrl = feedUrl;
     return newFeed;
-}
-
-function parseRSS2Items(feed, channel) {
-    let items = [];
-    for (let item of channel.querySelectorAll("item").values()) {
-	item = parseRSS2Item(item);
-	// duplicate info for the front end
-	item.feedTitle = feed.title;
-	item.feedId = feed.id;
-	items = [...items, item];
-	if (items.length >= MaxKeptItems)
-	    break;
-    }
-    return items;
 }
 
 function parseATOMFeed(feed, channel) {
@@ -112,27 +105,12 @@ function parseATOMFeed(feed, channel) {
     const title = getXMLTextContent(channel, "title");
     const link = getXMLTextAttribute(channel, "link[rel=alternate]", "href");
     const feedUrl = getXMLTextAttribute(channel, "link[rel=self]", "href");
-    if (title)
-	newFeed.title = title;
+    newFeed.title = title;
     if (link)
 	newFeed.homePageUrl = link;
     if (feedUrl)
 	newFeed.feedUrl = feedUrl;
     return newFeed;
-}
-
-function parseATOMItems(feed, channel) {
-    let items = [];
-    for (let item of channel.querySelectorAll("item").values()) {
-	item = parseATOMItem(item);
-	// duplicate info for the front end
-	item.feedTitle = feed.title;
-	item.feedId = feed.id;
-	items = [...items, item];
-	if (items.length >= MaxKeptItems)
-	    break;
-    }
-    return items;
 }
 
 function getXMLTextContent(elem, selector) {
@@ -152,47 +130,42 @@ function getXMLTextAttribute(elem, selector, attr) {
 }
 
 async function loadItems(db, feed) {
-    let response = await fetch(feed.feedUrl, {mode: 'no-cors'});
+    let rawItems, updated, parseFunc;
+    let response = await fetch(feed.feedUrl);
     if (response.status != 200)
 	throw "loading failed in load";
-    let updated = {...feed};
-    let items = [];
-    let now = new Date();
-    let json, xml, parser, doc, channel;
-    updated.lastLoadTime = now;
 
     switch (feed.type) {
     case FeedType.json:
-	json = await response.json();
-	updated = parseJSONFeed(updated, json);
-	items = parseJSONItems(updated, json);
+	let json = await response.json();
+	updated = parseJSONFeed(feed, json);
+	rawItems = json.items;
+	parseFunc = parseJSONItem;
 	break;
-    case FeedType.rss2:
-	xml = await response.text();
-	parser = new DOMParser();
-	doc = parser.parseFromString(xml, "application/xml");
-	channel = doc.querySelector("channel");
-	if (!channel)
-	    throw "Malformed RSS2";
-	updated = parseRSS2Feed(updated, channel);
-	items = parseRSS2Items(updated, channel);
-	break;
-    case FeedType.atom:
-	xml = await response.text();
-	parser = new DOMParser();
-	doc = parser.parseFromString(xml, "application/xml");
-	channel = doc.querySelector("feed");
-	if (!channel)
-	    throw "Malformed ATOM";
-	updated = parseATOMFeed(updated, channel);
-	items = parseATOMItems(updated, channel);
+    case FeedType.xml:
+	let xml = await response.text();
+	let parser = new DOMParser();
+	let doc = parser.parseFromString(xml, "text/xml");
+	let rss2Feed = doc.querySelector("channel");
+	let atomFeed = doc.querySelector("feed");
+	if (rss2Feed) {
+	    updated = parseRSS2Feed(feed, rss2Feed);
+	    rawItems = rss2Feed.querySelectorAll("item");
+	    parseFunc = parseRSS2Item;
+	} else if (atomFeed) {
+	    updated = parseATOMFeed(feed, atomFeed);
+	    rawItems = atomFeed.querySelectorAll("entry");
+	    parseFunc = parseATOMItem;
+	} else {
+	    throw "Malformed XML";
+	}
 	break;
     default:
 	throw "Unkonwn feed type";
     }
-
-    db.put(Store, updated);
-    return items;
+    updated.lastLoadTime = new Date();
+    await db.put(Store, updated);
+    return processItems(rawItems, updated, parseFunc);
 }
 
 function rotate() {
@@ -212,11 +185,11 @@ function mimeToType(mime) {
     case "application/feed+json":
 	return FeedType.json;
     case "application/atom+xml":
-	return FeedType.atom;
     case "application/rss+xml":
     case "application/x-rss+xml":
     case "application/xml":
-	return FeedType.rss2;
+    case "text/xml":
+	return FeedType.xml;
     default:
 	return null;
     }
@@ -245,10 +218,16 @@ async function sanitize(url) {
 	const doc = parser.parseFromString(html, "text/html");
 	const links = doc.head.querySelectorAll("link[rel=alternate]");
 	for (let link of links.values()) {
-	    feed.feedUrl = link.getAttribute("href");
-	    feed.type = mimeToType(link.getAttribute("type"));
-	    if (feed.feedUrl && (feed.type != null))
-		return feed;
+	    let href = link.getAttribute("href");
+	    let type = mimeToType(link.getAttribute("type"));
+	    if (!href)
+		continue;
+	    if (!type)
+		continue;
+	    feed.type = type;
+	    let mergedUrl = new URL(href, url);
+	    feed.feedUrl = mergedUrl.toString();
+	    return feed;
 	}
     }
     throw "Unrecognized mime";
