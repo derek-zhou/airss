@@ -98,3 +98,11 @@ document.addEventListener("AirSSModelShutDown", () => {
 document.addEventListener("AirSSModelInitDone", () => {
     loadCurrentItem();
 });
+
+// do I have a incoming api call to subscribe a feed
+if (location.search) {
+    let params = new URLSearchParams(location.search.substring(1));
+    let str = params.get("url");
+    if (str)
+	Model.subscribe(decodeURIComponent(str));
+}
