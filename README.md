@@ -14,7 +14,12 @@ You need a ES6 compliant browser (sorry, IE fans). The main branch is auto-deplo
 
 I am too lazy to write documentation. There are only a few buttons, so just try it. If you close the tab or browser or shut down the computer, you can pick it up right at where you left the next time you open it. The application will even shut down itself after a period of inactivity. For the curious minds, the application state is persistent on the local machine via [indexed db](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API); nothing go out to the internet. 
 
-You can also use the this bookmarklet: [subscribe in airss](javascript:location.href='https://airss.roastidio.us/?url='+encodeURIComponent(window.location.href)) to subscribe any blog. Just right click the above link, bookmark the link, give it a name such as `subscribe in airss`. Next time you came across an interesting blog, just click the bookmarklet and you are done.
+You can also use the this bookmarklet: 
+
+``` javascript javascript:location.href='https://airss.roastidio.us/?url='+encodeURIComponent(window.location.href)
+```
+
+to subscribe any blog. Github does not allow a link with `javascript:` URL, so you need to bookmark any page, such as this page, then edit the property of your newly created bookmark, give it a name such as `subscribe in airss` and paste in the above bookmarklet string as it's location. Next time you came across an interesting blog, just click the bookmarklet and you are done. This trick may not work in a mobile brower though.
 
 Comments or PRs are welcome.
 
