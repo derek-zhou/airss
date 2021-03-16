@@ -32,7 +32,7 @@ export {upgrade, load, length,
 function oopsItem() {
     let item = new Object();
     item.datePublished = new Date();
-    item.contentHtml = "If you see this, this feed failed loading";
+    item.contentHtml = "If you see this, this feed failed loading. Check the console for the actual error occured.";
     // just fake something to satisfy constrains
     item.url = Math.random().toString(36).substring(2, 15);
     item.title = "Oops...";

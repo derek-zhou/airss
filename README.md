@@ -7,14 +7,15 @@ A light weight feed reader that runs in your browser, with no backend.
 AirSS is an opinionated feed reader that is designed to aggregate and read blogs. It has very little functionality on the surface: You give it a bunch of feeds, it will feed you all the news, one item at a time. You cannot even jump ahead, let alone search or anything. The benefits are:
 
 * No software to install, no service to sign up, no middle man, no cookie, no tracking, completely free with no string attached at all.
+* It is tiny: 27KB transfer size for now, and that's html, style, scripts all put together, and I don't even bother with minifying or bundling.
 * Supports [JSON feeds](https://www.jsonfeed.org/), [RSS2 feeds](https://validator.w3.org/feed/docs/rss2.html) and [Atom feeds](https://tools.ietf.org/html/rfc4287). Also automatically figures out feed url from HTML through [rel=alternate links](https://developer.mozilla.org/en-US/docs/Web/HTML/Link_types)
 * You can also use the [roastidio.us](https://roastidio.us) commenting service (written and operated by me) to write your comment. The integration is just a simple link, there is no data sharing.
 
 You need a ES6 compliant browser (sorry, IE fans). The main branch is auto-deployed here: [airss.roastidio.us](https://airss.roastidio.us) which is on [Vercel](https://vercel.com). All are welcome to use it. Since this is open source you can also clone it and host it somewhere else; it is all upto you.
 
-I am too lazy to write documentation. There are only a few buttons, so just try it. If you close the tab or browser or shut down the computer, you can pick it up right at where you left the next time you open it. The application will even shut down itself after a period of inactivity. For the curious minds, the application state is persistent on the local machine via [indexed db](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API); nothing go out to the internet. 
+I am too lazy to write documentation. There are only a few buttons, so just try it out. If you close the tab or browser or shut down the computer, you can pick it up right at where you left the next time you open it. The application will even shut down itself after a period of inactivity. For the curious minds, the application state is persistent on the local machine via [indexed db](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API); nothing go out to the internet. 
 
-You can also use the this bookmarklet: 
+You can also use the this [bookmarklet](https://en.wikipedia.org/wiki/Bookmarklet): 
 
 ``` javascript
 javascript:location.href='https://airss.roastidio.us/?url='+encodeURIComponent(window.location.href)
@@ -26,7 +27,7 @@ Comments or PRs are welcome.
 
 ## Caveat
 
-The big caveat is that through no fault of its own, it only works with very few feeds, unless you do something (see later). The reason is [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS). For more info please see: [enable CORS](https://enable-cors.org/). The TL; DR is your browser will prevent AirSS from accessing other websites. I could use a proxy but that kind of defeats the purpose (simplicity, privacy, speed). All AirSS wants to do is to fetch and parse feeds, and the feeds:
+The big caveat is that through no fault of its own, it only works with very few feeds, unless you do something (see later). The reason is [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS). For more info please see: [enable CORS](https://enable-cors.org/). The TL; DR is your browser will prevent AirSS from accessing other websites. I could use a proxy like all the other commersial on-line feed readers, but that kinds of defeats the purpose (simplicity, privacy, speed). All AirSS wants to do is to fetch and parse feeds, and the feeds:
 
 * are usually static, so the cross site accesses pose no risk at all
 * shall be considered public API entry points anyway

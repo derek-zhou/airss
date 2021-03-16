@@ -138,6 +138,7 @@ async function cb_subscribe(prev, url) {
 	    throw e;
 	}
     }
+    emitModelInfo("The feed '" + url + "' is now subscribed");
 }
 
 async function cb_unsubscribe(prev, id) {

@@ -80,10 +80,10 @@
      if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {
 	 if ( xDiff > 0 ) {
 	     /* left swipe */
-	     forwardItem();
+	     clickRight();
 	 } else {
 	     /* right swipe */
-	     backwardItem();
+	     clickLeft();
 	 }
      }
      /* reset values */
