@@ -16,7 +16,8 @@ I am too lazy to write documentation. There are only a few buttons, so just try 
 
 You can also use the this bookmarklet: 
 
-``` javascript javascript:location.href='https://airss.roastidio.us/?url='+encodeURIComponent(window.location.href)
+``` javascript
+javascript:location.href='https://airss.roastidio.us/?url='+encodeURIComponent(window.location.href)
 ```
 
 to subscribe any blog. Github does not allow a link with `javascript:` URL, so you need to bookmark any page, such as this page, then edit the property of your newly created bookmark, give it a name such as `subscribe in airss` and paste in the above bookmarklet string as it's location. Next time you came across an interesting blog, just click the bookmarklet and you are done. This trick may not work in a mobile brower though.
