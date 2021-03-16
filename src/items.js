@@ -65,7 +65,7 @@ function parseJSONItem(json) {
 function getXMLTextContent(elem, selector) {
     const sub = elem.querySelector(selector);
     if (sub)
-	return sub.textContent;
+	return sub.textContent.trim();
     else
 	return null;
 }
