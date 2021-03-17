@@ -32,7 +32,7 @@ The big caveat is that through no fault of its own, it only works with very few 
 * are usually static, so the cross site accesses pose no risk at all
 * shall be considered public API entry points anyway
 
-If you operate your own web server, please see the the link: [enable CORS](https://enable-cors.org/) to find out how to enable CORS. Among the major hosting platforms out there, [Vercel](https://vercel.com) and [github pages](https://pages.github.com/) enable CORS by default for all static files, big kudos to them.
+**If you are a blogger and operate your own web server, please see the the link: [enable CORS](https://enable-cors.org/) to find out how to enable CORS and reach out a broader audience.** Among the major hosting platforms out there, [Vercel](https://vercel.com) and [github pages](https://pages.github.com/) enable CORS by default for all static files, big kudos to them.
 
 However, hope is not lost, even today. Via browser add-ons such as: [CORS everywhere](https://addons.mozilla.org/en-US/firefox/addon/cors-everywhere/?utm_source=addons.mozilla.org&utm_medium=referral&utm_content=search) and [CORS changer](https://chrome.google.com/webstore/detail/moesif-origin-cors-change/digfbfaphojjndkpccljibejjbppifbc?hl=en) Firefox and Chrome users can enjoy AirSS today on any feed. Please install one of the add-ons, whitelist `https://airss.roastidio.us` and everything shall be fine. If you are really paranoided, you are welcome to audit my source code to make sure there is nothing funny going on. With [state partitioning](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Privacy/State_Partitioning) imminent in Firefox, I believe even the bad guys will not be able to steal sensitive info via CORS.
 

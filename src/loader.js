@@ -2,7 +2,7 @@
  * networking loading module
  */
 
-import * as Model from './airss_model.js';
+import {addFeed, updateFeed, getLoadCandidate} from './airss_model.js';
 
 export {subscribe, load};
 
@@ -29,29 +29,28 @@ async function cb_subscribe(prev, url) {
 	feed = await sanitize(url);
     } catch (e) {
 	if (typeof e === 'string' || (e instanceof TypeError)) {
-	    Model.emitModelError("The feed '" + url + "' is not valid: " + e);
-	    return;
+	    feed = {
+		feedUrl: url,
+		error: e.toString()
+	    };
 	} else {
 	    throw e;
 	}
     }
-    Model.addFeed(feed);
+    addFeed(feed);
 }
 
 async function cb_load(prev) {
     await prev;
-    let feed = await Model.getLoadCandidate();
+    let feed = await getLoadCandidate();
     if (!feed)
 	return;
     try {
 	var data = await loadFeed(feed);
     } catch (e) {
 	if (typeof e === 'string' || (e instanceof TypeError)) {
-	    Model.emitModelError("Loading feed '" + feed.feedUrl +
-				 "' failed: " + e);
-	    // for any loading or parsing error, fake a dummy item for
-	    // better user visibility
-	    fakeLoad(feed);
+	    feed.error = e.toString();
+	    updateFeed(feed, []);
 	    return;
 	} else {
 	    throw e;
@@ -79,8 +78,7 @@ async function cb_load(prev) {
 	}
 	break;
     }
-    updated.lastLoadTime = new Date();
-    Model.updateFeed(updated, items);
+    updateFeed(updated, items);
 }
 
 async function loadFeed(feed) {
@@ -325,25 +323,6 @@ function parseATOMItem(elem) {
 	item.title = title;
     item.tags = tags;
     return item;
-}
-
-function oopsItem() {
-    let item = new Object();
-    item.datePublished = new Date();
-    item.contentHtml = "If you see this, this feed failed loading. Check the console for the actual error occured.";
-    // just fake something to satisfy constrains
-    item.url = Math.random().toString(36).substring(2, 15);
-    item.title = "Oops...";
-    item.tags = [];
-    return item;
-}
-
-function fakeLoad(feed) {
-    // fake a item
-    let oops = oopsItem();
-    oops.feedTitle = feed.title;
-    oops.feedId = feed.id;
-    Model.updateFeed(feed, [oops]);
 }
 
 /*

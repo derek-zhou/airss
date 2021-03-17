@@ -165,6 +165,9 @@
 	      <span class="site">
 		  | {$currentItem.datePublished.toLocaleString()}
 	      </span>
+	       {#each $currentItem.tags as tag}
+                 <span class="site"> | {tag} </span>
+               {/each}
 	  </h5>
 	  <p id="content_html" class="desc">
 	      {@html $currentItem.contentHtml}

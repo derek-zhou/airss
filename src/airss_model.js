@@ -22,7 +22,10 @@ export {emitModelWarning, emitModelError, emitModelInfo, emitModelItemsLoaded};
 const WaterMark = 10;
 
 // the minimal elapsed time before a reload, in milliseconds
-const MinReloadWait = 3600 * 1000;
+const MinReloadWait = 12 * 3600 * 1000;
+
+// too quiet in days?
+const MaxQuietPeriod = 180;
 
 // events I post to the document from the callback side
 function emitModelAlert(type, text) {
@@ -46,6 +49,8 @@ function emitModelInfo(text) {
 }
 
 function emitModelItemsLoaded(info) {
+    console.log("Items loaded. cursor at: " + info.cursor +
+		" length: " + info.length);
     window.document.dispatchEvent(new CustomEvent(
 	"AirSSModelItemsLoaded",
 	{detail: info}
@@ -133,6 +138,11 @@ async function cb_unsubscribe(prev, id) {
 
 async function cb_addFeed(prev, feed) {
     await prev;
+    if (feed.error) {
+	emitModelError("The feed '" + feed.feedUrl +
+		       "' is not valid: " + feed.error);
+	return;
+    }
     try {
 	await Feeds.addFeed(db, feed);
     } catch (e) {
@@ -146,9 +156,41 @@ async function cb_addFeed(prev, feed) {
     emitModelInfo("The feed '" + feed.feedUrl + "' is now subscribed");
 }
 
+function oopsItem(feed) {
+    let item = new Object();
+    item.datePublished = new Date();
+    item.contentHtml = "If you see this, this feed '" + feed.feedUrl +
+	"' failed loading:<br />" +
+	"<pre>" + feed.error + "</pre><br />" +
+	"Check the console for the detail error.";
+    // just fake something to satisfy constrains
+    item.url = Math.random().toString(36).substring(2, 15);
+    item.title = "Oops...";
+    item.tags = [];
+    item.feedTitle = feed.title;
+    item.feedId = feed.id;
+    return item;
+}
+
+function dummyItem(feed) {
+    let item = new Object();
+    item.datePublished = new Date();
+    item.contentHtml = "If you see this, this feed '" + feed.feedUrl +
+	"' hasn't been updated for " + MaxQuietPeriod +
+	" days. There is nothing wrong, just too quiet.";
+    // just fake something to satisfy constrains
+    item.url = Math.random().toString(36).substring(2, 15);
+    item.title = "Errrr...";
+    item.tags = [];
+    item.feedTitle = feed.title;
+    item.feedId = feed.id;
+    return item;
+}
+
 async function cb_updateFeed(prev, feed, items) {
     await prev;
     let oldCount = Items.length();
+    let now = new Date();
     // push items in reverse order
     for(let i = items.length - 1; i>= 0; i--) {
 	try {
@@ -163,14 +205,27 @@ async function cb_updateFeed(prev, feed, items) {
     }
     let num = Items.length() - oldCount;
     console.log("loading feed '" + feed.feedUrl + "' with " + num + " items");
-    await Feeds.updateFeed(db, feed);
-    if (num > 0)
+
+    if (feed.error) {
+	emitModelError("The feed '" + feed.feedUrl +
+			     "' faild to load: " + feed.error);
+	await Items.pushItem(db, oopsItem(feed));
+	num ++;
+    } else if (num == 0 &&
+	       feed.lastLoadTime < now - MaxQuietPeriod*24*3600*1000) {
+	await Items.pushItem(db, dummyItem(feed));
+	num ++;
+    }
+    if (num > 0) {
+	feed.lastLoadTime = now;
+	await Feeds.updateFeed(db, feed);
 	emitModelItemsLoaded({
 	    length: Items.length(),
 	    cursor: Items.readingCursor()
 	});
-    else
+    } else {
 	Loader.load();
+    }
 }
 
 async function cb_getLoadCandidate(prev) {
