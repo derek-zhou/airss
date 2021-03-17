@@ -8,11 +8,15 @@
 import {openDB} from 'idb';
 import * as Feeds from './feeds.js';
 import * as Items from './items.js';
+import * as Loader from './loader.js';
 
 // exported client side functions. all return promises or null
 export {currentState, reinit, shutdown,
 	forwardItem, backwardItem, deleteItem, currentItem,
-	subscribe, unsubscribe};
+	subscribe, unsubscribe,
+	getLoadCandidate, addFeed, updateFeed};
+
+export {emitModelWarning, emitModelError, emitModelInfo, emitModelItemsLoaded};
 
 // when the cursor is this close to the end I load more
 const WaterMark = 10;
@@ -22,6 +26,7 @@ const MinReloadWait = 3600 * 1000;
 
 // events I post to the document from the callback side
 function emitModelAlert(type, text) {
+    console.log(text);
     window.document.dispatchEvent(new CustomEvent(
 	"AirSSModelAlert",
 	{detail: {type, text}}
@@ -40,22 +45,18 @@ function emitModelInfo(text) {
     emitModelAlert("info", text);
 }
 
-function clearModelAlert() {
-    emitModelAlert("info", "");
-}
-
-function emitItemsLoaded(info) {
+function emitModelItemsLoaded(info) {
     window.document.dispatchEvent(new CustomEvent(
 	"AirSSModelItemsLoaded",
 	{detail: info}
     ));
 }
 
-function emitInitDone() {
+function emitModelInitDone() {
     window.document.dispatchEvent(new Event("AirSSModelInitDone"));
 }
 
-function emitShutDown() {
+function emitModelShutDown() {
     window.document.dispatchEvent(new Event("AirSSModelShutDown"));
 }
 
@@ -71,7 +72,7 @@ async function cb_shutdown(prev) {
     await db.close();
     // so database is safe. future db operation will crash
     db = null;
-    emitShutDown();
+    emitModelShutDown();
 }
 
 async function cb_currentItem(prev) {
@@ -116,31 +117,6 @@ async function cb_markRead(prev) {
 	await Items.markRead(db, item);
 }
 
-async function cb_subscribe(prev, url) {
-    await prev;
-    let feed;
-    try {
-	feed = await Feeds.sanitize(url);
-    } catch (e) {
-	if (typeof e === 'string' || (e instanceof TypeError)) {
-	    emitModelError("The feed '" + url + "' is not valid: " + e);
-	    return;
-	} else {
-	    throw e;
-	}
-    }
-    try {
-	await Feeds.addFeed(db, feed);
-    } catch (e) {
-	if (e instanceof DOMException) {
-	    emitModelError("The feed '" + url + "' is already subscribed");
-	} else {
-	    throw e;
-	}
-    }
-    emitModelInfo("The feed '" + url + "' is now subscribed");
-}
-
 async function cb_unsubscribe(prev, id) {
     await prev;
     try {
@@ -155,6 +131,60 @@ async function cb_unsubscribe(prev, id) {
     }
 }
 
+async function cb_addFeed(prev, feed) {
+    await prev;
+    try {
+	await Feeds.addFeed(db, feed);
+    } catch (e) {
+	if (e instanceof DOMException) {
+	    emitModelError("The feed '" + feed.feedUrl +
+			   "' is already subscribed");
+	} else {
+	    throw e;
+	}
+    }
+    emitModelInfo("The feed '" + feed.feedUrl + "' is now subscribed");
+}
+
+async function cb_updateFeed(prev, feed, items) {
+    await prev;
+    let oldCount = Items.length();
+    // push items in reverse order
+    for(let i = items.length - 1; i>= 0; i--) {
+	try {
+	    await Items.pushItem(db, items[i]);
+	} catch(e) {
+	    if (e instanceof DOMException) {
+		// it is common that an item cannot be add
+	    } else {
+		throw e;
+	    }
+	}
+    }
+    let num = Items.length() - oldCount;
+    console.log("loading feed '" + feed.feedUrl + "' with " + num + " items");
+    await Feeds.updateFeed(db, feed);
+    if (num > 0)
+	emitModelItemsLoaded({
+	    length: Items.length(),
+	    cursor: Items.readingCursor()
+	});
+    else
+	Loader.load();
+}
+
+async function cb_getLoadCandidate(prev) {
+    await prev;
+    let feedId = Feeds.first();
+    if (!feedId || Items.unreadCount() >= WaterMark)
+	return null;
+    let now = new Date();
+    let feed = await Feeds.get(db, feedId);
+    if (feed.lastLoadTime > now - MinReloadWait)
+	return null;
+    return feed;
+}
+
 /*
  * internal functions of the callback side
  */
@@ -167,59 +197,11 @@ async function init() {
     });
     await Feeds.load(db);
     await Items.load(db);
-    emitItemsLoaded({
+    emitModelItemsLoaded({
 	length: Items.length(),
 	cursor: Items.readingCursor()
     });
-    emitInitDone();
-}
-
-function shouldLoadMore() {
-    return Items.unreadCount() < WaterMark;
-}
-
-async function loadMore() {
-    do {
-	let feedId = Feeds.first();
-	var num = feedId ? (await loadFeed(feedId)) : -1;
-    } while(num >= 0 && shouldLoadMore());
-}
-
-async function loadFeed(feedId) {
-    let now = new Date();
-    let feed = await Feeds.get(db, feedId);
-    let num = -1;
-    if (feed.lastLoadTime <= now - MinReloadWait) {
-	console.log("loading feed '" + feed.feedUrl + "' ...");
-	let newItems = await Feeds.loadItems(db, feed);
-	let oldCount = Items.length();
-	// push newItems in reverse order
-	for(let i = newItems.length - 1; i>= 0; i--) {
-	    try {
-		await Items.pushItem(db, newItems[i]);
-	    } catch(e) {
-		if (e instanceof DOMException) {
-		    // it is common that an item cannot be add
-		} else {
-		    throw e;
-		}
-	    }
-	}
-	num = Items.length() - oldCount;
-	console.log("with " + num + " items");
-	Feeds.rotate();
-	if (num > 0)
-	    emitItemsLoaded({
-		length: Items.length(),
-		cursor: Items.readingCursor()
-	    });
-    }
-    else {
-	console.log("not loading feed '" + feed.feedUrl +
-		    "' because load time was: " +
-		    feed.lastLoadTime.toLocaleString());
-    }
-    return num;
+    emitModelInitDone();
 }
 
 /*
@@ -246,7 +228,7 @@ function forwardItem() {
     let value = state = cb_forwardItem(state);
     // to piggy back marking and loading here
     state = cb_markRead(state);
-    state = cb_loadMore(state);
+    Loader.load();
     return value;
 }
 
@@ -267,19 +249,34 @@ function deleteItem() {
 // just load the current item, if any
 function currentItem() {
     let value = state = cb_currentItem(state);
-    state = cb_loadMore(state);
+    Loader.load();
     return value;
 }
 
 // subscribe to a feed url
 function subscribe(url) {
-    state = cb_subscribe(state, url);
-    state = cb_loadMore(state);
+    Loader.subscribe(url);
 }
 
 // unsubscribe a feed by id
 function unsubscribe(id) {
     state = cb_unsubscribe(state, id);
+}
+
+// add a feed. this is for the callback from subscribe
+function addFeed(feed) {
+    state = cb_addFeed(state, feed);
+}
+
+// update a feed with new data. this is for the callback from load
+function updateFeed(feed, items) {
+    state = cb_updateFeed(state, feed, items);
+}
+
+// return a feed to load, or null if no such candidate is found
+function getLoadCandidate() {
+    state = cb_getLoadCandidate(state);
+    return state;
 }
 
 function shutdown() {
