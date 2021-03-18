@@ -205,8 +205,11 @@
 	}
 	.footer {
 	    @apply text-xs text-gray-700 mt-2 py-2 flex flex-col text-center;
+	    .links {
+		@apply w-1/2 text-left;
+	    }
 	    .copyright {
-                @apply flex-auto text-right;
+                @apply w-1/2 text-right;
             }
 	}
     }

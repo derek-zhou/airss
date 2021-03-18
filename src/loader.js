@@ -20,7 +20,8 @@ const FeedType = {
  * callback side state and entry points
  */
 
-// I have no state so far, just to serialize loading
+// I have no state so far. I could have multiple instances and do
+// parallel loading but there is no point to stress the network
 
 async function cb_subscribe(prev, url) {
     await prev;
