@@ -6,7 +6,7 @@
  */
 
 import {openDB} from 'idb';
-import Airtable from 'airtable';
+import * as Airtable from './airtable_server.js';
 import * as Feeds from './feeds.js';
 import * as Items from './items.js';
 import * as Loader from './loader.js';
