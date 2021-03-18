@@ -43,8 +43,10 @@ async function cb_subscribe(prev, url) {
 async function cb_load(prev) {
     await prev;
     let feed = await getLoadCandidate();
-    if (!feed)
+    if (!feed) {
+	console.info("Nothing to load, sleeping");
 	return;
+    }
     try {
 	var data = await loadFeed(feed);
     } catch (e) {

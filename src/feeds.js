@@ -42,7 +42,6 @@ async function get(db, id) {
 
 async function addFeed(db, feed) {
     let id = await db.add(Store, feed);
-    console.log("added feed " + feed.feedUrl + " with id: " + id);
     feeds = [id, ...feeds];
 }
 

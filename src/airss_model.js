@@ -29,7 +29,6 @@ const MaxQuietPeriod = 180;
 
 // events I post to the document from the callback side
 function emitModelAlert(type, text) {
-    console.log(text);
     window.document.dispatchEvent(new CustomEvent(
 	"AirSSModelAlert",
 	{detail: {type, text}}
@@ -37,19 +36,22 @@ function emitModelAlert(type, text) {
 }
 
 function emitModelWarning(text) {
+    console.warn(text);
     emitModelAlert("warning", text);
 }
 
 function emitModelError(text) {
+    console.error(text);
     emitModelAlert("error", text);
 }
 
 function emitModelInfo(text) {
+    console.info(text);
     emitModelAlert("info", text);
 }
 
 function emitModelItemsLoaded(info) {
-    console.log("Items loaded. cursor at: " + info.cursor +
+    console.info("Items loaded. cursor at: " + info.cursor +
 		" length: " + info.length);
     window.document.dispatchEvent(new CustomEvent(
 	"AirSSModelItemsLoaded",
@@ -145,6 +147,7 @@ async function cb_addFeed(prev, feed) {
     }
     try {
 	await Feeds.addFeed(db, feed);
+	console.info("added feed " + feed.feedUrl + " with id: " + id);
     } catch (e) {
 	if (e instanceof DOMException) {
 	    emitModelError("The feed '" + feed.feedUrl +
@@ -204,7 +207,7 @@ async function cb_updateFeed(prev, feed, items) {
 	}
     }
     let num = Items.length() - oldCount;
-    console.log("loading feed '" + feed.feedUrl + "' with " + num + " items");
+    console.info("loading feed '" + feed.feedUrl + "' with " + num + " items");
 
     if (feed.error) {
 	emitModelError("The feed '" + feed.feedUrl +
@@ -223,9 +226,8 @@ async function cb_updateFeed(prev, feed, items) {
 	    length: Items.length(),
 	    cursor: Items.readingCursor()
 	});
-    } else {
-	Loader.load();
     }
+    Loader.load();
 }
 
 async function cb_getLoadCandidate(prev) {
