@@ -99,6 +99,10 @@ document.addEventListener("AirSSModelInitDone", () => {
     loadCurrentItem();
 });
 
+// do I have a refer so I can subscribe?
+if (document.referrer) {
+    Model.subscribe(document.referrer);
+}
 // do I have a incoming api call to subscribe a feed
 if (location.search) {
     let params = new URLSearchParams(location.search.substring(1));
