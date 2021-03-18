@@ -147,7 +147,7 @@ async function cb_addFeed(prev, feed) {
     }
     try {
 	await Feeds.addFeed(db, feed);
-	console.info("added feed " + feed.feedUrl + " with id: " + id);
+	console.info("added feed " + feed.feedUrl + " with id: " + feed.id);
     } catch (e) {
 	if (e instanceof DOMException) {
 	    emitModelError("The feed '" + feed.feedUrl +
