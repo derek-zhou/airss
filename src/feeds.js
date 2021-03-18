@@ -33,7 +33,14 @@ async function load(db) {
 }
 
 function first() {
-    return feeds.length > 0 ? feeds[0] : null;
+    if (feeds.lenth == 0)
+	return null;
+    let head = feeds[0];
+    feeds = feeds.slice(1);
+    return head;
+}
+
+function rotate() {
 }
 
 async function get(db, id) {
@@ -46,11 +53,7 @@ async function addFeed(db, feed) {
 }
 
 async function updateFeed(db, feed) {
-    if (feed.id != feeds[0])
-	throw "must only update the first feed";
     db.put(Store, feed);
-    // rotation
-    feeds = [...feeds.slice(1), feed.id];
 }
 
 async function removeFeed(db, id) {
