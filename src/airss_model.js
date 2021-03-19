@@ -19,13 +19,13 @@ export {currentState, reinit, shutdown,
 export {emitModelWarning, emitModelError, emitModelInfo, emitModelItemsLoaded};
 
 // when the cursor is this close to the end I load more
-const WaterMark = 10;
+const WaterMark = localStorage.getItem("WATER_MARK") || 10;
 
-// the minimal elapsed time before a reload, in milliseconds
-const MinReloadWait = 12 * 3600 * 1000;
+// the minimal elapsed time before a reload, in hour
+const MinReloadWait = localStorage.getItem("MIN_RELOAD_WAIT") || 12;
 
-// too quiet in days?
-const MaxQuietPeriod = 180;
+// too quiet in days
+const MaxQuietPeriod = localStorage.getItem("MAX_QUIET_PERIOD") || 180;
 
 // events I post to the document from the callback side
 function emitModelAlert(type, text) {
@@ -148,6 +148,7 @@ async function cb_addFeed(prev, feed) {
     try {
 	await Feeds.addFeed(db, feed);
 	console.info("added feed " + feed.feedUrl + " with id: " + feed.id);
+	emitModelInfo("The feed '" + feed.feedUrl + "' is now subscribed");
     } catch (e) {
 	if (e instanceof DOMException) {
 	    emitModelError("The feed '" + feed.feedUrl +
@@ -156,7 +157,6 @@ async function cb_addFeed(prev, feed) {
 	    throw e;
 	}
     }
-    emitModelInfo("The feed '" + feed.feedUrl + "' is now subscribed");
 }
 
 function oopsItem(feed) {
@@ -237,7 +237,7 @@ async function cb_getLoadCandidate(prev) {
 	return null;
     let now = new Date();
     let feed = await Feeds.get(db, feedId);
-    if (feed.lastLoadTime > now - MinReloadWait)
+    if (feed.lastLoadTime > now - MinReloadWait * 3600 * 1000)
 	return null;
     return feed;
 }

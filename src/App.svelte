@@ -15,7 +15,7 @@
      shuutdown: 2,
      subscribe: 3,
      trash: 4,
-     airtable: 5
+     config: 5
  };
  const UnknownImage = "/images/unknown_link.png";
  const roastPrefix = "https://roastidio.us/roast?url=";
@@ -26,7 +26,33 @@
  // form value
  let subscribeUrl = "";
  let shouldUnsubscribe = false;
+
+ let waterMark;
+ let waterMarkChoices = [
+     {value: 0, text: "0 items"},
+     {value: 10, text: "10 items"},
+     {value: 100, text: "100 items"},
+     {value: 1000, text: "1000 items"}
+ ];
+ let waterMarkCurrent = localStorage.getItem("WATER_MARK") || 10;
+
+ let minReloadWait;
+ let minReloadWaitChoices = [
+     {value: 1, text: "1 hour"},
+     {value: 4, text: "4 hours"},
+     {value: 12, text: "12 hours"},
+     {value: 24, text: "24 hours"}
+ ];
+ let minReloadWaitCurrent = localStorage.getItem("MIN_RELOAD_WAIT") || 12;
  
+ let maxQuietPeriod;
+ let maxQuietPeriodChoices = [
+     {value: 30, text: "30 days"},
+     {value: 60, text: "60 days"},
+     {value: 180, text: "180 days"}
+ ];
+ let maxQuietPeriodCurrent = localStorage.getItem("MAX_QUIET_PERIOD") || 180;
+
  let xDown = null;
  let yDown = null;
 
@@ -95,9 +121,9 @@
      location.reload();
  }
 
- function clickCloud() {
+ function clickConfig() {
      $alertText = "";
-     screen = Screens.airtable;
+     screen = Screens.config;
  }
 
  function clickSubscribe() {
@@ -122,6 +148,19 @@
      screen = Screens.browse;
  }
 
+ function clickSubmitConfig() {
+     // airss_model:
+     if (waterMark)
+	 localStorage.setItem("WATER_MARK", waterMark.value);
+     if (minReloadWait)
+	 localStorage.setItem("MIN_RELOAD_WAIT", minReloadWait.value);
+     if (maxQuietPeriod)
+	 localStorage.setItem("MAX_QUIET_PERIOD", maxQuietPeriod.value);
+     // It is very hard to change config at run time, so I just take
+     // shortcut to reload
+     location.reload();
+ }
+
  function clickCancel() {
      $alertText = "";
      screen = Screens.browse;
@@ -134,16 +173,16 @@
     <a class="brand-title" href="/">AirSS</a>
     <div class="nav">
 	<button class="button"
-		on:click={clickCloud}>&#127785;</button>
-      <button class="button"
-	      on:click={clickSubscribe}>&#127868;</button>
-      <button class="button"
-	      disabled={leftDisabled}
-	      on:click={clickLeft}>&#x276e;</button>
-      {$cursor+1}/{$length}
-      <button class="button"
-	      disabled={rightDisabled}
-	      on:click={clickRight}>&#x276f;</button>
+		on:click={clickConfig}>&#x1f527;</button>
+	<button class="button"
+		on:click={clickSubscribe}>&#x1f37c;</button>
+	<button class="button"
+		disabled={leftDisabled}
+		on:click={clickLeft}>&#x276e;</button>
+	{$cursor+1}/{$length}
+	<button class="button"
+		disabled={rightDisabled}
+		on:click={clickRight}>&#x276f;</button>
     </div>
   </div>
   <p class={$alertClass} role="alert">{$alertText}</p>
@@ -199,27 +238,58 @@
 	  </p>
 	  <form on:submit|preventDefault={clickConfirmDelete}>
 	      <div class="line">
-		  <input type="checkbox" id="check-unsubscribe"
-			 name="ckeck-unsubscribe"
-			 bind:checked={shouldUnsubscribe}>
 		  <label for="check-unsubscribe">
 		      Unsubscribe <span class="focus">{$currentItem.feedTitle}</span> too
 		  </label>
+		  <input type="checkbox" id="check-unsubscribe"
+			 name="ckeck-unsubscribe"
+			 bind:checked={shouldUnsubscribe}>
 	      </div>
 	      <input class="button" type="submit" value="&#128076;">
 	      <input class="button" type="reset" value="&#128078;"
 		     on:click="{clickCancel}">
 	  </form>
       </div>
-  {:else if screen == Screens.airtable}
+  {:else if screen == Screens.config}
       <div class="box">
-	  <p>
-	      Not implemented yet.
-	  </p>
-	  <div class="toolbar">
-	      <button class="button button-danger"
-		      on:click={clickCancel}>&#128078;</button>
-	  </div>
+	  <form on:submit|preventDefault={clickSubmitConfig}>
+	      <div class="line">
+		  <label for="select-water-mark">
+		      Load more when unread items is below:
+		  </label>
+		  <select id="select-water-mark" bind:value={waterMark}>
+		      {#each waterMarkChoices as choice}
+			  <option selected={choice.value == waterMarkCurrent}
+				  value={choice}>{choice.text}</option>
+		      {/each}
+		  </select>
+	      </div>
+	      <div class="line">
+		  <label for="select-min-reload-wait">
+		      Between reloading a feed, wait at least:
+		  </label>
+		  <select id="select-min-reload-wait" bind:value={minReloadWait}>
+		      {#each minReloadWaitChoices as choice}
+			  <option selected={choice.value == minReloadWaitCurrent}
+				  value={choice}>{choice.text}</option>
+		      {/each}
+		  </select>
+	      </div>
+	      <div class="line">
+		  <label for="select-max-quiet-period">
+		      Warn me if a feed has been quiet for:
+		  </label>
+		  <select id="select-max-quiet-period" bind:value={maxQuietPeriod}>
+		      {#each maxQuietPeriodChoices as choice}
+			  <option selected={choice.value == maxQuietPeriodCurrent}
+				  value={choice}>{choice.text}</option>
+		      {/each}
+		  </select>
+	      </div>
+	      <input class="button" type="submit" value="&#128076;">
+	      <input class="button" type="reset" value="&#128078;"
+		     on:click="{clickCancel}">
+	  </form>
       </div>
   {:else if screen == Screens.subscribe}
       <div class="box">

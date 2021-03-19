@@ -149,11 +149,14 @@
 		    @apply w-full mb-2;
 		}
                 label {
-                    @apply ml-2 leading-relaxed;
+                    @apply mr-2 leading-relaxed;
 		    .focus {
 			@apply font-bold italic;
 		    }
                 }
+		select {
+		    @apply border rounded border-gray-600;
+		}
                 input[type="text"] {
                     @apply flex-none w-full mb-2 leading-relaxed border rounded border-gray-600;
                 }
