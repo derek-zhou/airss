@@ -83,8 +83,6 @@ export function subscribe(url) {
 document.addEventListener("AirSSModelItemsLoaded", e => {
     length.set(e.detail.length);
     cursor.set(e.detail.cursor);
-    if (e.detail.length > 0 && e.detail.cursor == -1)
-	forwardItem();
 });
 document.addEventListener("AirSSModelAlert", e => {
     alertClass.set("alert-" + e.detail.type);

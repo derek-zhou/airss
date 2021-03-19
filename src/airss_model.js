@@ -24,8 +24,8 @@ const WaterMark = localStorage.getItem("WATER_MARK") || 10;
 // the minimal elapsed time before a reload, in hour
 const MinReloadWait = localStorage.getItem("MIN_RELOAD_WAIT") || 12;
 
-// too quiet in days
-const MaxQuietPeriod = localStorage.getItem("MAX_QUIET_PERIOD") || 180;
+// kept in days
+const MaxKeptPeriod = localStorage.getItem("MAX_KEPT_PERIOD") || 180;
 
 // events I post to the document from the callback side
 function emitModelAlert(type, text) {
@@ -146,8 +146,8 @@ async function cb_addFeed(prev, feed) {
 	return;
     }
     try {
-	await Feeds.addFeed(db, feed);
-	console.info("added feed " + feed.feedUrl + " with id: " + feed.id);
+	let id = await Feeds.addFeed(db, feed);
+	console.info("added feed " + feed.feedUrl + " with id: " + id);
 	emitModelInfo("The feed '" + feed.feedUrl + "' is now subscribed");
     } catch (e) {
 	if (e instanceof DOMException) {
@@ -179,8 +179,8 @@ function dummyItem(feed) {
     let item = new Object();
     item.datePublished = new Date();
     item.contentHtml = "If you see this, this feed '" + feed.feedUrl +
-	"' hasn't been updated for " + MaxQuietPeriod +
-	" days. There is nothing wrong, just too quiet.";
+	"' hasn't been updated for " + MaxKeptPeriod +
+	" days. There is nothing wrong, just too kept.";
     // just fake something to satisfy constrains
     item.url = Math.random().toString(36).substring(2, 15);
     item.title = "Errrr...";
@@ -215,7 +215,7 @@ async function cb_updateFeed(prev, feed, items) {
 	await Items.pushItem(db, oopsItem(feed));
 	num ++;
     } else if (num == 0 &&
-	       feed.lastLoadTime < now - MaxQuietPeriod*24*3600*1000) {
+	       feed.lastLoadTime < now - MaxKeptPeriod*24*3600*1000) {
 	await Items.pushItem(db, dummyItem(feed));
 	num ++;
     }

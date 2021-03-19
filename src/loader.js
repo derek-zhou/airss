@@ -8,8 +8,8 @@ export {subscribe, load};
 
 // keep at most 100 items from feed
 const MaxKeptItems = 100;
-// keep at most 180 days back
-const MaxKeptPeriod = 180*24*3600*1000;
+// kept in days
+const MaxKeptPeriod = localStorage.getItem("MAX_KEPT_PERIOD") || 180;
 
 const FeedType = {
     json: 1,
@@ -167,7 +167,7 @@ function processItems(rawItems, feed, parseFunc) {
     let count = 0;
     for (let item of rawItems.values()) {
 	item = parseFunc(item);
-	if (item && (now - item.datePublished <= MaxKeptPeriod)) {
+	if (item && (now - item.datePublished <= MaxKeptPeriod*24*3600*1000)) {
 	    // duplicate info for simple access
 	    item.feedTitle = feed.title;
 	    item.feedId = feed.id;

@@ -45,13 +45,14 @@
  ];
  let minReloadWaitCurrent = localStorage.getItem("MIN_RELOAD_WAIT") || 12;
  
- let maxQuietPeriod;
- let maxQuietPeriodChoices = [
+ let maxKeptPeriod;
+ let maxKeptPeriodChoices = [
      {value: 30, text: "30 days"},
      {value: 60, text: "60 days"},
-     {value: 180, text: "180 days"}
+     {value: 180, text: "180 days"},
+     {value: 999, text: "999 days"}
  ];
- let maxQuietPeriodCurrent = localStorage.getItem("MAX_QUIET_PERIOD") || 180;
+ let maxKeptPeriodCurrent = localStorage.getItem("MAX_KEPT_PERIOD") || 180;
 
  let xDown = null;
  let yDown = null;
@@ -154,8 +155,8 @@
 	 localStorage.setItem("WATER_MARK", waterMark.value);
      if (minReloadWait)
 	 localStorage.setItem("MIN_RELOAD_WAIT", minReloadWait.value);
-     if (maxQuietPeriod)
-	 localStorage.setItem("MAX_QUIET_PERIOD", maxQuietPeriod.value);
+     if (maxKeptPeriod)
+	 localStorage.setItem("MAX_KEPT_PERIOD", maxKeptPeriod.value);
      // It is very hard to change config at run time, so I just take
      // shortcut to reload
      location.reload();
@@ -217,12 +218,19 @@
 	      <a class="button" target="roast"
 		 href={roastPrefix + encodeURIComponent($currentItem.url)}>&#128293;</a>
 	  </div>
-      {:else}
+      {:else if $length == 0}
 	  <h4>
 	      No news is bad news. How about
 	      <button class="button"
 		      on:click={clickSubscribe}>subscribe</button>
 	      something?
+	  </h4>
+      {:else}
+	  <h4>
+	      News are here. You can
+	      <button class="button"
+		      on:click={clickRight}>forward</button>
+	      to read
 	  </h4>
       {/if}
       </div>
@@ -276,12 +284,12 @@
 		  </select>
 	      </div>
 	      <div class="line">
-		  <label for="select-max-quiet-period">
-		      Warn me if a feed has been quiet for:
+		  <label for="select-max-kept-period">
+		      Keep read items for:
 		  </label>
-		  <select id="select-max-quiet-period" bind:value={maxQuietPeriod}>
-		      {#each maxQuietPeriodChoices as choice}
-			  <option selected={choice.value == maxQuietPeriodCurrent}
+		  <select id="select-max-kept-period" bind:value={maxKeptPeriod}>
+		      {#each maxKeptPeriodChoices as choice}
+			  <option selected={choice.value == maxKeptPeriodCurrent}
 				  value={choice}>{choice.text}</option>
 		      {/each}
 		  </select>

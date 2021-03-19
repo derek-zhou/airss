@@ -3,7 +3,10 @@
  */
 // import {unescape} from 'html-escaper';
 
-export const Store = "items";
+const Store = "items";
+
+// kept in days
+const MaxKeptPeriod = localStorage.getItem("MAX_KEPT_PERIOD") || 180;
 
 // items is an array of item ids in ascending order
 let items = [];
@@ -71,6 +74,9 @@ async function deleteCurrentItem(db) {
     return true;
 }
 
+async function deleteItemAt(db, i) {
+}
+
 async function pushItem(db, item) {
     // it may throw, which will be catch outside
     let id = await db.add(Store, item);
@@ -90,13 +96,23 @@ async function load(db) {
 
     items = [];
     known = -1;
+    let expired = [];
+    let now = new Date();
     while (cursor) {
-	// items from the beginning up to a point are read
-	if (cursor.value.read)
-	    known ++;
-	items.push(cursor.key);
+	if (now - cursor.value.datePublished <= MaxKeptPeriod*24*3600*1000) {
+	    // items from the beginning up to a point are read
+	    if (cursor.value.read)
+		known ++;
+	    items.push(cursor.key);
+	} else {
+	    expired.push(cursor.key);
+	}
 	cursor = await cursor.continue();
     }
     // point both cursor at the last read item
     reading = known;
+    for (let id of expired.values()) {
+	console.info("deleteing expired item: " + id);
+	await db.delete(Store, id);
+    }
 }

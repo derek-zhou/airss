@@ -2,7 +2,7 @@
  * The feeds schema, based on jsonfeed
  */
 
-export const Store = "feeds";
+const Store = "feeds";
 
 // in memory state
 // feeds is an array of feed ids, in the order of last load time. feeds[0]
@@ -50,6 +50,7 @@ async function get(db, id) {
 async function addFeed(db, feed) {
     let id = await db.add(Store, feed);
     feeds = [id, ...feeds];
+    return id;
 }
 
 async function updateFeed(db, feed) {
