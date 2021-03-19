@@ -40,9 +40,6 @@ function first() {
     return head;
 }
 
-function rotate() {
-}
-
 async function get(db, id) {
     return await db.get(Store, id);
 }
@@ -53,8 +50,8 @@ async function addFeed(db, feed) {
     return id;
 }
 
-async function updateFeed(db, feed) {
-    db.put(Store, feed);
+function updateFeed(db, feed) {
+    return db.put(Store, feed);
 }
 
 async function removeFeed(db, id) {

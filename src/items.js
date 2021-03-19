@@ -50,11 +50,11 @@ function length() {
     return items.length;
 }
 
-async function markRead(db, item) {
+function markRead(db, item) {
     if (item.read)
 	return;
     item.read = true;
-    await db.put(Store, item);
+    return db.put(Store, item);
 }
 
 function getCurrentItem(db) {
@@ -72,9 +72,6 @@ async function deleteCurrentItem(db) {
     reading--;
     known--;
     return true;
-}
-
-async function deleteItemAt(db, i) {
 }
 
 async function pushItem(db, item) {
