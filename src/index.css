@@ -158,7 +158,7 @@
 		    @apply border rounded border-gray-600;
 		}
                 input[type="text"] {
-                    @apply flex-none w-full mb-2 leading-relaxed border rounded border-gray-600;
+                    @apply leading-relaxed border rounded border-gray-600;
                 }
                 .button[type="reset"] {
                     @apply cursor-pointer text-white bg-pink-600 mr-1;
@@ -226,17 +226,6 @@
 		}
 	    }
 	    .content {
-                form {
-                    input[type="text"] {
-                        @apply w-auto flex-grow mb-0 mr-1;
-                    }
-                    .button[type="reset"] {
-                        @apply ml-1 mr-0;
-                    }
-                    .button[type="submit"] {
-                        @apply mr-0 mr-0;
-                    }
-                }
 		.box {
                     .title {
                         @apply text-2xl w-auto;

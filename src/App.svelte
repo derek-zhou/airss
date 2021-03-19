@@ -54,6 +54,9 @@
  ];
  let maxKeptPeriodCurrent = localStorage.getItem("MAX_KEPT_PERIOD") || 180;
 
+ let apiKey = localStorage.getItem('AIRTABLE_API_KEY') || "";
+ let baseToken = localStorage.getItem('AIRTABLE_BASE_TOKEN') || "";
+
  let xDown = null;
  let yDown = null;
 
@@ -157,6 +160,10 @@
 	 localStorage.setItem("MIN_RELOAD_WAIT", minReloadWait.value);
      if (maxKeptPeriod)
 	 localStorage.setItem("MAX_KEPT_PERIOD", maxKeptPeriod.value);
+     if (apiKey)
+	 localStorage.setItem("AIRTABLE_API_KEY", apiKey);
+     if (baseToken)
+	 localStorage.setItem("AIRTABLE_BASE_TOKEN", baseToken);
      // It is very hard to change config at run time, so I just take
      // shortcut to reload
      location.reload();
@@ -255,7 +262,7 @@
 	      </div>
 	      <input class="button" type="submit" value="&#128076;">
 	      <input class="button" type="reset" value="&#128078;"
-		     on:click="{clickCancel}">
+		     on:click={clickCancel}>
 	  </form>
       </div>
   {:else if screen == Screens.config}
@@ -294,19 +301,33 @@
 		      {/each}
 		  </select>
 	      </div>
+	      <div class="line">
+		  <label for="input-api-key">
+		      Your Airtable API key:
+		  </label>
+		  <input type="text" bind:value={apiKey}>
+	      </div>
+	      <div class="line">
+		  <label for="input-base-token">
+		      Airtable token for your base:
+		  </label>
+		  <input type="text" bind:value={baseToken}>
+	      </div>
 	      <input class="button" type="submit" value="&#128076;">
 	      <input class="button" type="reset" value="&#128078;"
-		     on:click="{clickCancel}">
+		     on:click={clickCancel}>
 	  </form>
       </div>
   {:else if screen == Screens.subscribe}
       <div class="box">
 	  <form on:submit|preventDefault={clickSubmitSubscribe}>
-	      <input type="text" bind:value={subscribeUrl}
-		     placeholder="enter the url to subscribe">
+	      <div class="line">
+		  <input type="text" bind:value={subscribeUrl}
+			 placeholder="enter the url to subscribe">
+	      </div>
 	      <input class="button" type="submit" value="&#128076;">
 	      <input class="button" type="reset" value="&#128078;"
-		     on:click="{clickCancel}">
+		     on:click={clickCancel}>
 	  </form>
       </div>
   {/if}
