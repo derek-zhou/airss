@@ -1,6 +1,7 @@
 /*
  * The feeds schema, based on jsonfeed
  */
+import * as Airtable from './airtable_server.js';
 
 const Store = "feeds";
 
@@ -24,12 +25,25 @@ async function load(db) {
     let store = await db.transaction(Store).store;
     let index = store.index("lastLoadTime");
     let cursor = await index.openCursor();
+    let lastId = 0;
 
     feeds = [];
     while (cursor) {
-	feeds.push(cursor.value.id);
+	if (lastId < cursor.value.id)
+	    lastId = cursor.value.id;
+	feeds.push(lastId);
 	cursor = await cursor.continue();
     }
+
+    // this is not exactly in the sort order of lastLoadTime though
+    let missingFeeds;
+    do {
+	missingFeeds = await Airtable.loadFeedsBeyond(lastId);
+	for (let feed of missingFeeds.values()) {
+	    await db.add(Store, feed);
+	    feeds.push(feed.id);
+	}
+    } while(missingFeeds.length > 0);
 }
 
 function first() {
@@ -47,14 +61,21 @@ async function get(db, id) {
 async function addFeed(db, feed) {
     let id = await db.add(Store, feed);
     feeds = [id, ...feeds];
+    feed.id = id;
+    // we do not await it and just hope it will land
+    Airtable.upsertFeed(feed);
     return id;
 }
 
 function updateFeed(db, feed) {
+    // we do not await it and just hope it will land
+    Airtable.upsertFeed(feed);
     return db.put(Store, feed);
 }
 
-async function removeFeed(db, id) {
+function removeFeed(db, id) {
     feeds = feeds.filter(i => i != id);
-    await db.delete(Store, id);
+    // we do not await it and just hope it will land
+    Airtable.deleteFeed(id);
+    return db.delete(Store, id);
 }

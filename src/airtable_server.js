@@ -4,7 +4,7 @@
 
 import Airtable from 'airtable';
 
-export {loadFeedsBeyond, updateFeed, deleteFeed};
+export {loadFeedsBeyond, upsertFeed, deleteFeed};
 export {loadItemsBeyond, markRead, addItem, deleteItem};
 
 const ApiKey = localStorage.getItem('AIRTABLE_API_KEY');
@@ -54,7 +54,7 @@ async function cb_loadFeedsBeyond(prev, min) {
     }
 }
 
-async function cb_updateFeed(prev, feed) {
+async function cb_upsertFeed(prev, feed) {
     await prev;
     let key = await getFeedKey(id);
     if (key === undefined) {
@@ -213,7 +213,7 @@ async function init() {
 	apiKey: ApiKey
     });
     try {
-	base = Airtable.base('appQhajHA4XMqNfx0');
+	base = Airtable.base(BaseToken);
 	return base;
     } catch (e) {
 	console.error("Cannot connect to airtable. check your configuration");
@@ -229,30 +229,30 @@ let state = init();
 
 // load as much as feeds from id up, non-inclusive.
 function loadFeedsBeyond(id) {
-    if (state == null)
+    if (state === null)
 	return [];
     state = cb_loadFeedsBeyond(state, id);
     return state;
 }
 
 // updata a feed. create it if there is none
-function updateFeed(feed) {
-    if (state == null)
+function upsertFeed(feed) {
+    if (state === null)
 	return feed.id;
-    state = cb_updateFeed(state, feed);
+    state = cb_upsertFeed(state, feed);
     return state;
 }
 
 // delete a feed.
 function deleteFeed(id) {
-    if (state == null)
+    if (state === null)
 	return true;
     state = cb_deleteFeed(state, id);
 }
 
 // load as much as items from id up, non-inclusive
 function loadItemsBeyond(id) {
-    if (state == null)
+    if (state === null)
 	return [];
     state = cb_loadItemsBeyond(state, id);
     return state;
@@ -260,7 +260,7 @@ function loadItemsBeyond(id) {
 
 // mark an item read. do not create it if there is none
 function markRead(id) {
-    if (state == null)
+    if (state === null)
 	return true;
     state = cb_markRead(state, id);
     return state;
@@ -268,7 +268,7 @@ function markRead(id) {
 
 // add an item. do nothing if there is already one
 function addItem(item) {
-    if (state == null)
+    if (state === null)
 	return item.id;
     state = cb_addItem(state, item);
     return state;
@@ -276,7 +276,7 @@ function addItem(item) {
 
 // delete an item.
 function deleteItem(id) {
-    if (state == null)
+    if (state === null)
 	return true;
     state = cb_deleteItem(state, id);
     return state;
