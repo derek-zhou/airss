@@ -38,8 +38,8 @@
 
  let minReloadWait;
  let minReloadWaitChoices = [
-     {value: 0, text: "0 hour"},
      {value: 1, text: "1 hour"},
+     {value: 4, text: "4 hours"},
      {value: 12, text: "12 hours"},
      {value: 24, text: "24 hours"}
  ];

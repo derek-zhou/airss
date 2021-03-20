@@ -8,7 +8,7 @@ AirSS is an opinionated feed reader that is designed to aggregate and read blogs
 
 * No software to install, no service to sign up, no middle man, no cookie, no tracking, completely free with no string attached at all.
 * Ok, I lied. You can __optionally__ use your own [airtable](https://airtable.com) to store your feeds so you can hop between several devices.
-* It is tiny: ~100KB transfer size for now, and that's html, style, scripts all put together, and I don't even bother with minifying or bundling.
+* It is tiny: <100KB transfer size (airtable client being the bulk of it) for now, and that's html, style, scripts all put together, and I don't even bother with minifying or bundling.
 * Supports [JSON feeds](https://www.jsonfeed.org/), [RSS2 feeds](https://validator.w3.org/feed/docs/rss2.html) and [Atom feeds](https://tools.ietf.org/html/rfc4287). Also automatically figures out feed url from HTML through [rel=alternate links](https://developer.mozilla.org/en-US/docs/Web/HTML/Link_types)
 * You can also use the [roastidio.us](https://roastidio.us) commenting service (written and operated by me) to write your comment. The integration is just a simple link, there is no data sharing.
 

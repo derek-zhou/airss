@@ -73,7 +73,6 @@ async function cb_load(prev) {
 	console.info("Nothing to load, sleeping");
 	return;
     }
-    console.info("prepare to load feed id: " + feed.id + " url: " + feed.feedUrl);
     try {
 	var data = await loadFeed(feed);
     } catch (e) {
@@ -107,7 +106,6 @@ async function cb_load(prev) {
 	}
 	break;
     }
-    console.info("done loading feed id: " + updated.id + " url: " + updated.feedUrl);
     updateFeed(updated, items);
 }
 
