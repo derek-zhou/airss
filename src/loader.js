@@ -2,7 +2,7 @@
  * networking loading module
  */
 
-import {addFeed, addItem, updateFeed, getLoadCandidate} from './airss_model.js';
+import {addFeed, addItems, updateFeed, getLoadCandidate} from './airss_model.js';
 import {loadFeedsBeyond, loadItemsBeyond} from './airtable_server.js';
 
 export {subscribe, load, loadAirtable};
@@ -24,29 +24,28 @@ const FeedType = {
 // I have no state so far. I could have multiple instances and do
 // parallel loading but there is no point to stress the network
 
-async function cb_loadAirtable(prev, lastFeedId, lastItemId) {
+async function cb_loadFeedsFromAirtable(prev, lastId) {
     await prev;
-    // load feeds
-    // this is not exactly in the sort order of lastLoadTime though
-    let missingFeeds;
-    do {
-	missingFeeds = await loadFeedsBeyond(lastFeedId);
-	for (let feed of missingFeeds.values()) {
-	    if (lastFeedId < feed.id)
-		lastFeedId = feed.id;
+    // this is not in the sort order of lastLoadTime though
+    while (true) {
+	let missingFeeds = await loadFeedsBeyond(lastId);
+	if (missingFeeds.length == 0)
+	    break;
+	for (let feed of missingFeeds.values())
 	    await addFeed(feed);
-	}
-    } while(missingFeeds.length > 0);
+	lastId = missingFeeds[missingFeeds.length - 1].id;
+    }
+}
 
-    let missingItems;
-    do {
-	missingItems = await loadItemsBeyond(lastItemId);
-	for (let item of missingItems.values()) {
-	    if (lastItemId < item.id)
-		lastItemId = item.id;
-	    await addItem(item);
-	}
-    } while(missingItems.length > 0);
+async function cb_loadItemsFromAirtable(prev, lastId) {
+    await prev;
+    while (true) {
+	let missingItems = await loadItemsBeyond(lastId);
+	if (missingItems.length == 0)
+	    break;
+	await addItems(missingItems);
+	lastId = missingItems[missingItems.length - 1].id;
+    }
 }
 
 async function cb_subscribe(prev, url) {
@@ -361,7 +360,8 @@ function parseATOMItem(elem) {
 let state = null;
 
 function loadAirtable(lastFeedId, lastItemId) {
-    state = cb_loadAirtable(state, lastFeedId, lastItemId);
+    state = cb_loadFeedsFromAirtable(state, lastFeedId);
+    state = cb_loadItemsFromAirtable(state, lastItemId);
 }
 
 function subscribe(url) {

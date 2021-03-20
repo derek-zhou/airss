@@ -87,13 +87,12 @@ async function pushItem(db, item) {
     return id;
 }
 
-async function addItem(db, item) {
+function addItem(db, item) {
     // already has id, must comming from airtable
-    await db.add(Store, item);
     items.push(item.id);
     if (item.read && known == items.length - 2)
 	known ++;
-    return item.id;
+    return db.add(Store, item);
 }
 
 function upgrade(db) {

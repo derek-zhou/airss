@@ -14,7 +14,7 @@ import * as Loader from './loader.js';
 export {currentState, reinit, shutdown,
 	forwardItem, backwardItem, deleteItem, currentItem,
 	subscribe, unsubscribe,
-	getLoadCandidate, addFeed, addItem, updateFeed};
+	getLoadCandidate, addFeed, addItems, updateFeed};
 
 export {emitModelWarning, emitModelError, emitModelInfo, emitModelItemsLoaded};
 
@@ -163,9 +163,11 @@ async function cb_addFeed(prev, feed) {
     }
 }
 
-async function cb_addItem(prev, item) {
+async function cb_addItems(prev, items) {
     await prev;
-    await Items.addItem(db, item);
+    for (let item of items.values()) {
+	await Items.addItem(db, item);
+    }
     emitModelItemsLoaded({
 	length: Items.length(),
 	cursor: Items.readingCursor()
@@ -342,8 +344,8 @@ function addFeed(feed) {
 }
 
 // add a item. this is for the callback from loading the airtable
-function addItem(item) {
-    state = cb_addItem(state, item);
+function addItems(items) {
+    state = cb_addItems(state, items);
 }
 
 // update a feed with new data. this is for the callback from load

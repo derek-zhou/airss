@@ -309,6 +309,14 @@
 		  </label>
 		  <input type="text" bind:value={baseToken}>
 	      </div>
+	      {#if baseToken}
+		  <div class="line">
+		      Your Airtable base is
+		      <a href="https://airtable.com/{baseToken}">
+			  https://airtable.com/{baseToken}
+		      </a>
+		  </div>
+	      {/if}
 	      <input class="button" type="submit" value="&#128076;">
 	      <input class="button" type="reset" value="&#128078;"
 		     on:click={clickCancel}>
