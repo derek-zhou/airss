@@ -247,13 +247,16 @@ async function cb_updateFeed(prev, feed, items) {
 
 async function cb_getLoadCandidate(prev) {
     await prev;
+    if (Items.unreadCount() >= WaterMark)
+	return null;
     let feedId = Feeds.first();
-    if (!feedId || Items.unreadCount() >= WaterMark)
+    if (!feedId)
 	return null;
     let now = new Date();
     let feed = await Feeds.get(db, feedId);
     if (feed.lastLoadTime > now - MinReloadWait * 3600 * 1000)
 	return null;
+    Feeds.rotate();
     return feed;
 }
 

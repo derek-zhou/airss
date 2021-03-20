@@ -11,7 +11,7 @@ const Store = "feeds";
 let feeds = [];
 
 // public apis
-export {upgrade, load, get, first, addFeed, updateFeed, removeFeed};
+export {upgrade, load, get, first, rotate, addFeed, updateFeed, removeFeed};
 
 function upgrade(db) {
     // the store holds all the feeds
@@ -31,7 +31,7 @@ async function load(db) {
     while (cursor) {
 	if (lastId < cursor.value.id)
 	    lastId = cursor.value.id;
-	feeds.push(lastId);
+	feeds.push(cursor.value.id);
 	cursor = await cursor.continue();
     }
     return lastId;
@@ -40,9 +40,11 @@ async function load(db) {
 function first() {
     if (feeds.lenth == 0)
 	return null;
-    let head = feeds[0];
+    return feeds[0];
+}
+
+function rotate() {
     feeds = feeds.slice(1);
-    return head;
 }
 
 async function get(db, id) {
