@@ -120,7 +120,9 @@ async function load(db) {
     let missingItems;
     do {
 	missingItems = await Airtable.loadItemsBeyond(lastId);
-	for (let item of missingFeeds.values()) {
+	for (let item of missingItems.values()) {
+	    if (lastId < item.id)
+		lastId = item.id;
 	    await db.add(Store, item);
 	    items.push(item.id);
 	    if (item.read)

@@ -40,6 +40,8 @@ async function load(db) {
     do {
 	missingFeeds = await Airtable.loadFeedsBeyond(lastId);
 	for (let feed of missingFeeds.values()) {
+	    if (lastId < feed.id)
+		lastId = feed.id;
 	    await db.add(Store, feed);
 	    feeds.push(feed.id);
 	}

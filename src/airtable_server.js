@@ -35,9 +35,11 @@ let itemsKeyMap = new Map();
 
 async function cb_loadFeedsBeyond(prev, min) {
     await prev;
+    if (base === null)
+	return [];
     let feeds = await base(FeedsTable).select({
 	filterByFormula: "id > " + min,
-	sort: ["id"]
+	sort: [{field: "id"}]
     }).firstPage();
 
     let rets = [];
@@ -52,10 +54,13 @@ async function cb_loadFeedsBeyond(prev, min) {
 	    homePageUrl: each.get("homePageUrl") || ""
 	});
     }
+    return rets;
 }
 
 async function cb_upsertFeed(prev, feed) {
     await prev;
+    if (base === null)
+	return feed.id;
     let key = await getFeedKey(id);
     if (key === undefined) {
 	let record = await base(FeedsTable).create({
@@ -83,6 +88,8 @@ async function cb_upsertFeed(prev, feed) {
 
 async function cb_deleteFeed(prev, id) {
     await prev;
+    if (base === null)
+	return true;
     let key = await getFeedKey(id);
     if (key !== undefined) {
 	feedsKeyMap.delete(id);
@@ -93,9 +100,11 @@ async function cb_deleteFeed(prev, id) {
 
 async function cb_loadItemsBeyond(prev, min) {
     await prev;
+    if (base === null)
+	return [];
     let items = await base(ItemsTable).select({
 	filterByFormula: "id > " + min,
-	sort: ["id"]
+	sort: [{field: "id"}]
     }).firstPage();
 
     let rets = [];
@@ -114,10 +123,13 @@ async function cb_loadItemsBeyond(prev, min) {
 	}
 	rets.push(item);
     }
+    return rets;
 }
 
 async function cb_markRead(prev, id) {
     await prev;
+    if (base === null)
+	return true;
     let key = await getItemKey(id);
     if (key !== undefined) {
 	await base(ItemsTable).update(key, {read: true});
@@ -127,6 +139,8 @@ async function cb_markRead(prev, id) {
 
 async function cb_addItem(prev, item) {
     await prev;
+    if (base === null)
+	return item.id;
     let key = await getItemKey(id);
     if (key === undefined) {
 	let extraInfo = {...item};
@@ -146,6 +160,8 @@ async function cb_addItem(prev, item) {
 
 async function cb_deleteItem(prev, id) {
     await prev;
+    if (base === null)
+	return true;
     let key = await getItemKey(id);
     if (key !== undefined) {
 	itemsKeyMap.delete(id);
@@ -204,7 +220,7 @@ function feedTypeStr(t) {
     }
 }
 
-async function init() {
+function init() {
     if (!ApiKey)
 	return null;
     
@@ -229,55 +245,42 @@ let state = init();
 
 // load as much as feeds from id up, non-inclusive.
 function loadFeedsBeyond(id) {
-    if (state === null)
-	return [];
     state = cb_loadFeedsBeyond(state, id);
     return state;
 }
 
 // updata a feed. create it if there is none
 function upsertFeed(feed) {
-    if (state === null)
-	return feed.id;
     state = cb_upsertFeed(state, feed);
     return state;
 }
 
 // delete a feed.
 function deleteFeed(id) {
-    if (state === null)
-	return true;
     state = cb_deleteFeed(state, id);
+    return state;
 }
 
 // load as much as items from id up, non-inclusive
 function loadItemsBeyond(id) {
-    if (state === null)
-	return [];
     state = cb_loadItemsBeyond(state, id);
     return state;
 }
 
 // mark an item read. do not create it if there is none
 function markRead(id) {
-    if (state === null)
-	return true;
     state = cb_markRead(state, id);
     return state;
 }
 
 // add an item. do nothing if there is already one
 function addItem(item) {
-    if (state === null)
-	return item.id;
     state = cb_addItem(state, item);
     return state;
 }
 
 // delete an item.
 function deleteItem(id) {
-    if (state === null)
-	return true;
     state = cb_deleteItem(state, id);
     return state;
 }
