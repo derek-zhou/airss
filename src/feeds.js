@@ -34,18 +34,7 @@ async function load(db) {
 	feeds.push(lastId);
 	cursor = await cursor.continue();
     }
-
-    // this is not exactly in the sort order of lastLoadTime though
-    let missingFeeds;
-    do {
-	missingFeeds = await Airtable.loadFeedsBeyond(lastId);
-	for (let feed of missingFeeds.values()) {
-	    if (lastId < feed.id)
-		lastId = feed.id;
-	    await db.add(Store, feed);
-	    feeds.push(feed.id);
-	}
-    } while(missingFeeds.length > 0);
+    return lastId;
 }
 
 function first() {
@@ -61,12 +50,19 @@ async function get(db, id) {
 }
 
 async function addFeed(db, feed) {
-    let id = await db.add(Store, feed);
-    feeds = [id, ...feeds];
-    feed.id = id;
-    // we do not await it and just hope it will land
-    Airtable.upsertFeed(feed);
-    return id;
+    if (feed.id) {
+	// already has id, must comming from airtable
+	feeds.push(feed.id);
+	await db.add(Store, feed);
+	return feed.id;
+    } else {
+	let id = await db.add(Store, feed);
+	feeds = [id, ...feeds];
+	feed.id = id;
+	// we do not await it and just hope it will land
+	Airtable.upsertFeed(feed);
+	return id;
+    }
 }
 
 function updateFeed(db, feed) {

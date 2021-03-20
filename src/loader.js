@@ -2,9 +2,10 @@
  * networking loading module
  */
 
-import {addFeed, updateFeed, getLoadCandidate} from './airss_model.js';
+import {addFeed, addItem, updateFeed, getLoadCandidate} from './airss_model.js';
+import {loadFeedsBeyond, loadItemsBeyond} from './airtable_server.js';
 
-export {subscribe, load};
+export {subscribe, load, loadAirtable};
 
 // keep at most 100 items from feed
 const MaxKeptItems = 100;
@@ -22,6 +23,31 @@ const FeedType = {
 
 // I have no state so far. I could have multiple instances and do
 // parallel loading but there is no point to stress the network
+
+async function cb_loadAirtable(prev, lastFeedId, lastItemId) {
+    await prev;
+    // load feeds
+    // this is not exactly in the sort order of lastLoadTime though
+    let missingFeeds;
+    do {
+	missingFeeds = await loadFeedsBeyond(lastFeedId);
+	for (let feed of missingFeeds.values()) {
+	    if (lastFeedId < feed.id)
+		lastFeedId = feed.id;
+	    await addFeed(feed);
+	}
+    } while(missingFeeds.length > 0);
+
+    let missingItems;
+    do {
+	missingItems = await loadItemsBeyond(lastItemId);
+	for (let item of missingItems.values()) {
+	    if (lastItemId < item.id)
+		lastItemId = item.id;
+	    await addItem(item);
+	}
+    } while(missingItems.length > 0);
+}
 
 async function cb_subscribe(prev, url) {
     await prev;
@@ -333,6 +359,10 @@ function parseATOMItem(elem) {
  */
 
 let state = null;
+
+function loadAirtable(lastFeedId, lastItemId) {
+    state = cb_loadAirtable(state, lastFeedId, lastItemId);
+}
 
 function subscribe(url) {
     state = cb_subscribe(state, url);

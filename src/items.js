@@ -16,7 +16,7 @@ let known = -1;
 // public apis
 export {upgrade, load, length,
 	readingCursor, knownCursor, forwardCursor, backwardCursor, unreadCount,
-	markRead, getCurrentItem, deleteCurrentItem, pushItem};
+	markRead, getCurrentItem, deleteCurrentItem, pushItem, addItem};
 
 function readingCursor() {
     return reading;
@@ -79,12 +79,21 @@ async function deleteCurrentItem(db) {
 }
 
 async function pushItem(db, item) {
-    // it may throw, which will be catch outside
     let id = await db.add(Store, item);
     items.push(id);
     item.id = id;
-     // we do not await it and just hope it will land
+    // we do not await it and just hope it will land
     Airtable.addItem(item);
+    return id;
+}
+
+async function addItem(db, item) {
+    // already has id, must comming from airtable
+    await db.add(Store, item);
+    items.push(item.id);
+    if (item.read && known == items.length - 2)
+	known ++;
+    return item.id;
 }
 
 function upgrade(db) {
@@ -117,19 +126,6 @@ async function load(db) {
 	cursor = await cursor.continue();
     }
 
-    let missingItems;
-    do {
-	missingItems = await Airtable.loadItemsBeyond(lastId);
-	for (let item of missingItems.values()) {
-	    if (lastId < item.id)
-		lastId = item.id;
-	    await db.add(Store, item);
-	    items.push(item.id);
-	    if (item.read)
-		known ++;
-	}
-    } while(missingItems.length > 0);
-
     for (let id of expired.values()) {
 	console.info("deleteing expired item: " + id);
 	await db.delete(Store, id);
@@ -139,4 +135,5 @@ async function load(db) {
 
     // point both cursor at the last read item
     reading = known;
+    return lastId;
 }

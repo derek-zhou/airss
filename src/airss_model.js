@@ -14,7 +14,7 @@ import * as Loader from './loader.js';
 export {currentState, reinit, shutdown,
 	forwardItem, backwardItem, deleteItem, currentItem,
 	subscribe, unsubscribe,
-	getLoadCandidate, addFeed, updateFeed};
+	getLoadCandidate, addFeed, addItem, updateFeed};
 
 export {emitModelWarning, emitModelError, emitModelInfo, emitModelItemsLoaded};
 
@@ -146,9 +146,13 @@ async function cb_addFeed(prev, feed) {
 	return;
     }
     try {
+	// if the feed come in with an id then it is from airtable
+	let newFeed = (feed.id === undefined);
 	let id = await Feeds.addFeed(db, feed);
 	console.info("added feed " + feed.feedUrl + " with id: " + id);
-	emitModelInfo("The feed '" + feed.feedUrl + "' is now subscribed");
+	if (newFeed) {
+	    emitModelInfo("The feed '" + feed.feedUrl + "' is now subscribed");
+	}
     } catch (e) {
 	if (e instanceof DOMException) {
 	    emitModelError("The feed '" + feed.feedUrl +
@@ -157,6 +161,15 @@ async function cb_addFeed(prev, feed) {
 	    throw e;
 	}
     }
+}
+
+async function cb_addItem(prev, item) {
+    await prev;
+    await Items.addItem(db, item);
+    emitModelItemsLoaded({
+	length: Items.length(),
+	cursor: Items.readingCursor()
+    });
 }
 
 function oopsItem(feed) {
@@ -252,8 +265,11 @@ async function init() {
 	    Items.upgrade(db);
 	},
     });
-    await Feeds.load(db);
-    await Items.load(db);
+    let lastFeedId = await Feeds.load(db);
+    let lastItemId = await Items.load(db);
+    // this is going to take awhile, we do not await it
+    // also this need to be called before the controller has any chance to do anything
+    Loader.loadAirtable(lastFeedId, lastItemId);
     emitModelItemsLoaded({
 	length: Items.length(),
 	cursor: Items.readingCursor()
@@ -323,6 +339,11 @@ function unsubscribe(id) {
 // add a feed. this is for the callback from subscribe
 function addFeed(feed) {
     state = cb_addFeed(state, feed);
+}
+
+// add a item. this is for the callback from loading the airtable
+function addItem(item) {
+    state = cb_addItem(state, item);
 }
 
 // update a feed with new data. this is for the callback from load
