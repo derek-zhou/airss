@@ -61,7 +61,7 @@ async function cb_upsertFeed(prev, feed) {
     await prev;
     if (base === null)
 	return feed.id;
-    let key = await getFeedKey(id);
+    let key = await getFeedKey(feed.id);
     if (key === undefined) {
 	let record = await base(FeedsTable).create({
 	    id: feed.id,
@@ -119,7 +119,11 @@ async function cb_loadItemsBeyond(prev, min) {
 	let extraInfo = JSON.parse(extra);
 	// just merge everything
 	for (const [key, value] of Object.entries(extraInfo)) {
-	    item[key] = value;
+	    // make sure data is a Date
+	    if (key == "datePublished")
+		item[key] = new Date(value);
+	    else
+		item[key] = value;
 	}
 	rets.push(item);
     }
@@ -141,7 +145,7 @@ async function cb_addItem(prev, item) {
     await prev;
     if (base === null)
 	return item.id;
-    let key = await getItemKey(id);
+    let key = await getItemKey(item.id);
     if (key === undefined) {
 	let extraInfo = {...item};
 	delete extraInfo.id;
@@ -171,29 +175,29 @@ async function cb_deleteItem(prev, id) {
 }
 
 async function getFeedKey(id) {
-    let key = feedsKeyMap.get(feed.id);
+    let key = feedsKeyMap.get(id);
     if (key === undefined) {
 	let feeds = await base(FeedsTable).select({
-	    filterByFormula: "id = " + feed.id,
+	    filterByFormula: "id = " + id,
 	}).firstPage();
 	for (let each of feeds.values()) {
 	    feedsKeyMap.set(each.get("id"), each.getId());
 	};
-	key = feedsKeyMap.get(feed.id);
+	key = feedsKeyMap.get(id);
     }
     return key;
 }
 
 async function getItemKey(id) {
-    let key = itemsKeyMap.get(feed.id);
+    let key = itemsKeyMap.get(id);
     if (key === undefined) {
 	let items = await base(ItemsTable).select({
-	    filterByFormula: "id = " + item.id,
+	    filterByFormula: "id = " + id,
 	}).firstPage();
 	for (let each of items.values()) {
 	    itemsKeyMap.set(each.get("id"), each.getId());
 	};
-	key = itemsKeyMap.get(item.id);
+	key = itemsKeyMap.get(id);
     }
     return key;
 }

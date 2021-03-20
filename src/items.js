@@ -82,7 +82,7 @@ async function pushItem(db, item) {
     // it may throw, which will be catch outside
     let id = await db.add(Store, item);
     items.push(id);
-    items.id = id;
+    item.id = id;
      // we do not await it and just hope it will land
     Airtable.addItem(item);
 }

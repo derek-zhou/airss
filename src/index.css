@@ -158,7 +158,7 @@
 		    @apply border rounded border-gray-600;
 		}
                 input[type="text"] {
-                    @apply leading-relaxed border rounded border-gray-600;
+                    @apply w-80 leading-relaxed border rounded border-gray-600;
                 }
                 .button[type="reset"] {
                     @apply cursor-pointer text-white bg-pink-600 mr-1;

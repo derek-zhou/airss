@@ -154,16 +154,12 @@
 
  function clickSubmitConfig() {
      // airss_model:
-     if (waterMark)
-	 localStorage.setItem("WATER_MARK", waterMark.value);
-     if (minReloadWait)
-	 localStorage.setItem("MIN_RELOAD_WAIT", minReloadWait.value);
-     if (maxKeptPeriod)
-	 localStorage.setItem("MAX_KEPT_PERIOD", maxKeptPeriod.value);
-     if (apiKey)
-	 localStorage.setItem("AIRTABLE_API_KEY", apiKey);
-     if (baseToken)
-	 localStorage.setItem("AIRTABLE_BASE_TOKEN", baseToken);
+     localStorage.setItem("WATER_MARK", waterMark.value);
+     localStorage.setItem("MIN_RELOAD_WAIT", minReloadWait.value);
+     localStorage.setItem("MAX_KEPT_PERIOD", maxKeptPeriod.value);
+     // airtable_server
+     localStorage.setItem("AIRTABLE_API_KEY", apiKey);
+     localStorage.setItem("AIRTABLE_BASE_TOKEN", baseToken);
      // It is very hard to change config at run time, so I just take
      // shortcut to reload
      location.reload();
@@ -292,7 +288,7 @@
 	      </div>
 	      <div class="line">
 		  <label for="select-max-kept-period">
-		      Keep read items for:
+		      Keep read items in the database for:
 		  </label>
 		  <select id="select-max-kept-period" bind:value={maxKeptPeriod}>
 		      {#each maxKeptPeriodChoices as choice}
@@ -309,7 +305,7 @@
 	      </div>
 	      <div class="line">
 		  <label for="input-base-token">
-		      Airtable token for your base:
+		      The ID of your Airtable base:
 		  </label>
 		  <input type="text" bind:value={baseToken}>
 	      </div>
@@ -322,7 +318,11 @@
       <div class="box">
 	  <form on:submit|preventDefault={clickSubmitSubscribe}>
 	      <div class="line">
-		  <input type="text" bind:value={subscribeUrl}
+		  <label for="input-feed-url">
+		      The URL to the feed or the index page:
+		  </label>
+		  <input id="input-feed-url" type="text"
+			 bind:value={subscribeUrl}
 			 placeholder="enter the url to subscribe">
 	      </div>
 	      <input class="button" type="submit" value="&#128076;">
