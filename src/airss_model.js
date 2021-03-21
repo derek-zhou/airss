@@ -170,13 +170,24 @@ async function cb_fetchFeed(prev, id) {
 
 async function cb_addItems(prev, items) {
     await prev;
+    let cnt = 0;
     for (let item of items.values()) {
-	await Items.addItem(db, item);
+	try {
+	    await Items.addItem(db, item);
+	    cnt ++;
+	} catch (e) {
+	    if (e instanceof DOMException) {
+		// it is common that an item cannot be add
+	    } else {
+		throw e;
+	    }
+	}
     }
-    emitModelItemsLoaded({
-	length: Items.length(),
-	cursor: Items.readingCursor()
-    });
+    if (cnt)
+	emitModelItemsLoaded({
+	    length: Items.length(),
+	    cursor: Items.readingCursor()
+	});
 }
 
 function oopsItem(feed) {
