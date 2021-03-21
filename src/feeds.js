@@ -25,16 +25,14 @@ async function load(db) {
     let store = await db.transaction(Store).store;
     let index = store.index("lastLoadTime");
     let cursor = await index.openCursor();
-    let lastId = 0;
 
     feeds = [];
     while (cursor) {
-	if (lastId < cursor.value.id)
-	    lastId = cursor.value.id;
 	feeds.push(cursor.value.id);
 	cursor = await cursor.continue();
     }
-    return lastId;
+    // return a copy so my state is not affected
+    return [...feeds];
 }
 
 function first() {
@@ -62,14 +60,14 @@ async function addFeed(db, feed) {
 	feeds = [id, ...feeds];
 	feed.id = id;
 	// we do not await it and just hope it will land
-	Airtable.upsertFeed(feed);
+	Airtable.insertFeed(feed);
 	return id;
     }
 }
 
 function updateFeed(db, feed) {
     // we do not await it and just hope it will land
-    Airtable.upsertFeed(feed);
+    Airtable.updateFeed(feed);
     return db.put(Store, feed);
 }
 

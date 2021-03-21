@@ -69,6 +69,8 @@ Airtable's free tier can store upto 1200 records in a base. Each feed is a recor
 
 Do not use AirSS with airtable on a device that you do not control; AirSS stores the API key in the local storage unencrypted. A local super user can steal it. 
 
+Please also keep in mind that AirSS does not do two-way data syncing or resolve conflicts. All the sync'ed devices except the first one shall connect to airtable with a clean slate. 
+
 ## Disclaimer
 
 The software shall be consider alpha quality right now. Use it  your own risk.

@@ -4,7 +4,7 @@
 
 import Airtable from 'airtable';
 
-export {loadFeedsBeyond, upsertFeed, deleteFeed};
+export {loadFeedsBeyond, insertFeed, updateFeed, deleteFeed};
 export {loadItemsBeyond, markRead, addItem, deleteItem};
 
 const ApiKey = localStorage.getItem('AIRTABLE_API_KEY');
@@ -57,32 +57,37 @@ async function cb_loadFeedsBeyond(prev, min) {
     return rets;
 }
 
-async function cb_upsertFeed(prev, feed) {
+async function cb_updateFeed(prev, feed) {
     await prev;
     if (base === null)
 	return feed.id;
-    let key = await getFeedKey(feed.id);
-    if (key === undefined) {
-	let record = await base(FeedsTable).create({
-	    id: feed.id,
-	    feedUrl: feed.feedUrl,
-	    lastLoadTime: Math.floor(feed.lastLoadTime / 1000),
-	    type: feedTypeStr(feed.type),
-	    title: feed.title || "",
-	    homePageUrl: feed.homePageUrl || ""
-	});
-	feedsKeyMap.set(feed.id, record.getId());
-    } else {
-	// we do not update every field
-	let patch = new Object();
-	if (feed.title !== undefined)
-	    patch.title = feed.title;
-	if (feed.lastLoadTime !== undefined)
-	    patch.lastLoadTime = Math.floor(feed.lastLoadTime / 1000);
-	if (feed.homePageUrl !== undefined)
-	    patch.homePageUrl = feed.homePageUrl;
-	await base(FeedsTable).update(key, patch);
-    }
+    let key = feedsKeyMap.get(feed.id);
+
+    // we do not update every field
+    let patch = new Object();
+    if (feed.title !== undefined)
+	patch.title = feed.title;
+    if (feed.lastLoadTime !== undefined)
+	patch.lastLoadTime = Math.floor(feed.lastLoadTime / 1000);
+    if (feed.homePageUrl !== undefined)
+	patch.homePageUrl = feed.homePageUrl;
+    await base(FeedsTable).update(key, patch);
+    return feed.id;
+}
+
+async function cb_insertFeed(prev, feed) {
+    await prev;
+    if (base === null)
+	return feed.id;
+    let record = await base(FeedsTable).create({
+	id: feed.id,
+	feedUrl: feed.feedUrl,
+	lastLoadTime: Math.floor(feed.lastLoadTime / 1000),
+	type: feedTypeStr(feed.type),
+	title: feed.title || "",
+	homePageUrl: feed.homePageUrl || ""
+    });
+    feedsKeyMap.set(feed.id, record.getId());
     return feed.id;
 }
 
@@ -90,10 +95,10 @@ async function cb_deleteFeed(prev, id) {
     await prev;
     if (base === null)
 	return true;
-    let key = await getFeedKey(id);
+    let key = feedsKeyMap.get(id);
     if (key !== undefined) {
-	feedsKeyMap.delete(id);
 	await base(FeedsTable).destroy(key);
+	feedsKeyMap.delete(id);
     }
     return true;
 }
@@ -174,20 +179,6 @@ async function cb_deleteItem(prev, id) {
     return true;
 }
 
-async function getFeedKey(id) {
-    let key = feedsKeyMap.get(id);
-    if (key === undefined) {
-	let feeds = await base(FeedsTable).select({
-	    filterByFormula: "id = " + id,
-	}).firstPage();
-	for (let each of feeds.values()) {
-	    feedsKeyMap.set(each.get("id"), each.getId());
-	};
-	key = feedsKeyMap.get(id);
-    }
-    return key;
-}
-
 async function getItemKey(id) {
     let key = itemsKeyMap.get(id);
     if (key === undefined) {
@@ -253,9 +244,15 @@ function loadFeedsBeyond(id) {
     return state;
 }
 
-// updata a feed. create it if there is none
-function upsertFeed(feed) {
-    state = cb_upsertFeed(state, feed);
+// update a feed
+function updateFeed(feed) {
+    state = cb_updateFeed(state, feed);
+    return state;
+}
+
+// insert a feed. create it if there is none
+function insertFeed(feed) {
+    state = cb_insertFeed(state, feed);
     return state;
 }
 

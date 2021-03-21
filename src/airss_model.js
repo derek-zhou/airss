@@ -14,7 +14,7 @@ import * as Loader from './loader.js';
 export {currentState, reinit, shutdown,
 	forwardItem, backwardItem, deleteItem, currentItem,
 	subscribe, unsubscribe,
-	getLoadCandidate, addFeed, addItems, updateFeed};
+	getLoadCandidate, addFeed, addItems, fetchFeed, updateFeed};
 
 export {emitModelWarning, emitModelError, emitModelInfo, emitModelItemsLoaded};
 
@@ -163,6 +163,11 @@ async function cb_addFeed(prev, feed) {
     }
 }
 
+async function cb_fetchFeed(prev, id) {
+    await prev;
+    return Feeds.get(db, id);
+}
+
 async function cb_addItems(prev, items) {
     await prev;
     for (let item of items.values()) {
@@ -178,8 +183,8 @@ function oopsItem(feed) {
     let item = new Object();
     item.datePublished = new Date();
     item.contentHtml = "If you see this, this feed '" + feed.feedUrl +
-	"' failed loading:<br />" +
-	"<pre>" + feed.error + "</pre><br />" +
+	"' failed loading:" +
+	"<pre>" + feed.error + "</pre>" +
 	"Check the console for the detail error.";
     // just fake something to satisfy constrains
     item.url = Math.random().toString(36).substring(2, 15);
@@ -195,7 +200,7 @@ function dummyItem(feed) {
     item.datePublished = new Date();
     item.contentHtml = "If you see this, this feed '" + feed.feedUrl +
 	"' hasn't been updated for " + MaxKeptPeriod +
-	" days. There is nothing wrong, just too kept.";
+	" days. There is nothing wrong, just too quiet.";
     // just fake something to satisfy constrains
     item.url = Math.random().toString(36).substring(2, 15);
     item.title = "Errrr...";
@@ -270,11 +275,11 @@ async function init() {
 	    Items.upgrade(db);
 	},
     });
-    let lastFeedId = await Feeds.load(db);
+    let feedIds = await Feeds.load(db);
     let lastItemId = await Items.load(db);
     // this is going to take awhile, we do not await it
     // also this need to be called before the controller has any chance to do anything
-    Loader.loadAirtable(lastFeedId, lastItemId);
+    Loader.loadAirtable(feedIds, lastItemId);
     emitModelItemsLoaded({
 	length: Items.length(),
 	cursor: Items.readingCursor()
@@ -359,6 +364,12 @@ function updateFeed(feed, items) {
 // return a feed to load, or null if no such candidate is found
 function getLoadCandidate() {
     state = cb_getLoadCandidate(state);
+    return state;
+}
+
+// return a single feed fetched from the db
+function fetchFeed(id) {
+    state = cb_fetchFeed(state, id);
     return state;
 }
 

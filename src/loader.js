@@ -2,8 +2,8 @@
  * networking loading module
  */
 
-import {addFeed, addItems, updateFeed, getLoadCandidate} from './airss_model.js';
-import {loadFeedsBeyond, loadItemsBeyond} from './airtable_server.js';
+import * as Model from './airss_model.js';
+import * as Airtable from './airtable_server.js';
 
 export {subscribe, load, loadAirtable};
 
@@ -24,26 +24,44 @@ const FeedType = {
 // I have no state so far. I could have multiple instances and do
 // parallel loading but there is no point to stress the network
 
-async function cb_loadFeedsFromAirtable(prev, lastId) {
+async function cb_loadFeedsFromAirtable(prev, feedIds) {
     await prev;
+    // numeric sort
+    feedIds.sort((a, b) => a - b);
+    let localLastId = 0;
+    if (feedIds.length > 0)
+	localLastId = feedIds[feedIds.length - 1];
+    let remoteLastId = 0;
+    let remoteFeedIds = new Set();
+    // add every feeds that exist in remote but not local
     // this is not in the sort order of lastLoadTime though
     while (true) {
-	let missingFeeds = await loadFeedsBeyond(lastId);
-	if (missingFeeds.length == 0)
+	let remoteFeeds = await Airtable.loadFeedsBeyond(remoteLastId);
+	if (remoteFeeds.length == 0)
 	    break;
-	for (let feed of missingFeeds.values())
-	    await addFeed(feed);
-	lastId = missingFeeds[missingFeeds.length - 1].id;
+	for (let feed of remoteFeeds.values()) {
+	    remoteFeedIds.add(feed.id);
+	    if (feed.id > localLastId)
+		await Model.addFeed(feed);
+	}
+	remoteLastId = remoteFeeds[remoteFeeds.length - 1].id;
+    }
+    // push every feeds that exist locally but not in remote
+    for (let id of feedIds.values()) {
+	if (remoteFeedIds.has(id))
+	    continue;
+	let feed = await Model.fetchFeed(id);
+	Airtable.insertFeed(feed);
     }
 }
 
 async function cb_loadItemsFromAirtable(prev, lastId) {
     await prev;
     while (true) {
-	let missingItems = await loadItemsBeyond(lastId);
+	let missingItems = await Airtable.loadItemsBeyond(lastId);
 	if (missingItems.length == 0)
 	    break;
-	await addItems(missingItems);
+	await Model.addItems(missingItems);
 	lastId = missingItems[missingItems.length - 1].id;
     }
 }
@@ -63,12 +81,12 @@ async function cb_subscribe(prev, url) {
 	    throw e;
 	}
     }
-    addFeed(feed);
+    Model.addFeed(feed);
 }
 
 async function cb_load(prev) {
     await prev;
-    let feed = await getLoadCandidate();
+    let feed = await Model.getLoadCandidate();
     if (!feed) {
 	console.info("Nothing to load, sleeping");
 	return;
@@ -78,7 +96,7 @@ async function cb_load(prev) {
     } catch (e) {
 	if (typeof e === 'string' || (e instanceof TypeError)) {
 	    feed.error = e.toString();
-	    updateFeed(feed, []);
+	    Model.updateFeed(feed, []);
 	    return;
 	} else {
 	    throw e;
@@ -106,7 +124,7 @@ async function cb_load(prev) {
 	}
 	break;
     }
-    updateFeed(updated, items);
+    Model.updateFeed(updated, items);
 }
 
 async function loadFeed(feed) {
@@ -359,8 +377,8 @@ function parseATOMItem(elem) {
 
 let state = null;
 
-function loadAirtable(lastFeedId, lastItemId) {
-    state = cb_loadFeedsFromAirtable(state, lastFeedId);
+function loadAirtable(feedIds, lastItemId) {
+    state = cb_loadFeedsFromAirtable(state, feedIds);
     state = cb_loadItemsFromAirtable(state, lastItemId);
 }
 
