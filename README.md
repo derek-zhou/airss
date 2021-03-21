@@ -41,36 +41,16 @@ However, hope is not lost, even today. Via browser add-ons such as: [CORS everyw
 
 ## Airtable
 
-The folks at airtable are nice enough to provide anyone free accounts. With airtable you can share feeds and news between multiple devices, such as computer + phone etc so you can read your news anywhere. There is some setup involved, because airtables cannot be setup through API. You will need to setup a dedicated base for airss, and 2 tables under the base. The two tables are:
+The folks at airtable are nice enough to provide anyone free accounts. With airtable you can share feeds and news between multiple devices, such as computer + phone etc so you can read your news anywhere. There is some setup involved, because airtables cannot be setup through API. You will need to setup a dedicated base for airss, and 2 tables under the base. The easiest way is to just copy this base: [airss template](https://airtable.com/shrFm410wa0iyoKpq) into your workspace.
 
-### feeds
+Then you generate a API key through your account profile, and take a note of the base ID from `help` -> `API documentation` in this base. Put them in the config page of airss, then you are done.
 
-|field name | field type |
-|-----------|------------|
-| id        | integer   |
-| feedUrl   | URL       |
-| lastLoadTime | integer |
-| type | select(json/xml) |
-| title | single line text |
-| homePageUrl | URL |
-
-### items
-
-| field name | field type |
-|------------|------------|
-| id         | integer |
-| url        | URL |
-| read | checkbox |
-| extra | long text |
-
-Then you generate a API key through your account profile, and take a note of the basd ID from `help` -> `API documentation` in this base. Put them in the config page of airss, then you are done.
-
-Airtable's free tier can store upto 1200 records in a base. Each feed is a record, and each news item is a record too. If you subscribe to a lot of feeds, you may have to limit history depth to stay in the bound.
-
-Do not use AirSS with airtable on a device that you do not control; AirSS stores the API key in the local storage unencrypted. A local super user can steal it. 
+Airtable's free tier can store upto 1200 records in a base. Each feed is a record, and each news item is a record too. If you subscribe to a lot of feeds, you may have to limit history depth to stay in the bound. Alternatively, you can hop onto airtable to delete old items manually.
 
 Please also keep in mind that AirSS does not do two-way data syncing or resolve conflicts. All the sync'ed devices except the first one shall connect to airtable with a clean slate. 
 
 ## Disclaimer
 
 The software shall be consider alpha quality right now. Use it  your own risk.
+
+Do not use AirSS with airtable on a device that you do not control; AirSS stores the API key in the local storage unencrypted. A local super user can steal it. 
