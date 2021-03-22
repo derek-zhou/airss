@@ -148,9 +148,12 @@ async function cb_markRead(prev, id) {
 
 async function cb_addItem(prev, item) {
     await prev;
-    if (base === null)
+    if (base === null) {
+	console.log("base not opened");
 	return item.id;
+    }
     let key = await getItemKey(item.id);
+    console.log("adding item: " + item.id + " with url: " + item.url);
     if (key === undefined) {
 	let extraInfo = {...item};
 	delete extraInfo.id;
