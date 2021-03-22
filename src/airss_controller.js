@@ -94,16 +94,15 @@ document.addEventListener("AirSSModelShutDown", () => {
 });
 
 document.addEventListener("AirSSModelInitDone", () => {
+    // do I have a incoming api call to subscribe a feed
+    if (location.search) {
+	let params = new URLSearchParams(location.search.substring(1));
+	let str = params.get("url");
+	// do I have a refer so I can subscribe?
+	if (params.has("subscribe-referrer") && document.referrer)
+	    Model.subscribe(document.referrer);
+	if (str)
+	    Model.subscribe(decodeURIComponent(str));
+    }
     loadCurrentItem();
 });
-
-// do I have a incoming api call to subscribe a feed
-if (location.search) {
-    let params = new URLSearchParams(location.search.substring(1));
-    let str = params.get("url");
-    // do I have a refer so I can subscribe?
-    if (params.has("subscribe-referrer") && document.referrer)
-	Model.subscribe(document.referrer);
-    if (str)
-	Model.subscribe(decodeURIComponent(str));
-}

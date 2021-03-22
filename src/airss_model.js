@@ -90,7 +90,9 @@ async function cb_subscribe(prev, url) {
 
 async function cb_currentItem(prev) {
     await prev;
-    return Items.getCurrentItem(db);
+    let item = await Items.getCurrentItem(db);
+    Loader.load();
+    return item;
 }
 
 async function cb_forwardItem(prev) {
@@ -99,7 +101,9 @@ async function cb_forwardItem(prev) {
 	emitModelWarning("Already at the end");
 	return null;
     }
-    return Items.getCurrentItem(db);
+    let item = await Items.getCurrentItem(db);
+    Loader.load();
+    return item;
 }
 
 async function cb_backwardItem(prev) {
@@ -328,7 +332,6 @@ function forwardItem() {
     let value = state = cb_forwardItem(state);
     // to piggy back marking and loading here
     state = cb_markRead(state);
-    Loader.load();
     return value;
 }
 
@@ -349,7 +352,6 @@ function deleteItem() {
 // just load the current item, if any
 function currentItem() {
     let value = state = cb_currentItem(state);
-    Loader.load();
     return value;
 }
 
