@@ -82,6 +82,12 @@ async function cb_shutdown(prev) {
     emitModelShutDown();
 }
 
+async function cb_subscribe(prev, url) {
+    await prev;
+    // we have to make sure init is done
+    Loader.subscribe(url);
+}
+
 async function cb_currentItem(prev) {
     await prev;
     return Items.getCurrentItem(db);
@@ -349,7 +355,8 @@ function currentItem() {
 
 // subscribe to a feed url
 function subscribe(url) {
-    Loader.subscribe(url);
+    state = cb_subscribe(state, url);
+    return state;
 }
 
 // unsubscribe a feed by id
