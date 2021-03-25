@@ -342,7 +342,7 @@
   </div>
   <div class="footer">
       <div class="links">
-	  <a href="https://roastidio.us/roast">feedback</a>
+	  <a href="https://roastidio.us/roast" referrerpolicy="no-referrer-when-downgrade">feedback</a>
       </div>
       <div class="copyright">
 	  © <a href="https://blog.roastidio.us">roastidio.us</a>, 2021
