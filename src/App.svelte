@@ -238,106 +238,103 @@
       {/if}
       </div>
   {:else if screen == Screens.shutdown}
-      <div class="box">
-	  <button class="button"
-		  on:click={clickReload}>Reload</button>
-      </div>
+      <button class="button"
+	      on:click={clickReload}>Reload</button>
   {:else if screen == Screens.trash}
-      <div class="box">
-	  <p>
-	      Are you sure you want to delete this item?
-	  </p>
-	  <form on:submit|preventDefault={clickConfirmDelete}>
-	      <div class="line">
-		  <label for="check-unsubscribe">
-		      Unsubscribe <span class="focus">{$currentItem.feedTitle}</span> too
-		  </label>
-		  <input type="checkbox" id="check-unsubscribe"
-			 name="ckeck-unsubscribe"
-			 bind:checked={shouldUnsubscribe}>
-	      </div>
+      <p>
+	  Are you sure you want to delete this item?
+      </p>
+      <form on:submit|preventDefault={clickConfirmDelete}>
+	  <div class="field">
+	      <label for="check-unsubscribe">
+		  Unsubscribe <span class="focus">{$currentItem.feedTitle}</span> too
+	      </label>
+	      <input type="checkbox" id="check-unsubscribe"
+		     name="ckeck-unsubscribe"
+		     bind:checked={shouldUnsubscribe}>
+	  </div>
+	  <div class="toolbar">
 	      <input class="button" type="submit" value="&#128076;">
 	      <input class="button" type="reset" value="&#128078;"
 		     on:click={clickCancel}>
-	  </form>
-      </div>
+	  </div>
+      </form>
   {:else if screen == Screens.config}
-      <div class="box">
-	  <form on:submit|preventDefault={clickSubmitConfig}>
-	      <div class="line">
-		  <label for="select-water-mark">
-		      Load more when unread items is below:
-		  </label>
-		  <select id="select-water-mark" bind:value={waterMark}>
-		      {#each waterMarkChoices as choice}
-			  <option selected={choice.value == waterMarkCurrent}
-				  value={choice}>{choice.text}</option>
-		      {/each}
-		  </select>
+      <form on:submit|preventDefault={clickSubmitConfig}>
+	  <div class="field">
+	      <label for="select-water-mark">
+		  Load more when unread items is below:
+	      </label>
+	      <select id="select-water-mark" bind:value={waterMark}>
+		  {#each waterMarkChoices as choice}
+		      <option selected={choice.value == waterMarkCurrent}
+			      value={choice}>{choice.text}</option>
+		  {/each}
+	      </select>
+	  </div>
+	  <div class="field">
+	      <label for="select-min-reload-wait">
+		  Between reloading a feed, wait at least:
+	      </label>
+	      <select id="select-min-reload-wait" bind:value={minReloadWait}>
+		  {#each minReloadWaitChoices as choice}
+		      <option selected={choice.value == minReloadWaitCurrent}
+			      value={choice}>{choice.text}</option>
+		  {/each}
+	      </select>
+	  </div>
+	  <div class="field">
+	      <label for="select-max-kept-period">
+		  Keep read items in the database for:
+	      </label>
+	      <select id="select-max-kept-period" bind:value={maxKeptPeriod}>
+		  {#each maxKeptPeriodChoices as choice}
+		      <option selected={choice.value == maxKeptPeriodCurrent}
+			      value={choice}>{choice.text}</option>
+		  {/each}
+	      </select>
+	  </div>
+	  <div class="field">
+	      <label for="input-api-key">
+		  Your Airtable API key:
+	      </label>
+	      <input type="text" bind:value={apiKey}>
+	  </div>
+	  <div class="field">
+	      <label for="input-base-token">
+		  The ID of your base:
+	      </label>
+	      <input type="text" bind:value={baseToken}>
+	  </div>
+	  {#if baseToken}
+	      <div class="footnote">
+		  <a href="https://airtable.com/{baseToken}">
+		      https://airtable.com/{baseToken}
+		  </a>
 	      </div>
-	      <div class="line">
-		  <label for="select-min-reload-wait">
-		      Between reloading a feed, wait at least:
-		  </label>
-		  <select id="select-min-reload-wait" bind:value={minReloadWait}>
-		      {#each minReloadWaitChoices as choice}
-			  <option selected={choice.value == minReloadWaitCurrent}
-				  value={choice}>{choice.text}</option>
-		      {/each}
-		  </select>
-	      </div>
-	      <div class="line">
-		  <label for="select-max-kept-period">
-		      Keep read items in the database for:
-		  </label>
-		  <select id="select-max-kept-period" bind:value={maxKeptPeriod}>
-		      {#each maxKeptPeriodChoices as choice}
-			  <option selected={choice.value == maxKeptPeriodCurrent}
-				  value={choice}>{choice.text}</option>
-		      {/each}
-		  </select>
-	      </div>
-	      <div class="line">
-		  <label for="input-api-key">
-		      Your Airtable API key:
-		  </label>
-		  <input type="text" bind:value={apiKey}>
-	      </div>
-	      <div class="line">
-		  <label for="input-base-token">
-		      The ID of your Airtable base:
-		  </label>
-		  <input type="text" bind:value={baseToken}>
-	      </div>
-	      {#if baseToken}
-		  <div class="line">
-		      Your Airtable base is
-		      <a href="https://airtable.com/{baseToken}">
-			  https://airtable.com/{baseToken}
-		      </a>
-		  </div>
-	      {/if}
+	  {/if}
+	  <div class="toolbar">
 	      <input class="button" type="submit" value="&#128076;">
 	      <input class="button" type="reset" value="&#128078;"
 		     on:click={clickCancel}>
-	  </form>
-      </div>
+	  </div>
+      </form>
   {:else if screen == Screens.subscribe}
-      <div class="box">
-	  <form on:submit|preventDefault={clickSubmitSubscribe}>
-	      <div class="line">
-		  <label for="input-feed-url">
-		      The URL to the feed or the index page:
-		  </label>
-		  <input id="input-feed-url" type="text"
-			 bind:value={subscribeUrl}
-			 placeholder="enter the url to subscribe">
-	      </div>
+      <form on:submit|preventDefault={clickSubmitSubscribe}>
+	  <div class="field">
+	      <label for="input-feed-url">
+		  The URL to the feed or the index page:
+	      </label>
+	      <input id="input-feed-url" type="text"
+		     bind:value={subscribeUrl}
+		     placeholder="enter the url to subscribe">
+	  </div>
+	  <div class="toolbar">
 	      <input class="button" type="submit" value="&#128076;">
 	      <input class="button" type="reset" value="&#128078;"
 		     on:click={clickCancel}>
-	  </form>
-      </div>
+	  </div>
+      </form>
   {/if}
   </div>
   <div class="footer">
