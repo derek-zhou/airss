@@ -103,7 +103,7 @@
     .alert-warning {
         @apply p-2 rounded bg-yellow-300 text-purple-700;
     }
-    .alert-error {
+    .alert-danger {
         @apply p-2 rounded bg-yellow-300 text-red-700;
     }
     .alert-info:empty {
@@ -112,7 +112,7 @@
     .alert-warning:empty {
         @apply hidden;
     }
-    .alert-error:empty {
+    .alert-danger:empty {
         @apply hidden;
     }
     .button {
@@ -172,6 +172,9 @@
 		}
                 input[type="text"] {
                     @apply w-80 leading-relaxed border rounded border-gray-600;
+                }
+                input[type="password"] {
+                    @apply w-40 leading-relaxed border rounded border-purple-600;
                 }
 	    }
 	    .box {

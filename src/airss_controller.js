@@ -17,7 +17,7 @@ let idleTimeout = setTimeout(timeoutShutdown, TimeoutPeriod);
 export const length = writable(0);
 export const cursor = writable(-1);
 export const alertText = writable("");
-export const alertClass = writable("alert-info");
+export const alertType = writable("info");
 export const currentItem = writable(null);
 export const running = writable(true);
 
@@ -32,7 +32,7 @@ function actionPreamble() {
 function timeoutShutdown() {
     actionPreamble();
     clearTimeout(idleTimeout);
-    alertClass.set("alert-error");
+    alertType.set("error");
     alertText.set("Shutdown due to inactivity");
     return Model.shutdown();
 }
@@ -85,7 +85,7 @@ document.addEventListener("AirSSModelItemsLoaded", e => {
     cursor.set(e.detail.cursor);
 });
 document.addEventListener("AirSSModelAlert", e => {
-    alertClass.set("alert-" + e.detail.type);
+    alertType.set(e.detail.type);
     alertText.set(e.detail.text);
 });
 

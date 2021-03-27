@@ -1,7 +1,7 @@
 <script>
 
  // stores
- import {length, cursor, alertText, alertClass, currentItem, running} from './airss_controller.js';
+ import {length, cursor, alertText, alertType, currentItem, running} from './airss_controller.js';
 
  import { afterUpdate } from 'svelte';
  
@@ -64,8 +64,7 @@
  $: leftDisabled = ($cursor <= 0) || (screen != Screens.browse);
  $: rightDisabled = ($cursor >= $length - 1) || (screen != Screens.browse);
  $: screen = !$running ? Screens.shutdown : screen;
-
- // view functions
+ $: alertClass = classFromType($alertType);
 
  afterUpdate(() => {
      let container = document.querySelector("#content_html");
@@ -81,6 +80,17 @@
  });
 
  // view functions
+
+ function classFromType(type) {
+     switch (type) {
+	 case "error":
+	     return "alert-danger";
+	 case "warning":
+	     return "alert-warning";
+	 default:
+	     return "alert-info";
+     }
+ }
 
  function clickLeft() {
      window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -125,18 +135,22 @@
      location.reload();
  }
 
- function clickConfig() {
+ function clearAlert() {
      $alertText = "";
+ }
+
+ function clickConfig() {
+     clearAlert();
      screen = Screens.config;
  }
 
  function clickSubscribe() {
-     $alertText = "";
+     clearAlert();
      screen = Screens.subscribe;
  }
 
  function clickTrash() {
-     $alertText = "";
+     clearAlert();
      screen = Screens.trash;
  }
 
@@ -166,7 +180,7 @@
  }
 
  function clickCancel() {
-     $alertText = "";
+     clearAlert();
      screen = Screens.browse;
  }
 
@@ -189,7 +203,7 @@
 		on:click={clickRight}>&#x276f;</button>
     </div>
   </div>
-  <p class={$alertClass} role="alert">{$alertText}</p>
+  <p class={alertClass} role="alert" on:click={clearAlert}>{$alertText}</p>
   <div class="content">
   {#if screen == Screens.browse}
       <div class="box"
