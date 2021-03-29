@@ -115,6 +115,9 @@
     .alert-danger:empty {
         @apply hidden;
     }
+    .name {
+	@apply capitalize italic;
+    }
     .button {
         @apply flex-none px-6 py-1 text-purple-600 inline-block rounded appearance-none
         font-bold whitespace-nowrap text-lg text-center uppercase;
@@ -281,9 +284,6 @@
             @apply max-w-screen-lg;
 	    .content {
 		.box {
-		    .title {
-                        @apply overflow-hidden whitespace-nowrap;
-                    }
                     .thumbnail {
                         img {
                             @apply h-96;
