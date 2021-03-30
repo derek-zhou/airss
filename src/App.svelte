@@ -1,7 +1,7 @@
 <script>
 
  // stores
- import {length, cursor, alertText, alertType, currentItem, running} from './airss_controller.js';
+ import {length, cursor, alertText, alertType, currentItem, running, loading} from './airss_controller.js';
 
  import { afterUpdate } from 'svelte';
  
@@ -188,7 +188,7 @@
 
 <div id="layout" class="viewport">
   <div class="header">
-    <a class="brand-title" href="/">AirSS</a>
+    <a class="brand-title" class:brand-title-busy={$loading} href="/">AirSS</a>
     <div class="nav">
 	<button class="button"
 		on:click={clickConfig}>&#x1f527;</button>
@@ -255,10 +255,10 @@
       <button class="button"
 	      on:click={clickReload}>Reload</button>
   {:else if screen == Screens.trash}
-      <p>
-	  Are you sure you want to delete this item?
-      </p>
       <form on:submit|preventDefault={clickConfirmDelete}>
+	  <p>
+	      Are you sure you want to delete this item?
+	  </p>
 	  <div class="field">
 	      <label for="check-unsubscribe">
 		  Unsubscribe <span class="focus">{$currentItem.feedTitle}</span> too

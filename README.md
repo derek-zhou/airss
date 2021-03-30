@@ -24,7 +24,13 @@ javascript:location.href='https://airss.roastidio.us/?url='+encodeURIComponent(w
 
 to subscribe any blog. Github does not allow a link with `javascript:` URL, so you need to bookmark any page, such as this page, then edit the property of your newly created bookmark, give it a name such as `subscribe in airss` and paste in the above bookmarklet string as it's location. Next time you came across an interesting blog, just click the bookmarklet and you are done. This trick may not work in a mobile brower though.
 
-There is another trick: If your blog's index page links to [https://airss.roastidio.us/?subscribe-referrer](https://airss.roastidio.us/?subscribe-referrer) and your visitor click this link, the visitor will automatically subscribe to your blog. This magic happens in two steps: first, AirSS uses [referrer](https://en.wikipedia.org/wiki/HTTP_referer) to figure out where the visitor is comming from, then it uses the [rel=alternate links](https://developer.mozilla.org/en-US/docs/Web/HTML/Link_types) of that page to find out the feed. Neat, huh?
+There is another trick: If your blog's index page links to Airss and your visitor click this link, the visitor will automatically subscribe to your blog. This magic happens in two steps: first, AirSS uses [referrer](https://en.wikipedia.org/wiki/HTTP_referer) to figure out where the visitor is comming from, then it uses the [rel=alternate links](https://developer.mozilla.org/en-US/docs/Web/HTML/Link_types) of that page to find out the feed. Neat, huh?
+
+One thing to keep in mind is you have to make sure the referer header is intact. In Firefox 87+ the default of referrer policy is very strict, it will strip off path and query string when crossing origins. So you would need to add the proper referrerpolicy attribute in the link:
+
+``` html
+<a href="https://airss.roastidio.us/?subscribe-referrer" referrerpolicy="no-referrer-when-downgrade">Follow me with Airss!</a>
+```
 
 Comments or PRs are welcome.
 

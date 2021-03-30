@@ -138,6 +138,9 @@
                     @apply inline-block;
                 }
 	    }
+	    .brand-title-busy {
+		@apply text-pink-500;
+	    }
             .nav {
                 @apply flex-auto text-right;
                 .button {

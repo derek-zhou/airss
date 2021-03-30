@@ -16,8 +16,6 @@ export {currentState, reinit, shutdown,
 	subscribe, unsubscribe,
 	getLoadCandidate, addFeed, addItems, fetchFeed, updateFeed};
 
-export {emitModelWarning, emitModelError, emitModelInfo, emitModelItemsLoaded};
-
 // when the cursor is this close to the end I load more
 const WaterMark = localStorage.getItem("WATER_MARK") || 10;
 
@@ -57,6 +55,10 @@ function emitModelItemsLoaded(info) {
 	"AirSSModelItemsLoaded",
 	{detail: info}
     ));
+}
+
+function emitModelStartLoading() {
+    window.document.dispatchEvent(new Event("AirSSModelStartLoading"));
 }
 
 function emitModelInitDone() {
@@ -193,11 +195,10 @@ async function cb_addItems(prev, items) {
 	    }
 	}
     }
-    if (cnt)
-	emitModelItemsLoaded({
-	    length: Items.length(),
-	    cursor: Items.readingCursor()
-	});
+    emitModelItemsLoaded({
+	length: Items.length(),
+	cursor: Items.readingCursor()
+    });
 }
 
 function oopsItem(feed) {
@@ -263,11 +264,11 @@ async function cb_updateFeed(prev, feed, items) {
     if (num > 0) {
 	feed.lastLoadTime = now;
 	await Feeds.updateFeed(db, feed);
-	emitModelItemsLoaded({
-	    length: Items.length(),
-	    cursor: Items.readingCursor()
-	});
     }
+    emitModelItemsLoaded({
+	length: Items.length(),
+	cursor: Items.readingCursor()
+    });
     Loader.load();
 }
 
@@ -283,6 +284,7 @@ async function cb_getLoadCandidate(prev) {
     if (feed.lastLoadTime > now - MinReloadWait * 3600 * 1000)
 	return null;
     Feeds.rotate();
+    emitModelStartLoading();
     return feed;
 }
 

@@ -20,6 +20,7 @@ export const alertText = writable("");
 export const alertType = writable("info");
 export const currentItem = writable(null);
 export const running = writable(true);
+export const loading = writable(true);
 
 function actionPreamble() {
     clearTimeout(idleTimeout);
@@ -80,7 +81,11 @@ export function subscribe(url) {
     Model.subscribe(url);
 }
 
+document.addEventListener("AirSSModelStartLoading", e => {
+    loading.set(true);
+});
 document.addEventListener("AirSSModelItemsLoaded", e => {
+    loading.set(false);
     length.set(e.detail.length);
     cursor.set(e.detail.cursor);
 });
