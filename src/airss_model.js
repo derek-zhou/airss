@@ -211,7 +211,7 @@ function oopsItem(feed) {
     // just fake something to satisfy constrains
     item.url = Math.random().toString(36).substring(2, 15);
     item.title = "Oops...";
-    item.tags = [];
+    item.tags = ["_error"];
     item.feedTitle = feed.title;
     item.feedId = feed.id;
     return item;
@@ -226,7 +226,7 @@ function dummyItem(feed) {
     // just fake something to satisfy constrains
     item.url = Math.random().toString(36).substring(2, 15);
     item.title = "Errrr...";
-    item.tags = [];
+    item.tags = ["_error"];
     item.feedTitle = feed.title;
     item.feedId = feed.id;
     return item;

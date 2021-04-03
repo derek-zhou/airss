@@ -65,10 +65,13 @@
  $: rightDisabled = ($cursor >= $length - 1) || (screen != Screens.browse);
  $: screen = !$running ? Screens.shutdown : screen;
  $: alertClass = classFromType($alertType);
+ $: dummy = isDummyItem($currentItem);
 
  afterUpdate(() => {
      let container = document.querySelector("#content_html");
      if (!container)
+	 return;
+     if (!$currentItem)
 	 return;
      let baseUrl = $currentItem.url;
      // fix up all img's href
@@ -80,6 +83,13 @@
  });
 
  // view functions
+
+ function isDummyItem(item) {
+     if (!item)
+	 return false;
+     let tags = item.tags;
+     return tags.length == 1 && tags[0] == "_error";
+ }
 
  function classFromType(type) {
      switch (type) {
@@ -209,22 +219,32 @@
       <div class="box"
 	   on:touchstart={browseTouchStart}
 	   on:touchmove={browseTouchMove}>
-      {#if $currentItem}
-	  <div class={$currentItem.imageUrl ? "thumbnail" : "thumbnail-missing"}>
-	      <a href={$currentItem.url} target="item">
-		  <img src={$currentItem.imageUrl ? $currentItem.imageUrl : UnknownImage}
-		       alt="thumbnail"/></a>
-	  </div>
-	  <h4 class="title"><a href={$currentItem.url}
-			       target="item">{$currentItem.title}</a></h4>
+	  {#if $currentItem}
+	      {#if !dummy}
+		  <div class={$currentItem.imageUrl ? "thumbnail" : "thumbnail-missing"}>
+		      <a href={$currentItem.url} target="item">
+			  <img src={$currentItem.imageUrl ? $currentItem.imageUrl : UnknownImage}
+			       alt="thumbnail"/>
+		      </a>
+		  </div>
+	      {/if}
+	      <h4 class="title">
+		  {#if dummy}
+		      {$currentItem.title}
+		  {:else}
+		      <a href={$currentItem.url} target="item">{$currentItem.title}</a>
+		  {/if}
+	      </h4>
 	  <h5 class="tag-line">
 	      <span class="site">{$currentItem.feedTitle}</span>
 	      <span class="site">
 		  | {$currentItem.datePublished.toLocaleString()}
 	      </span>
-	       {#each $currentItem.tags as tag}
-                 <span class="site"> | {tag} </span>
-               {/each}
+	      {#if !dummy}
+		  {#each $currentItem.tags as tag}
+                      <span class="site"> | {tag} </span>
+		  {/each}
+	      {/if}
 	  </h5>
 	  <p id="content_html" class="desc">
 	      {@html $currentItem.contentHtml}
@@ -232,8 +252,10 @@
 	  <div class="toolbar">
 	      <button class="button button-danger"
 		      on:click={clickTrash}>&#128465;</button>
-	      <a class="button" target="roast"
-		 href={roastPrefix + encodeURIComponent($currentItem.url)}>&#128293;</a>
+	      {#if !dummy}
+		  <a class="button" target="roast"
+		     href={roastPrefix + encodeURIComponent($currentItem.url)}>&#128293;</a>
+	      {/if}
 	  </div>
       {:else if $length == 0}
 	  <h4>

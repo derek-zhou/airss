@@ -128,6 +128,14 @@
     .button[disabled] {
         @apply cursor-default opacity-50;
     }
+    /* progress bar */
+    .progress-bar {
+	@apply fixed left-0 top-0 h-1 bg-indigo-700 z-50;
+	transition:
+            width 300ms ease-out,
+            opacity 150ms 150ms ease-in;
+	transform: translate3d(0, 0, 0);
+    }
     .viewport {
 	@apply relative;
 	.header {
@@ -172,6 +180,9 @@
                 }
 		.footnote {
 		    @apply text-xs text-gray-700 py-2 flex justify-center;
+		}
+		.error {
+		    @apply text-sm text-red-700 py-2;
 		}
 		select {
 		    @apply border rounded border-gray-600;
