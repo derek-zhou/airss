@@ -253,8 +253,9 @@ async function cb_updateFeed(prev, feed, items) {
 
     if (feed.error) {
 	emitModelError("The feed '" + feed.feedUrl +
-			     "' faild to load: " + feed.error);
+		       "' faild to load: " + feed.error);
 	await Items.pushItem(db, oopsItem(feed));
+	delete feed.error;
 	num ++;
     } else if (num == 0 &&
 	       feed.lastLoadTime < now - MaxKeptPeriod*24*3600*1000) {
