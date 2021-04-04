@@ -195,7 +195,7 @@
                 }
 	    }
 	    .box {
-                @apply bg-white p-2 mb-2 flow-root w-full;
+                @apply bg-white p-2 mb-2 flow-root w-full overflow-x-hidden;
                 .thumbnail {
                     img {
                         @apply w-auto max-w-full h-48;

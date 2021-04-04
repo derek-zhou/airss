@@ -217,8 +217,8 @@
   <div class="content">
   {#if screen == Screens.browse}
       <div class="box"
-	   on:touchstart={browseTouchStart}
-	   on:touchmove={browseTouchMove}>
+	   on:touchstart|passive={browseTouchStart}
+	   on:touchmove|passive={browseTouchMove}>
 	  {#if $currentItem}
 	      {#if !dummy}
 		  <div class={$currentItem.imageUrl ? "thumbnail" : "thumbnail-missing"}>
