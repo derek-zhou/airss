@@ -197,21 +197,23 @@
 </script>
 
 <div id="layout" class="viewport">
-  <div class="header">
-    <a class="brand-title" class:brand-title-busy={$loading} href="/">AirSS</a>
-    <div class="nav">
-	<button class="button"
-		on:click={clickConfig}>&#x1f527;</button>
-	<button class="button"
-		on:click={clickSubscribe}>&#x1f37c;</button>
-	<button class="button"
-		disabled={leftDisabled}
-		on:click={clickLeft}>&#x276e;</button>
-	{$cursor+1}/{$length}
-	<button class="button"
-		disabled={rightDisabled}
-		on:click={clickRight}>&#x276f;</button>
-    </div>
+    <div class="header">
+	<div class="brand">
+	    <span class="title" class:title-busy={$loading} href="/">AirSS</span>
+	    <span class="info">{$cursor+1}/{$length}</span>
+	</div>
+      <div class="nav">
+	  <button class="button"
+			 on:click={clickConfig}>🔧</button>
+	  <button class="button"
+		  on:click={clickSubscribe}>🍼</button>
+	  <button class="button"
+		  disabled={leftDisabled}
+		  on:click={clickLeft}>◀</button>
+	  <button class="button"
+		  disabled={rightDisabled}
+		  on:click={clickRight}>▶</button>
+      </div>
   </div>
   <p class={alertClass} role="alert" on:click={clearAlert}>{$alertText}</p>
   <div class="content">
@@ -251,10 +253,10 @@
 	  </p>
 	  <div class="toolbar">
 	      <button class="button button-danger"
-		      on:click={clickTrash}>&#128465;</button>
+		      on:click={clickTrash}>🗑</button>
 	      {#if !dummy}
 		  <a class="button" target="roast"
-		     href={roastPrefix + encodeURIComponent($currentItem.url)}>&#128293;</a>
+		     href={roastPrefix + encodeURIComponent($currentItem.url)}>🔥</a>
 	      {/if}
 	  </div>
       {:else if $length == 0}
@@ -290,8 +292,8 @@
 		     bind:checked={shouldUnsubscribe}>
 	  </div>
 	  <div class="toolbar">
-	      <input class="button" type="submit" value="&#128076;">
-	      <input class="button" type="reset" value="&#128078;"
+	      <input class="button" type="submit" value="👌">
+	      <input class="button" type="reset" value="👎"
 		     on:click={clickCancel}>
 	  </div>
       </form>
@@ -350,8 +352,8 @@
 	      </div>
 	  {/if}
 	  <div class="toolbar">
-	      <input class="button" type="submit" value="&#128076;">
-	      <input class="button" type="reset" value="&#128078;"
+	      <input class="button" type="submit" value="👌">
+	      <input class="button" type="reset" value="👎"
 		     on:click={clickCancel}>
 	  </div>
       </form>
@@ -366,8 +368,8 @@
 		     placeholder="enter the url to subscribe">
 	  </div>
 	  <div class="toolbar">
-	      <input class="button" type="submit" value="&#128076;">
-	      <input class="button" type="reset" value="&#128078;"
+	      <input class="button" type="submit" value="👌">
+	      <input class="button" type="reset" value="👎"
 		     on:click={clickCancel}>
 	  </div>
       </form>

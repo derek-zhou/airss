@@ -140,19 +140,25 @@
 	@apply relative;
 	.header {
 	    @apply sticky top-0 bg-gray-200 p-2 flex;
-	    .brand-title {
-                @apply flex-auto text-3xl text-indigo-500 font-bold;
+	    .brand {
+		@apply flex-none;
                 img {
-                    @apply inline-block;
+		    @apply inline-block;
                 }
-	    }
-	    .brand-title-busy {
-		@apply text-pink-500;
+		.title {
+                    @apply text-3xl text-indigo-500 font-bold align-bottom;
+		}
+		.busy {
+		    @apply text-pink-500;
+		}
+		.info {
+		    @apply text-gray-600 align-bottom;
+		}
 	    }
             .nav {
-                @apply flex-auto text-right;
+                @apply flex-grow text-right;
                 .button {
-                    @apply text-xl ml-1 py-1 mt-1 px-1;
+                    @apply ml-1 px-1;
                 }
             }
 	}
