@@ -1,7 +1,8 @@
 <script>
 
  // stores
- import {length, cursor, alertText, alertType, currentItem, running, loading} from './airss_controller.js';
+ import {length, cursor, alertText, alertType,
+	 currentItem, running} from './airss_controller.js';
 
  import { afterUpdate } from 'svelte';
  
@@ -199,7 +200,7 @@
 <div id="layout" class="viewport">
     <div class="header">
 	<div class="brand">
-	    <span class="title" class:title-busy={$loading} href="/">AirSS</span>
+	    <span class="title">AirSS</span>
 	    <span class="info">{$cursor+1}/{$length}</span>
 	</div>
       <div class="nav">

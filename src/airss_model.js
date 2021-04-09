@@ -57,10 +57,6 @@ function emitModelItemsLoaded(info) {
     ));
 }
 
-function emitModelStartLoading() {
-    window.document.dispatchEvent(new Event("AirSSModelStartLoading"));
-}
-
 function emitModelInitDone() {
     window.document.dispatchEvent(new Event("AirSSModelInitDone"));
 }
@@ -285,7 +281,6 @@ async function cb_getLoadCandidate(prev) {
     if (feed.lastLoadTime > now - MinReloadWait * 3600 * 1000)
 	return null;
     Feeds.rotate();
-    emitModelStartLoading();
     return feed;
 }
 

@@ -148,9 +148,6 @@
 		.title {
                     @apply text-3xl text-indigo-500 font-bold align-bottom;
 		}
-		.busy {
-		    @apply text-pink-500;
-		}
 		.info {
 		    @apply text-gray-600 align-bottom;
 		}
@@ -201,7 +198,7 @@
                 }
 	    }
 	    .box {
-                @apply bg-white p-2 mb-2 flow-root w-full overflow-x-hidden;
+                @apply bg-white p-2 flow-root w-full overflow-x-hidden;
                 .thumbnail {
                     img {
                         @apply w-auto max-w-full h-48;
