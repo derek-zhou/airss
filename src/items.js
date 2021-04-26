@@ -112,14 +112,17 @@ async function load(db) {
     known = -1;
     let expired = [];
     let now = new Date();
+    let has_unread = false;
     while (cursor) {
 	if (lastId < cursor.value.id)
 	    lastId = cursor.value.id;
 	if (now - cursor.value.datePublished <= MaxKeptPeriod*24*3600*1000) {
 	    items.push(cursor.key);
 	    // items from the beginning up to a point are read
-	    if (cursor.value.read)
+	    if (cursor.value.read && !has_unread)
 		known ++;
+	    else
+		has_unread = true;
 	} else {
 	    expired.push(cursor.key);
 	}

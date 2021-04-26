@@ -65,7 +65,7 @@
  $: leftDisabled = ($cursor <= 0) || (screen != Screens.browse);
  $: rightDisabled = ($cursor >= $length - 1) || (screen != Screens.browse);
  $: screen = !$running ? Screens.shutdown : screen;
- $: alertClass = classFromType($alertType);
+ $: alertClass = alertClassFromType($alertType);
  $: dummy = isDummyItem($currentItem);
 
  afterUpdate(() => {
@@ -92,14 +92,14 @@
      return tags.length == 1 && tags[0] == "_error";
  }
 
- function classFromType(type) {
+ function alertClassFromType(type) {
      switch (type) {
 	 case "error":
-	     return "alert-danger";
+	     return "alert alert-danger";
 	 case "warning":
-	     return "alert-warning";
+	     return "alert alert-warning";
 	 default:
-	     return "alert-info";
+	     return "alert alert-info";
      }
  }
 
