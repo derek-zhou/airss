@@ -75,11 +75,17 @@
      if (!$currentItem)
 	 return;
      let baseUrl = $currentItem.url;
-     // fix up all img's href
+     // fix up all img's src
      for (let img of container.querySelectorAll("img").values()) {
 	 let href = img.getAttribute("src");
 	 let absUrl = new URL(href, baseUrl);
 	 img.setAttribute("src", absUrl.toString());
+     }
+     // fixup all a's href
+     for (let link of container.querySelectorAll("a").values()) {
+	 let href = link.getAttribute("href");
+	 let absUrl = new URL(href, baseUrl);
+	 link.setAttribute("href", absUrl.toString());
      }
  });
 
