@@ -124,7 +124,7 @@ async function load(db) {
 	} else {
 	    perFeedCounter.set(feedId, 1);
 	}
-	if (now - cursor.value.datePublished <= MaxKeptPeriod*24*3600*1000 ||
+	if (now - cursor.value.datePublished <= MaxKeptPeriod*24*3600*1000 &&
 	    perFeedCounter.get(feedId) <= MaxKeptItems) {
 	    buffer.push(cursor.key);
 	    // items from the beginning up to a point are read
