@@ -55,6 +55,15 @@
  ];
  let maxKeptPeriodCurrent = localStorage.getItem("MAX_KEPT_PERIOD") || 180;
 
+ let maxItemsPerFeed;
+ let maxItemsPerFeedChoices = [
+     {value: 25, text: "25 items"},
+     {value: 50, text: "50 items"},
+     {value: 100, text: "100 items"},
+     {value: 200, text: "200 items"}
+ ];
+ let maxItemsPerFeedCurrent = localStorage.getItem("MAX_ITEMS_PER_FEED") || 100;
+
  let apiKey = localStorage.getItem('AIRTABLE_API_KEY') || "";
  let baseToken = localStorage.getItem('AIRTABLE_BASE_TOKEN') || "";
 
@@ -188,6 +197,7 @@
      localStorage.setItem("WATER_MARK", waterMark.value);
      localStorage.setItem("MIN_RELOAD_WAIT", minReloadWait.value);
      localStorage.setItem("MAX_KEPT_PERIOD", maxKeptPeriod.value);
+     localStorage.setItem("MAX_ITEMS_PER_FEED", maxItemsPerFeed.value);
      // airtable_server
      localStorage.setItem("AIRTABLE_API_KEY", apiKey);
      localStorage.setItem("AIRTABLE_BASE_TOKEN", baseToken);
@@ -335,6 +345,17 @@
 	      <select id="select-max-kept-period" bind:value={maxKeptPeriod}>
 		  {#each maxKeptPeriodChoices as choice}
 		      <option selected={choice.value == maxKeptPeriodCurrent}
+			      value={choice}>{choice.text}</option>
+		  {/each}
+	      </select>
+	  </div>
+	  <div class="field">
+	      <label for="select-max-items-per-feed">
+		  Keep in the database at most per feed:
+	      </label>
+	      <select id="select-max-items-per-feed" bind:value={maxItemsPerFeed}>
+		  {#each maxItemsPerFeedChoices as choice}
+		      <option selected={choice.value == maxItemsPerFeedCurrent}
 			      value={choice}>{choice.text}</option>
 		  {/each}
 	      </select>

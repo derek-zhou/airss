@@ -7,6 +7,8 @@ const Store = "items";
 
 // kept in days
 const MaxKeptPeriod = localStorage.getItem("MAX_KEPT_PERIOD") || 180;
+// keep at most 100 items from feed
+const MaxKeptItems = localStorage.getItem("MAX_ITEMS_PER_FEED") || 100;
 
 // items is an array of item ids in ascending order
 let items = [];
@@ -105,24 +107,29 @@ function upgrade(db) {
 
 async function load(db) {
     let store = await db.transaction(Store).store;
-    let cursor = await store.openCursor();
+    let cursor = await store.openCursor(IDBKeyRange.lowerBound(0), "prev");
     let lastId = 0;
-
-    items = [];
-    known = -1;
+    let perFeedCounter = new Map();
+    let buffer = [];
+    let unread = 0;
     let expired = [];
     let now = new Date();
-    let has_unread = false;
+
     while (cursor) {
-	if (lastId < cursor.value.id)
+	let feedId = cursor.value.feedId;
+	if (lastId == 0)
 	    lastId = cursor.value.id;
-	if (now - cursor.value.datePublished <= MaxKeptPeriod*24*3600*1000) {
-	    items.push(cursor.key);
+	if (perFeedCounter.has(feedId)) {
+	    perFeedCounter.set(feedId, perFeedCounter.get(feedId) + 1);
+	} else {
+	    perFeedCounter.set(feedId, 1);
+	}
+	if (now - cursor.value.datePublished <= MaxKeptPeriod*24*3600*1000 ||
+	    perFeedCounter.get(feedId) <= MaxKeptItems) {
+	    buffer.push(cursor.key);
 	    // items from the beginning up to a point are read
-	    if (cursor.value.read && !has_unread)
-		known ++;
-	    else
-		has_unread = true;
+	    if (!cursor.value.read)
+		unread ++;
 	} else {
 	    expired.push(cursor.key);
 	}
@@ -135,8 +142,8 @@ async function load(db) {
 	// we do not await it and just hope it will land
 	Airtable.deleteItem(id);
     }
-
+    items = buffer.reverse();
     // point both cursor at the last read item
-    reading = known;
+    known = reading = items.length - unread - 1;
     return lastId;
 }

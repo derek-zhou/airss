@@ -8,7 +8,7 @@ import * as Airtable from './airtable_server.js';
 export {subscribe, load, loadAirtable};
 
 // keep at most 100 items from feed
-const MaxKeptItems = 100;
+const MaxKeptItems = localStorage.getItem("MAX_ITEMS_PER_FEED") || 100;
 // kept in days
 const MaxKeptPeriod = localStorage.getItem("MAX_KEPT_PERIOD") || 180;
 
