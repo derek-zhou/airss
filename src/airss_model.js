@@ -150,7 +150,9 @@ async function cb_addFeed(prev, feed) {
     await prev;
     if (feed.error) {
 	emitModelError("The feed '" + feed.feedUrl +
-		       "' is not valid: " + feed.error);
+		       "' is not valid");
+	console.error("The feed '" + feed.feedUrl +
+		      "' is not valid: " + feed.error);
 	return;
     }
     try {
@@ -202,7 +204,6 @@ function oopsItem(feed) {
     item.datePublished = new Date();
     item.contentHtml = "If you see this, this feed '" + feed.feedUrl +
 	"' failed loading:" +
-	"<pre>" + feed.error + "</pre>" +
 	"Check the console for the detail error.";
     // just fake something to satisfy constrains
     item.url = Math.random().toString(36).substring(2, 15);
@@ -249,6 +250,8 @@ async function cb_updateFeed(prev, feed, items) {
 
     if (feed.error) {
 	emitModelError("The feed '" + feed.feedUrl +
+		       "' faild to load");
+	console.error("The feed '" + feed.feedUrl +
 		       "' faild to load: " + feed.error);
 	await Items.pushItem(db, oopsItem(feed));
 	delete feed.error;

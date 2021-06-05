@@ -84,6 +84,12 @@
      if (!$currentItem)
 	 return;
      let baseUrl = $currentItem.url;
+     try {
+	 let url = new URL(baseUrl);
+     } catch (e) {
+	 console.warn(baseUrl + " is not a valid url");
+	 return;
+     }
      // fix up all img's src
      for (let img of container.querySelectorAll("img").values()) {
 	 let href = img.getAttribute("src");

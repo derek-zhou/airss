@@ -161,8 +161,14 @@
             .nav {
                 @apply flex-grow text-right;
                 .button {
-                    @apply ml-1 px-1;
+                    @apply cursor-pointer ml-1 px-1;
                 }
+		.attach {
+		    @apply inline-block;
+		    input[type="file"] {
+			@apply hidden;
+		    }
+		}
             }
 	}
 	.content {
@@ -233,6 +239,18 @@
 		    }
 		}
 	    }
+	    ul.attachments {
+		@apply border rounded mb-0 py-1;
+		li {
+		    @apply text-sm inline;
+		    .progress-box {
+			@apply border h-2 w-16 inline-block;
+			.progress {
+			    @apply bg-indigo-700 h-full;
+			}
+		    }
+		}
+	    }
 	    .node-container {
 		@apply w-full;
 		.message {
@@ -273,6 +291,9 @@
 		.mail-body {
 		    @apply w-full h-screen;
 		}
+		pre {
+		    @apply whitespace-pre-line;
+		}
                 .thumbnail {
                     img {
                         @apply w-auto max-w-full h-48;
@@ -307,18 +328,6 @@
                     .button:focus, .button:hover {
 			@apply border-gray-600;
                     }
-		}
-		ul.attachments {
-		    @apply border rounded mb-0 py-1;
-		    li {
-			@apply text-sm inline;
-			.progress-box {
-			    @apply border h-2 w-16 inline-block;
-			    .progress {
-				@apply bg-indigo-700 h-full;
-			    }
-			}
-		    }
 		}
 	    }
 	}
