@@ -5,18 +5,18 @@
 	"watch": "snowpack --watch"
     },
     "devDependencies": {
+	"autoprefixer": "^10.2.4",
+	"postcss": "^8.2.6",
+	"postcss-cli": "^8.3.1",
+	"postcss-nested": "^5.0.3",
+	"tailwindcss": "^2.0.3",
 	"@snowpack/plugin-svelte": "^3.5.2",
 	"@snowpack/plugin-postcss": "^1.1.0",
 	"snowpack": "^3.0.1"
     },
     "dependencies": {
 	"airtable": "^0.10.1",
-	"autoprefixer": "^10.2.4",
 	"idb": "^6.0.0",
-	"postcss": "^8.2.6",
-	"postcss-cli": "^8.3.1",
-	"postcss-nested": "^5.0.3",
-	"svelte": "^3.32.3",
-	"tailwindcss": "^2.0.3"
+	"svelte": "^3.32.3"
     }
 }
