@@ -193,9 +193,10 @@ async function cb_addItems(prev, items) {
 	    }
 	}
     }
-    emitModelItemsLoaded({
-	length: Items.length(),
-	cursor: Items.readingCursor()
+    if (cnt > 0)
+	emitModelItemsLoaded({
+	    length: Items.length(),
+	    cursor: Items.readingCursor()
     });
 }
 
@@ -264,11 +265,11 @@ async function cb_updateFeed(prev, feed, items) {
     if (num > 0) {
 	feed.lastLoadTime = now;
 	await Feeds.updateFeed(db, feed);
+	emitModelItemsLoaded({
+	    length: Items.length(),
+	    cursor: Items.readingCursor()
+	});
     }
-    emitModelItemsLoaded({
-	length: Items.length(),
-	cursor: Items.readingCursor()
-    });
     Loader.load();
 }
 
