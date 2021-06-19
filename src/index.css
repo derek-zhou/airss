@@ -316,6 +316,9 @@
 		}
                 .desc {
                     @apply text-sm leading-tight mb-2;
+		    span {
+			@apply whitespace-normal;
+		    }
                 }
 		.toolbar {
                     @apply flex flex-wrap justify-between w-full;
