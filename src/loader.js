@@ -11,7 +11,9 @@ export {subscribe, load, loadAirtable};
 const MaxKeptItems = localStorage.getItem("MAX_ITEMS_PER_FEED") || 100;
 // kept in days
 const MaxKeptPeriod = localStorage.getItem("MAX_KEPT_PERIOD") || 180;
-
+// whether to load with bouncer
+const BounceLoad = localStorage.getItem("BOUNCE_LOAD") == "true";
+const Bouncer = "https://roastidio.us/bounce?encoded=";
 const FeedType = {
     json: 1,
     xml: 2
@@ -127,8 +129,20 @@ async function cb_load(prev) {
     Model.updateFeed(updated, items);
 }
 
+function myFetch(url) {
+    if (BounceLoad) {
+	return fetch(Bouncer + encodeURIComponent(url), {
+	    mode: "cors",
+	    credentials: "include",
+	    redirect: "error"
+	});
+    } else {
+	return fetch(url);
+    }
+}
+
 async function loadFeed(feed) {
-    let response = await fetch(feed.feedUrl);
+    let response = await myFetch(feed.feedUrl);
     if (response.status != 200)
 	throw "fetching failed in loadFeed";
     switch (feed.type) {
@@ -169,7 +183,7 @@ async function sanitize(url) {
     if (urlObject.protocol != 'http:' && urlObject.protocol != 'https:')
 	throw "Only http(s) is supported";
     let feed = new Object();
-    let response = await fetch(url);
+    let response = await myFetch(url);
     if (response.status != 200)
 	throw "fetching failed in sanitize";
     let mime = response.headers.get('Content-Type');

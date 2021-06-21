@@ -64,6 +64,8 @@
  ];
  let maxItemsPerFeedCurrent = localStorage.getItem("MAX_ITEMS_PER_FEED") || 100;
 
+ let bounceLoad = localStorage.getItem("BOUNCE_LOAD") == "true";
+
  let apiKey = localStorage.getItem('AIRTABLE_API_KEY') || "";
  let baseToken = localStorage.getItem('AIRTABLE_BASE_TOKEN') || "";
 
@@ -204,6 +206,7 @@
      localStorage.setItem("MIN_RELOAD_WAIT", minReloadWait.value);
      localStorage.setItem("MAX_KEPT_PERIOD", maxKeptPeriod.value);
      localStorage.setItem("MAX_ITEMS_PER_FEED", maxItemsPerFeed.value);
+     localStorage.setItem("BOUNCE_LOAD", bounceLoad);
      // airtable_server
      localStorage.setItem("AIRTABLE_API_KEY", apiKey);
      localStorage.setItem("AIRTABLE_BASE_TOKEN", baseToken);
@@ -366,17 +369,25 @@
 		  {/each}
 	      </select>
 	  </div>
+	  <hr />
+	  <div class="field">
+	      <label for="input-bounce-load">
+		  Load feeds with roastidio.us:
+	      </label>
+	      <input id="input-bounce-load" type="checkbox" bind:checked={bounceLoad}>
+	  </div>
+	  <hr />
 	  <div class="field">
 	      <label for="input-api-key">
 		  Your Airtable API key:
 	      </label>
-	      <input type="text" bind:value={apiKey}>
+	      <input id="input-api-key" type="text" bind:value={apiKey}>
 	  </div>
 	  <div class="field">
 	      <label for="input-base-token">
 		  The ID of your base:
 	      </label>
-	      <input type="text" bind:value={baseToken}>
+	      <input id="input-base-token" type="text" bind:value={baseToken}>
 	  </div>
 	  {#if baseToken}
 	      <div class="footnote">
