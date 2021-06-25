@@ -95,14 +95,22 @@
      // fix up all img's src
      for (let img of container.querySelectorAll("img").values()) {
 	 let href = img.getAttribute("src");
-	 let absUrl = new URL(href, baseUrl);
-	 img.setAttribute("src", absUrl.toString());
+	 try {
+	     let absUrl = new URL(href, baseUrl);
+	     img.setAttribute("src", absUrl.toString());
+	 } catch (e) {
+	     console.warn(href + "is not a valid link");
+	 }
      }
      // fixup all a's href
      for (let link of container.querySelectorAll("a").values()) {
 	 let href = link.getAttribute("href");
-	 let absUrl = new URL(href, baseUrl);
-	 link.setAttribute("href", absUrl.toString());
+	 try {
+	     let absUrl = new URL(href, baseUrl);
+	     link.setAttribute("href", absUrl.toString());
+	 } catch (e) {
+	     console.warn(href + "is not a valid link");
+	 }
      }
  });
 
