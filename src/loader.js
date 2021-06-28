@@ -143,7 +143,9 @@ function myFetch(url) {
 
 async function loadFeed(feed) {
     let response = await myFetch(feed.feedUrl);
-    if (response.status != 200)
+    if (response.status == 401)
+	throw "Unauthorized. Are you logged in to roastidio.us?";
+    else if (response.status != 200)
 	throw "fetching failed in loadFeed";
     switch (feed.type) {
     case FeedType.json:
@@ -184,7 +186,9 @@ async function sanitize(url) {
 	throw "Only http(s) is supported";
     let feed = new Object();
     let response = await myFetch(url);
-    if (response.status != 200)
+    if (response.status == 401)
+	throw "Unauthorized. Are you logged in to roastidio.us?";
+    else if (response.status != 200)
 	throw "fetching failed in sanitize";
     let mime = response.headers.get('Content-Type');
     let parts = mime.split(/\s*;\s*/);
