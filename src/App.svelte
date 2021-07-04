@@ -230,6 +230,10 @@
 
 </script>
 
+<svelte:head>
+    <title>AirSS Reader({$cursor+1}/{$length})</title>
+</svelte:head>
+
 <div id="layout" class="viewport">
     <div class="header">
 	<div class="brand">
@@ -430,10 +434,10 @@
   </div>
   <div class="footer">
       <div class="links">
-	  <a href="https://roastidio.us/roast" referrerpolicy="no-referrer-when-downgrade">feedback</a>
+	  <a href="https://roastidio.us/roast" referrerpolicy="no-referrer-when-downgrade">Roast me at Roastidious</a>
       </div>
       <div class="copyright">
-	  © <a href="https://blog.roastidio.us">roastidio.us</a>, 2021
+	  <a href="https://github.com/derek-zhou/airss" referrerpolicy="no-referrer-when-downgrade">Fork me on GitHub</a>
       </div>
   </div>
 </div>
