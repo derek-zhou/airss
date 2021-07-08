@@ -262,7 +262,7 @@
 	  {#if $currentItem}
 	      {#if !dummy}
 		  <div class={$currentItem.imageUrl ? "thumbnail" : "thumbnail-missing"}>
-		      <a href={$currentItem.url} target="item">
+		      <a href={$currentItem.url} target="_blank" rel="noopener noreferrer">
 			  <img src={$currentItem.imageUrl ? $currentItem.imageUrl : UnknownImage}
 			       alt="thumbnail"/>
 		      </a>
@@ -272,7 +272,8 @@
 		  {#if dummy}
 		      {$currentItem.title}
 		  {:else}
-		      <a href={$currentItem.url} target="item">{$currentItem.title}</a>
+		      <a href={$currentItem.url} target="_blank" rel="noopener noreferrer">
+                          {$currentItem.title}</a>
 		  {/if}
 	      </h4>
 	  <h5 class="tag-line">

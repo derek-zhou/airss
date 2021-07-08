@@ -42,7 +42,7 @@ function first() {
 }
 
 function rotate() {
-    feeds = feeds.slice(1);
+    feeds = [...feeds.slice(1), feeds[0]];
 }
 
 async function get(db, id) {
