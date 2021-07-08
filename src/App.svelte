@@ -385,7 +385,7 @@
 	  <hr />
 	  <div class="field">
 	      <label for="input-bounce-load">
-		  Load feeds with roastidio.us (<a href="https://github.com/derek-zhou/airss#bouncer">Why</a>):
+		  Load feeds with roastidio.us (<a href="https://github.com/derek-zhou/airss#Proxy">Why</a>):
 	      </label>
 	      <input id="input-bounce-load" type="checkbox" bind:checked={bounceLoad}>
 	  </div>
