@@ -11,7 +11,8 @@ const Store = "feeds";
 let feeds = [];
 
 // public apis
-export {upgrade, load, get, first, rotate, addFeed, updateFeed, removeFeed};
+export {upgrade, load, get, first, rotate, addFeed, updateFeed, touchFeed,
+	removeFeed, deleteFeed};
 
 function upgrade(db) {
     // the store holds all the feeds
@@ -71,9 +72,17 @@ function updateFeed(db, feed) {
     return db.put(Store, feed);
 }
 
+function touchFeed(db, feed) {
+    return db.put(Store, feed);
+}
+
 function removeFeed(db, id) {
-    feeds = feeds.filter(i => i != id);
     // we do not await it and just hope it will land
     Airtable.deleteFeed(id);
+    return deleteFeed(db, id);
+}
+
+function deleteFeed(db, id) {
+    feeds = feeds.filter(i => i != id);
     return db.delete(Store, id);
 }

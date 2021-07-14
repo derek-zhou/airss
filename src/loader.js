@@ -48,12 +48,19 @@ async function cb_loadFeedsFromAirtable(prev, feedIds) {
 	}
 	remoteLastId = remoteFeeds[remoteFeeds.length - 1].id;
     }
-    // push every feeds that exist locally but not in remote
-    for (let id of feedIds.values()) {
-	if (remoteFeedIds.has(id))
-	    continue;
-	let feed = await Model.fetchFeed(id);
-	Airtable.insertFeed(feed);
+    // two modes of action. if remote is empty, we push everything.
+    // else we trust the remote and delete what remote doesn't have
+    if (remoteLastId == 0) {
+	for (let id of feedIds.values()) {
+	    let feed = await Model.fetchFeed(id);
+	    Airtable.insertFeed(feed);
+	}
+    } else {
+	for (let id of feedIds.values()) {
+	    if (remoteFeedIds.has(id))
+		continue;
+	    Model.deleteFeed(id);
+	}
     }
 }
 

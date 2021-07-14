@@ -14,7 +14,7 @@ import * as Loader from './loader.js';
 export {currentState, reinit, shutdown,
 	forwardItem, backwardItem, deleteItem, currentItem,
 	subscribe, unsubscribe,
-	getLoadCandidate, addFeed, addItems, fetchFeed, updateFeed};
+	getLoadCandidate, addFeed, deleteFeed, addItems, fetchFeed, updateFeed};
 
 // when the cursor is this close to the end I load more
 const WaterMark = localStorage.getItem("WATER_MARK") || 10;
@@ -173,6 +173,11 @@ async function cb_addFeed(prev, feed) {
     }
 }
 
+async function cb_deleteFeed(prev, id) {
+    await prev;
+    return Feeds.deleteFeed(db, id);
+}
+
 async function cb_fetchFeed(prev, id) {
     await prev;
     return Feeds.get(db, id);
@@ -262,13 +267,15 @@ async function cb_updateFeed(prev, feed, items) {
 	await Items.pushItem(db, dummyItem(feed));
 	num ++;
     }
+    feed.lastLoadTime = now;
     if (num > 0) {
-	feed.lastLoadTime = now;
 	await Feeds.updateFeed(db, feed);
 	emitModelItemsLoaded({
 	    length: Items.length(),
 	    cursor: Items.readingCursor()
 	});
+    } else {
+	await Feeds.touchFeed(db, feed);
     }
     Loader.load();
 }
@@ -300,7 +307,7 @@ async function init() {
     });
     let feedIds = await Feeds.load(db);
     let lastItemId = await Items.load(db);
-    // this is going to take awhile, we do not await it
+    // this is going to take a while, we do not await it
     // also this need to be called before the controller has any chance to do anything
     Loader.loadAirtable(feedIds, lastItemId);
     emitModelItemsLoaded({
@@ -371,6 +378,11 @@ function unsubscribe(id) {
 // add a feed. this is for the callback from subscribe
 function addFeed(feed) {
     state = cb_addFeed(state, feed);
+}
+
+// delete a feed by id. do not touch airtable
+function deleteFeed(id) {
+    state = cb_deleteFeed(state, id);
 }
 
 // add a item. this is for the callback from loading the airtable
