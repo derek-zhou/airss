@@ -202,6 +202,12 @@
 			@apply flex-none cursor-pointer text-white bg-purple-600 mr-1;
                     }
 		}
+		section {
+		    @apply py-2 border-b;
+		}
+		section:last-child {
+		    @apply border-b-0 pb-0;
+		}
                 label {
                     @apply flex-none mr-2;
 		    .focus {
@@ -220,6 +226,9 @@
 		.preview {
 		    @apply border rounded bg-yellow-50 p-2;
 		}
+                input[type="number"] {
+                    @apply w-16 leading-relaxed border rounded border-gray-600;
+                }
                 input[type="text"] {
                     @apply w-80 leading-relaxed border rounded border-gray-600;
                 }
@@ -269,6 +278,9 @@
 		    .subject {
 			@apply font-bold;
 		    }
+		}
+		.message.message-replied {
+		    @apply bg-yellow-50;
 		}
 		.children-container {
 		    @apply border-l-4 border-yellow-600 ml-2;
@@ -412,11 +424,10 @@
 	.viewport {
             @apply max-w-screen-lg;
 	    .content {
-		.mail-meta {
-		    @apply grid grid-cols-2 gap-x-2;
-		}
-		.mail-body {
-		    @apply grid grid-cols-2 gap-x-2;
+		form {
+		    section {
+			@apply grid grid-cols-2 gap-x-2;
+		    }
 		}
 		.box {
                     .thumbnail {

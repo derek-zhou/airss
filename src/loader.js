@@ -184,6 +184,18 @@ function mimeToType(mime) {
     }
 }
 
+function strictMimeToType(mime) {
+    switch (mime) {
+    case "application/feed+json":
+	return FeedType.json;
+    case "application/atom+xml":
+    case "application/rss+xml":
+	return FeedType.xml;
+    default:
+	return null;
+    }
+}
+
 // return a feed object if url is ok, or throw
 async function sanitize(url) {
     // first we need to make sure it is a valid url. If not,
@@ -215,7 +227,7 @@ async function sanitize(url) {
 	const links = doc.head.querySelectorAll("link[rel=alternate]");
 	for (let link of links.values()) {
 	    let href = link.getAttribute("href");
-	    let type = mimeToType(link.getAttribute("type"));
+	    let type = strictMimeToType(link.getAttribute("type"));
 	    if (!href)
 		continue;
 	    if (!type)
