@@ -70,6 +70,11 @@ export async function deleteItem() {
     }
 }
 
+export function clearData() {
+    actionPreamble();
+    return Model.clearData();
+}
+
 export function unsubscribe(id) {
     actionPreamble();
     Model.unsubscribe(id);

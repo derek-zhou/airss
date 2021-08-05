@@ -5,13 +5,13 @@
  * to the root document
  */
 
-import {openDB} from 'idb';
+import {openDB, deleteDB} from 'idb';
 import * as Feeds from './feeds.js';
 import * as Items from './items.js';
 import * as Loader from './loader.js';
 
 // exported client side functions. all return promises or null
-export {currentState, reinit, shutdown,
+export {currentState, shutdown, clearData,
 	forwardItem, backwardItem, deleteItem, currentItem,
 	subscribe, unsubscribe,
 	getLoadCandidate, addFeed, deleteFeed, addItems, fetchFeed, updateFeed};
@@ -78,6 +78,15 @@ async function cb_shutdown(prev) {
     // so database is safe. future db operation will crash
     db = null;
     emitModelShutDown();
+}
+
+async function cb_clearData(prev) {
+    await prev;
+    console.info("deleting database");
+    await db.close();
+    await deleteDB("AirSS");
+    console.info("database deleted");
+    db = null;
 }
 
 async function cb_subscribe(prev, url) {
@@ -328,10 +337,10 @@ function currentState() {
     return state;
 }
 
-// reinit the model layer. return a promise that resolve to null
+// clear all local data. return a promise that resolve to null
 // when everything initialized.
-function reinit() {
-    state = cb_reinit(state);
+function clearData() {
+    state = cb_clearData(state);
     return state;
 }
 

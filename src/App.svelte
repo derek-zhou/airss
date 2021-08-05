@@ -7,7 +7,7 @@
  import { afterUpdate } from 'svelte';
  
  // functions
- import {forwardItem, backwardItem, deleteItem, subscribe, unsubscribe} from  './airss_controller.js';
+ import {forwardItem, backwardItem, deleteItem, subscribe, unsubscribe, clearData} from  './airss_controller.js';
 
  // constants
  // screen is fundimental content shown in the window
@@ -68,6 +68,7 @@
 
  let apiKey = localStorage.getItem('AIRTABLE_API_KEY') || "";
  let baseToken = localStorage.getItem('AIRTABLE_BASE_TOKEN') || "";
+ let clearDatabase = "";
 
  let xDown = null;
  let yDown = null;
@@ -220,7 +221,13 @@
      localStorage.setItem("AIRTABLE_BASE_TOKEN", baseToken);
      // It is very hard to change config at run time, so I just take
      // shortcut to reload
-     location.reload();
+     if (clearDatabase == "clear database") {
+	 clearData().then(() => {
+	     location.reload();
+	 });
+     } else {
+	 location.reload();
+     }
  }
 
  function clickCancel() {
@@ -409,6 +416,10 @@
 		  </a>
 	      </div>
 	  {/if}
+	  <div class="field alert alert-danger">
+	      <label for="input-clear-database">Danger! Type "clear database" to delete all data</label>
+	      <input id="input-clear-database" type="text" bind:value={clearDatabase}>
+	  </div>
 	  <div class="toolbar">
 	      <input class="button" type="submit" value="👌">
 	      <input class="button" type="reset" value="👎"
