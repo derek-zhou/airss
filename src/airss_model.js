@@ -306,14 +306,14 @@ async function init() {
 	},
     });
     let feedIds = await Feeds.load(db);
-    let lastItemId = await Items.load(db);
-    // this is going to take a while, we do not await it
-    // also this need to be called before the controller has any chance to do anything
-    Loader.loadAirtable(feedIds, lastItemId);
+    let itemIds = await Items.load(db);
     emitModelItemsLoaded({
 	length: Items.length(),
 	cursor: Items.readingCursor()
     });
+    // this is going to take a while and will use the model so we cannot await
+    // also this need to be called before the controller has any chance to load anything
+    Loader.loadAirtable(feedIds, itemIds);
     emitModelInitDone();
 }
 

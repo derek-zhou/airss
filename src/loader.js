@@ -44,7 +44,7 @@ async function cb_loadFeedsFromAirtable(prev, feedIds) {
 	for (let feed of remoteFeeds.values()) {
 	    remoteFeedIds.add(feed.id);
 	    if (feed.id > localLastId)
-		await Model.addFeed(feed);
+		Model.addFeed(feed);
 	}
 	remoteLastId = remoteFeeds[remoteFeeds.length - 1].id;
     }
@@ -64,14 +64,25 @@ async function cb_loadFeedsFromAirtable(prev, feedIds) {
     }
 }
 
-async function cb_loadItemsFromAirtable(prev, lastId) {
+async function cb_loadItemsFromAirtable(prev, itemIds) {
     await prev;
+    let remoteLastId = 0;
+    let localIds = new Set(itemIds);
+
     while (true) {
-	let missingItems = await Airtable.loadItemsBeyond(lastId);
-	if (missingItems.length == 0)
+	let remoteIds = await Airtable.loadItemsBeyond(remoteLastId);
+	let missingItems = [];
+	if (remoteIds.length == 0)
 	    break;
-	await Model.addItems(missingItems);
-	lastId = missingItems[missingItems.length - 1].id;
+	for (let id of remoteIds.values()) {
+	    if (!localIds.has(id)) {
+		let item = await Airtable.fetchItem(id);
+		console.info("fetched missing item " + item.url + " with id: " + item.id);
+		missingItems.push(item);
+	    }
+	}
+	Model.addItems(missingItems);
+	remoteLastId = remoteIds[remoteIds.length - 1];
     }
 }
 
@@ -414,9 +425,9 @@ function parseATOMItem(elem) {
 
 let state = null;
 
-function loadAirtable(feedIds, lastItemId) {
+function loadAirtable(feedIds, itemIds) {
     state = cb_loadFeedsFromAirtable(state, feedIds);
-    state = cb_loadItemsFromAirtable(state, lastItemId);
+    state = cb_loadItemsFromAirtable(state, itemIds);
 }
 
 function subscribe(url) {

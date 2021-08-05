@@ -108,7 +108,6 @@ function upgrade(db) {
 async function load(db) {
     let store = await db.transaction(Store).store;
     let cursor = await store.openCursor(IDBKeyRange.lowerBound(0), "prev");
-    let lastId = 0;
     let perFeedCounter = new Map();
     let buffer = [];
     let unread = 0;
@@ -117,8 +116,6 @@ async function load(db) {
 
     while (cursor) {
 	let feedId = cursor.value.feedId;
-	if (lastId == 0)
-	    lastId = cursor.value.id;
 	if (perFeedCounter.has(feedId)) {
 	    perFeedCounter.set(feedId, perFeedCounter.get(feedId) + 1);
 	} else {
@@ -145,5 +142,6 @@ async function load(db) {
     items = buffer.reverse();
     // point both cursor at the last read item
     known = reading = items.length - unread - 1;
-    return lastId;
+    // return a copy so my state is not affected
+    return [...items];
 }

@@ -5,7 +5,7 @@
 import Airtable from 'airtable';
 
 export {loadFeedsBeyond, insertFeed, updateFeed, deleteFeed};
-export {loadItemsBeyond, markRead, addItem, deleteItem};
+export {loadItemsBeyond, fetchItem, markRead, addItem, deleteItem};
 
 const ApiKey = localStorage.getItem('AIRTABLE_API_KEY');
 const BaseToken = localStorage.getItem('AIRTABLE_BASE_TOKEN');
@@ -78,7 +78,11 @@ async function cb_updateFeed(prev, feed) {
 async function cb_insertFeed(prev, feed) {
     await prev;
     if (base === null)
-	return feed.id;
+	return;
+    if (feedsKeyMap.has(feed.id)) {
+	console.warn("id " + feed.id + " already exist");
+	return;
+    }
     let record = await base(FeedsTable).create({
 	id: feed.id,
 	feedUrl: feed.feedUrl,
@@ -88,19 +92,19 @@ async function cb_insertFeed(prev, feed) {
 	homePageUrl: feed.homePageUrl || ""
     });
     feedsKeyMap.set(feed.id, record.getId());
-    return feed.id;
+    return;
 }
 
 async function cb_deleteFeed(prev, id) {
     await prev;
     if (base === null)
-	return true;
+	return;
     let key = feedsKeyMap.get(id);
     if (key !== undefined) {
 	await base(FeedsTable).destroy(key);
 	feedsKeyMap.delete(id);
     }
-    return true;
+    return;
 }
 
 async function cb_loadItemsBeyond(prev, min) {
@@ -108,29 +112,16 @@ async function cb_loadItemsBeyond(prev, min) {
     if (base === null)
 	return [];
     let items = await base(ItemsTable).select({
+	fields: ["id"],
 	filterByFormula: "id > " + min,
 	sort: [{field: "id"}]
     }).firstPage();
 
     let rets = [];
     for (let each of items.values()) {
-	itemsKeyMap.set(each.get("id"), each.getId());
-	let item = {
-	    id: each.get("id"),
-	    url: each.get("url") || "",
-	    read: each.get("read") || false
-	};
-	let extra = each.get("extra") || "{}";
-	let extraInfo = JSON.parse(extra);
-	// just merge everything
-	for (const [key, value] of Object.entries(extraInfo)) {
-	    // make sure data is a Date
-	    if (key == "datePublished")
-		item[key] = new Date(value);
-	    else
-		item[key] = value;
-	}
-	rets.push(item);
+	let id = each.get("id");
+	itemsKeyMap.set(id, each.getId());
+	rets.push(id);
     }
     return rets;
 }
@@ -138,18 +129,22 @@ async function cb_loadItemsBeyond(prev, min) {
 async function cb_markRead(prev, id) {
     await prev;
     if (base === null)
-	return true;
-    let key = await getItemKey(id);
+	return;
+    let key = itemsKeyMap.get(id);
     if (key !== undefined) {
 	await base(ItemsTable).update(key, {read: true});
     }
-    return true;
+    return;
 }
 
 async function cb_addItem(prev, item) {
     await prev;
     if (base === null)
-	return item.id;
+	return;
+    if (itemsKeyMap.has(item.id)) {
+	console.warn("item id " + item.id + " already exist");
+	return;
+    }
     let extraInfo = {...item};
     delete extraInfo.id;
     delete extraInfo.url;
@@ -161,33 +156,45 @@ async function cb_addItem(prev, item) {
 	extra: JSON.stringify(extraInfo)
     });
     itemsKeyMap.set(item.id, record.getId());
-    return item.id;
+    return;
+}
+
+async function cb_fetchItem(prev, id) {
+    await prev;
+    if (base === null)
+	throw "base is not opened";
+    let key = itemsKeyMap.get(id);
+    if (key === undefined)
+	throw "key for " + id + " not found";
+    let record = await base(ItemsTable).find(key);
+    let item = {
+	id: record.get("id"),
+	url: record.get("url") || "",
+	read: record.get("read") || false
+    };
+    let extra = record.get("extra") || "{}";
+    let extraInfo = JSON.parse(extra);
+    // just merge everything
+    for (const [key, value] of Object.entries(extraInfo)) {
+	// make sure data is a Date
+	if (key == "datePublished")
+	    item[key] = new Date(value);
+	else
+	    item[key] = value;
+    }
+    return item;
 }
 
 async function cb_deleteItem(prev, id) {
     await prev;
     if (base === null)
-	return true;
-    let key = await getItemKey(id);
+	return;
+    let key = itemsKeyMap.get(id);
     if (key !== undefined) {
 	itemsKeyMap.delete(id);
 	await base(ItemsTable).destroy(key);
     }
-    return true;
-}
-
-async function getItemKey(id) {
-    let key = itemsKeyMap.get(id);
-    if (key === undefined) {
-	let items = await base(ItemsTable).select({
-	    filterByFormula: "id = " + id,
-	}).firstPage();
-	for (let each of items.values()) {
-	    itemsKeyMap.set(each.get("id"), each.getId());
-	};
-	key = itemsKeyMap.get(id);
-    }
-    return key;
+    return;
 }
 
 function feedType(str) {
@@ -274,6 +281,12 @@ function markRead(id) {
 // add an item. do nothing if there is already one
 function addItem(item) {
     state = cb_addItem(state, item);
+    return state;
+}
+
+// fetch a item including everything
+function fetchItem(id) {
+    state = cb_fetchItem(state, id);
     return state;
 }
 

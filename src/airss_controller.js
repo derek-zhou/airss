@@ -101,7 +101,7 @@ document.addEventListener("AirSSModelInitDone", () => {
 	// do I have a refer so I can subscribe?
 	if (params.has("subscribe-referrer") && document.referrer)
 	    Model.subscribe(document.referrer);
-	if (str)
+	else if (str)
 	    Model.subscribe(decodeURIComponent(str));
     }
     loadCurrentItem();
