@@ -207,11 +207,20 @@ async function cb_addItems(prev, items) {
 	    }
 	}
     }
-    if (cnt > 0)
+    if (cnt > 0) {
 	emitModelItemsLoaded({
 	    length: Items.length(),
 	    cursor: Items.readingCursor()
-    });
+	});
+	await flushDB();
+    }
+}
+
+async function flushDB() {
+    // to ensure db is persistant. is there a better way?
+    console.info("flushing");
+    await db.close();
+    db = await openDB("AirSS");
 }
 
 function oopsItem(feed) {
@@ -283,6 +292,7 @@ async function cb_updateFeed(prev, feed, items) {
 	    length: Items.length(),
 	    cursor: Items.readingCursor()
 	});
+	await flushDB();
     } else {
 	await Feeds.touchFeed(db, feed);
     }
