@@ -29,6 +29,9 @@ let base = null;
 let feedsKeyMap = new Map();
 let itemsKeyMap = new Map();
 
+let itemsToBeDeleted = new Set();
+let feedsToBeDeleted = new Set();
+
 /*
  * callback functions
  */
@@ -44,15 +47,21 @@ async function cb_loadFeedsBeyond(prev, min) {
 
     let rets = [];
     for (let each of feeds.values()) {
-	feedsKeyMap.set(each.get("id"), each.getId());
-	rets.push({
-	    id: each.get("id"),
-	    feedUrl: each.get("feedUrl"),
-	    lastLoadTime: each.get("lastLoadTime") * 1000,
-	    type: feedType(each.get("type")),
-	    title: each.get("title") || "",
-	    homePageUrl: each.get("homePageUrl") || ""
-	});
+	let id = each.get("id");
+	if (feedsToBeDeleted.has(id)) {
+	    await base(FeedsTable).destroy(each.getId());
+	    feedsToBeDeleted.delete(id);
+	} else {
+	    feedsKeyMap.set(id, each.getId());
+	    rets.push({
+		id: id,
+		feedUrl: each.get("feedUrl"),
+		lastLoadTime: each.get("lastLoadTime") * 1000,
+		type: feedType(each.get("type")),
+		title: each.get("title") || "",
+		homePageUrl: each.get("homePageUrl") || ""
+	    });
+	}
     }
     return rets;
 }
@@ -100,7 +109,9 @@ async function cb_deleteFeed(prev, id) {
     if (base === null)
 	return;
     let key = feedsKeyMap.get(id);
-    if (key !== undefined) {
+    if (key === undefined) {
+	feedsToBeDeleted.add(id);
+    } else {
 	await base(FeedsTable).destroy(key);
 	feedsKeyMap.delete(id);
     }
@@ -120,8 +131,13 @@ async function cb_loadItemsBeyond(prev, min) {
     let rets = [];
     for (let each of items.values()) {
 	let id = each.get("id");
-	itemsKeyMap.set(id, each.getId());
-	rets.push(id);
+	if (itemsToBeDeleted.has(id)) {
+	    await base(ItemsTable).destroy(each.getId());
+	    itemsToBeDeleted.delete(id);
+	} else {
+	    itemsKeyMap.set(id, each.getId());
+	    rets.push(id);
+	}
     }
     return rets;
 }
@@ -190,7 +206,9 @@ async function cb_deleteItem(prev, id) {
     if (base === null)
 	return;
     let key = itemsKeyMap.get(id);
-    if (key !== undefined) {
+    if (key === undefined) {
+	itemsToBeDeleted.add(id);
+    } else {
 	itemsKeyMap.delete(id);
 	await base(ItemsTable).destroy(key);
     }
@@ -229,6 +247,7 @@ function init() {
     });
     try {
 	base = Airtable.base(BaseToken);
+	console.info("Airtable opened");
 	return base;
     } catch (e) {
 	console.error("Cannot connect to airtable. check your configuration");
