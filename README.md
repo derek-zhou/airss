@@ -1,16 +1,17 @@
 # AirSS
 
-AirSS is a light weight feed reader that runs in your browser, with no backend.
+AirSS is a light weight RSS feed reader that runs entirely in your browser.
 
 ## Introduction
 
 AirSS is an opinionated feed reader that is designed to aggregate and read blogs or news. It provides only the essential functionalities on the surface: You give it a bunch of feeds, it will feed you all the news, one item at a time. The benefits are:
 
 * No software to install, no service to sign up, no middle man, no cookie, no tracking, completely free with no string attached.
-* Ok, I lied. You can __optionally__ use your own [airtable](https://airtable.com) to store your feeds so you can hop between several devices.
+* You can __optionally__ use your own [airtable](https://airtable.com) to store your feeds so you can hop between several devices.
 * It is tiny: <100KB transfer size (airtable client being the bulk of it) for now, and that's html, style, scripts all put together, and I don't even bother with minifying or bundling.
 * Supports [JSON feeds](https://www.jsonfeed.org/), [RSS2 feeds](https://validator.w3.org/feed/docs/rss2.html) and [Atom feeds](https://tools.ietf.org/html/rfc4287). Also automatically figures out feed url from typical web pages through [rel=alternate links](https://developer.mozilla.org/en-US/docs/Web/HTML/Link_types)
 * You can also use the [roastidio.us](https://roastidio.us) commenting service (written and operated by me) to write your comment with a click of the button (🔥). The integration is just a simple link, there is no data sharing.
+* You can __optionally__ use [roastidio.us](https://roastidio.us) to load feeds to bypass [CORS](https://enable-cors.org/) restriction (more on this later).
 
 You need a ES6 compliant browser (sorry, IE fans). The main branch is auto-deployed here: [airss.roastidio.us](https://airss.roastidio.us) which is on [Vercel](https://vercel.com). All are welcome to use it. Since the software is open sourced, you can also clone it and host it somewhere else; it is all upto you.
 
@@ -51,14 +52,14 @@ Hope is not lost, even today. Via browser add-ons such as: [CORS everywhere](htt
 
 Because of the caveat mentioned in the previous section, I provide a proxy service to anyone logged in to [roastidio.us](https://roastidio.us), so the CORS restriction can be circumvented. All you need to do is to login to [roastidio.us](https://roastidio.us) in the same browser; Then you can just check the box `Load feeds with roastidio.us` in the config page and all should be good; no browser plugin or developer menu is required. However:
 
-* It will be slower and less reliable this way
-* If I turned evil I could invade your privacy
+* Loading feeds will be slower. Once loaded everything is as fast as before 
+* If I turned evil I could invade your privacy or sabotage the feed content
 
 [roastidio.us](https://roastidio.us) is a free commenting service open to everyone, and is written and operated by the me. The cookie will keep you logged in for up to 30 days. If you suddently see feed loading failures en mass, the most likely culprit is a expired cookie.
 
 ## Airtable
 
-The folks at Airtable are nice enough to provide anyone free accounts. With Airtable you can share feeds and news between multiple devices, such as computer + phone etc so you can read your news anywhere. There is some setup involved, because airtables cannot be setup through API. You will need to setup a dedicated base for airss, and 2 tables under the base. The easiest way is to just copy this base: [airss template](https://airtable.com/shrFm410wa0iyoKpq) into your workspace.
+The folks at Airtable are nice enough to provide anyone free accounts. With Airtable you can share feeds and news between multiple devices that you control, such as computer + phone etc so you can read your news anywhere. There is some setup involved, because airtables cannot be setup through API. You will need to setup a dedicated base for airss, and 2 tables under the base. The easiest way is to just copy this blank template: [airss template](https://airtable.com/shrFm410wa0iyoKpq) into your workspace.
 
 Then you generate a API key through your account profile, and take a note of the base ID from `help` -> `API documentation` in this base. Put them in the config page of airss, then you are done.
 
@@ -70,4 +71,4 @@ Please also keep in mind that AirSS does not do two-way data syncing or resolve 
 
 The software shall be consider beta quality right now. Use it at your own risk.
 
-Do not use AirSS with airtable on a device that you do not control; AirSS stores the API key in the local storage unencrypted. A local super user could steal it. 
+Do not use AirSS with Airtable on a device that you do not control; AirSS stores the API key in the local storage unencrypted. A local super user could steal it. 
