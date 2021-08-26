@@ -390,7 +390,7 @@ function parseATOMItem(elem) {
     const categories = elem.querySelectorAll("category");
     let tags = [];
     for (let category of categories.values()) {
-	tags = [...tags, category.textContent];
+	tags = [...tags, category.getAttribute("term")];
     }
     if (published)
 	item.datePublished = new Date(published);
