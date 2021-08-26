@@ -13,7 +13,7 @@ const MaxKeptItems = localStorage.getItem("MAX_ITEMS_PER_FEED") || 100;
 const MaxKeptPeriod = localStorage.getItem("MAX_KEPT_PERIOD") || 180;
 // whether to load with bouncer
 const BounceLoad = localStorage.getItem("BOUNCE_LOAD") == "true";
-const Bouncer = "https://roastidio.us/bounce?encoded=";
+const Bouncer = "https://roastidio.us/bounce?url=";
 const FeedType = {
     json: 1,
     xml: 2
