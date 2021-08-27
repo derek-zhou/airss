@@ -111,6 +111,7 @@ async function load(db) {
     let perFeedCounter = new Map();
     let buffer = [];
     let unread = 0;
+    let counter = 0;
     let expired = [];
     let now = new Date();
 
@@ -124,9 +125,10 @@ async function load(db) {
 	if (now - cursor.value.datePublished <= MaxKeptPeriod*24*3600*1000 &&
 	    perFeedCounter.get(feedId) <= MaxKeptItems) {
 	    buffer.push(cursor.key);
+	    counter ++;
 	    // items from the beginning up to a point are read
 	    if (!cursor.value.read)
-		unread ++;
+		unread = counter;
 	} else {
 	    expired.push(cursor.key);
 	}
@@ -141,7 +143,7 @@ async function load(db) {
     }
     items = buffer.reverse();
     // point both cursor at the last read item
-    known = reading = items.length - unread - 1;
+    known = reading = counter - unread - 1;
     // return a copy so my state is not affected
     return [...items];
 }
