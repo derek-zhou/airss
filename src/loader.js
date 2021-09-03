@@ -13,7 +13,8 @@ const MaxKeptItems = localStorage.getItem("MAX_ITEMS_PER_FEED") || 100;
 const MaxKeptPeriod = localStorage.getItem("MAX_KEPT_PERIOD") || 180;
 // whether to load with bouncer
 const BounceLoad = localStorage.getItem("BOUNCE_LOAD") == "true";
-const Bouncer = "https://roastidio.us/bounce?url=";
+const BouncerRoot = "https://roastidio.us"
+const Bouncer = BouncerRoot + "/bounce?url=";
 const FeedType = {
     json: 1,
     xml: 2
@@ -23,8 +24,7 @@ const FeedType = {
  * callback side state and entry points
  */
 
-// I have no state so far. I could have multiple instances and do
-// parallel loading but there is no point to stress the network
+let enabled = true;
 
 async function cb_loadFeedsFromAirtable(prev, feedIds) {
     await prev;
@@ -88,6 +88,8 @@ async function cb_loadItemsFromAirtable(prev, itemIds) {
 
 async function cb_subscribe(prev, url) {
     await prev;
+    if (!enabled)
+	return;
     let feed;
     try {
 	feed = await sanitize(url);
@@ -101,18 +103,25 @@ async function cb_subscribe(prev, url) {
 	    throw e;
 	}
     }
-    Model.addFeed(feed);
+    if (feed)
+	Model.addFeed(feed);
+    else
+	Model.warn("Unauthorized. Please either load directly or login to <a href=\""
+		   + BouncerRoot + "\">roastidio.us</a> then reload Airss");
 }
 
 async function cb_load(prev) {
     await prev;
+    if (!enabled)
+	return;
     let feed = await Model.getLoadCandidate();
     if (!feed) {
 	console.info("Nothing to load, sleeping");
 	return;
     }
+    let data;
     try {
-	var data = await loadFeed(feed);
+	data = await loadFeed(feed);
     } catch (e) {
 	if (typeof e === 'string' || (e instanceof TypeError)) {
 	    feed.error = e.toString();
@@ -122,29 +131,34 @@ async function cb_load(prev) {
 	    throw e;
 	}
     }
-    let updated = feed;
-    let items = [];
-    switch (feed.type) {
-    case FeedType.json:
-	updated = parseJSONFeed(feed, data);
-	if (data.items)
-	    items = processItems(data.items, updated, parseJSONItem);
-	break;
-    case FeedType.xml:
-	let rss2Feed = data.querySelector("channel");
-	let atomFeed = data.querySelector("feed");
-	if (rss2Feed) {
-	    updated = parseRSS2Feed(feed, rss2Feed);
-	    items = processItems(rss2Feed.querySelectorAll("item"),
-				 updated, parseRSS2Item);
-	} else if (atomFeed) {
-	    updated = parseATOMFeed(feed, atomFeed);
-	    items = processItems(atomFeed.querySelectorAll("entry"),
-				 updated, parseATOMItem);
+    if (data) {
+	let updated = feed;
+	let items = [];
+	switch (feed.type) {
+	case FeedType.json:
+	    updated = parseJSONFeed(feed, data);
+	    if (data.items)
+		items = processItems(data.items, updated, parseJSONItem);
+	    break;
+	case FeedType.xml:
+	    let rss2Feed = data.querySelector("channel");
+	    let atomFeed = data.querySelector("feed");
+	    if (rss2Feed) {
+		updated = parseRSS2Feed(feed, rss2Feed);
+		items = processItems(rss2Feed.querySelectorAll("item"),
+				     updated, parseRSS2Item);
+	    } else if (atomFeed) {
+		updated = parseATOMFeed(feed, atomFeed);
+		items = processItems(atomFeed.querySelectorAll("entry"),
+				     updated, parseATOMItem);
+	    }
+	    break;
 	}
-	break;
+	Model.updateFeed(updated, items);
+    } else {
+	Model.warn("Unauthorized. Please either load directly or login to <a href=\""
+		   + BouncerRoot + "\">roastidio.us</a> then reload Airss");
     }
-    Model.updateFeed(updated, items);
 }
 
 function myFetch(url) {
@@ -161,8 +175,10 @@ function myFetch(url) {
 
 async function loadFeed(feed) {
     let response = await myFetch(feed.feedUrl);
-    if (response.status == 401)
-	throw "Unauthorized. Are you logged in to roastidio.us?";
+    if (BounceLoad && response.status == 401) {
+	enabled = false;
+	return false;
+    }
     else if (response.status != 200)
 	throw "fetching failed in loadFeed";
     switch (feed.type) {
@@ -216,8 +232,10 @@ async function sanitize(url) {
 	throw "Only http(s) is supported";
     let feed = new Object();
     let response = await myFetch(url);
-    if (response.status == 401)
-	throw "Unauthorized. Are you logged in to roastidio.us?";
+    if (BounceLoad && response.status == 401) {
+	enabled = false;
+	return false;
+    }
     else if (response.status != 200)
 	throw "fetching failed in sanitize";
     let mime = response.headers.get('Content-Type');

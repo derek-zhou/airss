@@ -260,7 +260,7 @@
 		  on:click={clickRight}>▶</button>
       </div>
   </div>
-  <p class={alertClass} role="alert" on:click={clearAlert}>{$alertText}</p>
+  <p class={alertClass} role="alert" on:click={clearAlert}>{@html $alertText}</p>
   <div class="content">
   {#if screen == Screens.browse}
       <div class="box"
