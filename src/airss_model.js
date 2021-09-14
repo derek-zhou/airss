@@ -266,7 +266,7 @@ async function cb_updateFeed(prev, feed, items) {
 	}
     }
     let num = Items.length() - oldCount;
-    console.info("loading feed '" + feed.feedUrl + "' with " + num + " items");
+    console.info("loaded feed '" + feed.feedUrl + "' with " + num + " of " + items.length + " items");
 
     if (feed.error) {
 	emitModelError("The feed '" + feed.feedUrl +
