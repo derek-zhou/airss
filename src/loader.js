@@ -283,7 +283,7 @@ function processItems(rawItems, feed, parseFunc) {
 	    items = [...items, item];
 	}
 	count++;
-	if (count > MaxKeptItems)
+	if (count >= MaxKeptItems)
 	    break;
     }
     return items;
