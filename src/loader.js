@@ -273,7 +273,6 @@ async function sanitize(url) {
 function processItems(rawItems, feed, parseFunc) {
     let now = new Date();
     let items = [];
-    let count = 0;
     for (let item of rawItems.values()) {
 	item = parseFunc(item);
 	if (item && (now - item.datePublished <= MaxKeptPeriod*24*3600*1000)) {
@@ -281,9 +280,9 @@ function processItems(rawItems, feed, parseFunc) {
 	    item.feedTitle = feed.title;
 	    item.feedId = feed.id;
 	    items = [...items, item];
-	}
-	count++;
-	if (count >= MaxKeptItems)
+	    if (items.length >= MaxKeptItems)
+		break;
+	} else
 	    break;
     }
     return items;
