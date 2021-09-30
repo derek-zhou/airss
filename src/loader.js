@@ -275,7 +275,9 @@ function processItems(rawItems, feed, parseFunc) {
     let items = [];
     for (let item of rawItems.values()) {
 	item = parseFunc(item);
-	if (item && (now - item.datePublished <= MaxKeptPeriod*24*3600*1000)) {
+	if (!item)
+	    continue;
+	if (now - item.datePublished <= MaxKeptPeriod*24*3600*1000) {
 	    // duplicate info for simple access
 	    item.feedTitle = feed.title;
 	    item.feedId = feed.id;
@@ -377,7 +379,7 @@ function parseRSS2Item(elem) {
     else if (description)
 	item.contentHtml = description;
     else
-	return null;
+	item.contentHtml = "";
     if (enclosure_type) {
 	const tokens = enclosure_type.split('/');
 	if (tokens[0] == 'image')
@@ -418,7 +420,7 @@ function parseATOMItem(elem) {
     else if (summary)
 	item.contentHtml = '<p>' + summary + '</p>';
     else
-	return null;
+	item.contentHtml = "";
     if (enclosure_type) {
 	const tokens = enclosure_type.split('/');
 	if (tokens[0] == 'image')
