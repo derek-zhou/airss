@@ -334,6 +334,15 @@ function getXMLTextAttribute(elem, selector, attr) {
 	return null;
 }
 
+function enforceURL(url) {
+    try {
+	let absUrl = new URL(url);
+	return absUrl.toString();
+    } catch(e) {
+	return null;
+    }
+}
+
 function parseJSONItem(json) {
     let item = new Object();
     item.datePublished = new Date(json.date_published);
@@ -342,10 +351,9 @@ function parseJSONItem(json) {
     else if (json.content_text !== undefined)
 	item.contentHtml = '<p>' + json.content_text + '</p>';
     else
-	return null;
-    if (json.url)
-	item.url = json.url;
-    else
+	item.contentHtml = "";
+    item.url = enforceURL(json.url);
+    if (!item.url)
 	return null;
     item.imageUrl = json.image;
     item.title = json.title;
@@ -385,9 +393,8 @@ function parseRSS2Item(elem) {
 	if (tokens[0] == 'image')
 	    item.imageUrl = enclosure;
     }
-    if (link)
-	item.url = link;
-    else
+    item.url = enforceURL(link);
+    if (!item.url)
 	return null;
     if (title)
 	item.title = title;
@@ -427,10 +434,10 @@ function parseATOMItem(elem) {
 	    item.imageUrl = enclosure;
     }
     if (alternate)
-	item.url = alternate;
-    else if (link)
-	item.url = link;
+	item.url = enforceURL(alternate);
     else
+	item.url = enforceURL(link);
+    if (!item.url)
 	return null;
     if (title)
 	item.title = title;
