@@ -20,6 +20,7 @@
  };
  const UnknownImage = "/images/unknown_link.png";
  const roastPrefix = "https://roastidio.us/roast?url=";
+ const airssPrefix = "https://airss.roastidio.us/";
 
  // fundimental states of the app
  let screen = Screens.browse;
@@ -305,21 +306,43 @@
 		     href={roastPrefix + encodeURIComponent($currentItem.url)}>🔥</a>
 	      {/if}
 	  </div>
-      {:else if $length == 0}
-	  <h4>
-	      No news is bad news. How about
-	      <button class="button"
-		      on:click={clickSubscribe}>subscribe</button>
-	      something?
-	  </h4>
-      {:else}
+	  {:else if $length == 0}
+	  <h2>No news is bad news</h2>
+	  <p>
+	      AirSS is a <a href="https://en.wikipedia.org/wiki/Web_feed">web feed</a> reader that runs entirely in your browser. For a detail description, please visit its <a href="https://github.com/derek-zhou/airss">Github page.</a>
+	  </p>
+	  <h3>Desktop browser users</h3>
+	  <p>
+	      Install this bookmarklet <a class="button" href="javascript:location.href='{airssPrefix}?url='+encodeURIComponent(window.location.href)">Subscribe it in AirSS</a> by <b>dragging</b> it to your bookmarks. Whenever you encounter something interesting on the web, be it a blog, a news website or whatever, you can click this bookmarklet to subscribe. Chances are they support RSS feeds so you will always stay updated.
+	  </p>
+	  <h3>Mobile browser users</h3>
+	  <p>
+	      Android users can install this app: <a href="https://play.google.com/store/apps/details?id=net.daverix.urlforward">URL Forwarder</a> (Thank you, David Laurell!) then add a filter as:
+	  </p>
+	  <pre>
+{airssPrefix}?url=@url
+	  </pre>
+	  <p>
+	      Then you can share links here to subscribe. Chances are they support RSS feeds so you will always stay updated.
+	  </p>
+	  <h3>Bloggers</h3>
+	  <p>
+	      Please make sure you have your feed <a href="https://www.rssboard.org/rss-autodiscovery">auto-discoverable</a> from your homepage. And if you can, please enable <a href="https://enable-cors.org/">permissive CORS</a> on your blog to reach out to a broader audience. Lastly, if you really like AirSS, you can put a link on your homepage:
+	  </p>
+	  <pre>
+	      {'<a href="'+airssPrefix+'?subscribe-referrer" referrerpolicy="no-referrer-when-downgrade">Follow me with AirSS!</a>'}
+	  </pre>
+	  <p>
+	      So your readers can have an even easier time to follow you.
+	  </p>
+	  {:else}
 	  <h4>
 	      News are here. You can
 	      <button class="button"
 		      on:click={clickRight}>forward</button>
 	      to read
 	  </h4>
-      {/if}
+	  {/if}
       </div>
   {:else if screen == Screens.shutdown}
       <button class="button"
