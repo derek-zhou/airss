@@ -117,15 +117,14 @@ async function load(db) {
 
     while (cursor) {
 	let feedId = cursor.value.feedId;
-	if (perFeedCounter.has(feedId)) {
-	    perFeedCounter.set(feedId, perFeedCounter.get(feedId) + 1);
-	} else {
-	    perFeedCounter.set(feedId, 1);
-	}
-	if (now - cursor.value.datePublished <= MaxKeptPeriod*24*3600*1000 &&
-	    perFeedCounter.get(feedId) <= MaxKeptItems) {
+	let thisCount = 0;
+	if (perFeedCounter.has(feedId))
+	    thisCount = perFeedCounter.get(feedId);
+ 	if (now - cursor.value.datePublished <= MaxKeptPeriod*24*3600*1000 &&
+	    thisCount <= MaxKeptItems) {
 	    buffer.push(cursor.key);
 	    counter ++;
+	    perFeedCounter.set(feedId, thisCount + 1);
 	    // items from the beginning up to a point are read
 	    if (!cursor.value.read)
 		unread = counter;
