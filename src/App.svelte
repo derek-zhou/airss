@@ -239,13 +239,13 @@
 </script>
 
 <svelte:head>
-    <title>AirSS Reader({$cursor+1}/{$length})</title>
+    <title>Airss Reader({$cursor+1}/{$length})</title>
 </svelte:head>
 
 <div id="layout" class="viewport">
     <div class="header">
 	<div class="brand">
-	    <span class="title">AirSS</span>
+	    <span class="title">Airss</span>
 	    <span class="info">{$cursor+1}/{$length}</span>
 	</div>
       <div class="nav">
@@ -309,11 +309,11 @@
 	  {:else if $length == 0}
 	  <h2>No news is bad news</h2>
 	  <p>
-	      AirSS is a <a href="https://en.wikipedia.org/wiki/Web_feed">web feed</a> reader that runs entirely in your browser. For a detail description, please visit its <a href="https://github.com/derek-zhou/airss">Github page.</a>
+	      Airss is a <a href="https://en.wikipedia.org/wiki/Web_feed">web feed</a> reader that runs entirely in your browser. For a detail description, please visit its <a href="https://github.com/derek-zhou/airss">Github page.</a>
 	  </p>
 	  <h3>Desktop browser users</h3>
 	  <p>
-	      Install this bookmarklet <a class="button" href="javascript:location.href='{airssPrefix}?url='+encodeURIComponent(window.location.href)">Subscribe it in AirSS</a> by <b>dragging</b> it to your bookmarks. Whenever you encounter something interesting on the web, be it a blog, a news website or whatever, you can click this bookmarklet to subscribe. Chances are they support RSS feeds so you will always stay updated.
+	      Install this bookmarklet <a class="button" href="javascript:location.href='{airssPrefix}?url='+encodeURIComponent(window.location.href)">Subscribe it in Airss</a> by <b>dragging</b> it to your bookmarks. Whenever you encounter something interesting on the web, be it a blog, a news website or whatever, you can click this bookmarklet to subscribe. Chances are they support RSS feeds so you will always stay updated.
 	  </p>
 	  <h3>Mobile browser users</h3>
 	  <p>
@@ -327,10 +327,10 @@
 	  </p>
 	  <h3>Bloggers</h3>
 	  <p>
-	      Please make sure you have your feed <a href="https://www.rssboard.org/rss-autodiscovery">auto-discoverable</a> from your homepage. And if you can, please enable <a href="https://enable-cors.org/">permissive CORS</a> on your blog to reach out to a broader audience. Lastly, if you really like AirSS, you can put a link on your homepage:
+	      Please make sure you have your feed <a href="https://www.rssboard.org/rss-autodiscovery">auto-discoverable</a> from your homepage. And if you can, please enable <a href="https://enable-cors.org/">permissive CORS</a> on your blog to reach out to a broader audience. Lastly, if you really like Airss, you can put a link on your homepage:
 	  </p>
 	  <pre>
-	      {'<a href="'+airssPrefix+'?subscribe-referrer" referrerpolicy="no-referrer-when-downgrade">Follow me with AirSS!</a>'}
+	      {'<a href="'+airssPrefix+'?subscribe-referrer" referrerpolicy="no-referrer-when-downgrade">Follow me with Airss!</a>'}
 	  </pre>
 	  <p>
 	      So your readers can have an even easier time to follow you.
