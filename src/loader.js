@@ -106,7 +106,7 @@ async function cb_subscribe(prev, url) {
     if (feed)
 	Model.addFeed(feed);
     else
-	Model.warn("Unauthorized. Please either load directly or login to <a href=\""
+	Model.warn("Unauthorized. Please login to <a href=\""
 		   + BouncerRoot + "\">roastidio.us</a> then reload Airss");
 }
 
@@ -156,7 +156,7 @@ async function cb_load(prev) {
 	}
 	Model.updateFeed(updated, items);
     } else {
-	Model.warn("Unauthorized. Please either load directly or login to <a href=\""
+	Model.warn("Unauthorized. Please login to <a href=\""
 		   + BouncerRoot + "\">roastidio.us</a> then reload Airss");
     }
 }

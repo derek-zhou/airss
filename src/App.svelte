@@ -19,7 +19,8 @@
      config: 5
  };
  const UnknownImage = "/images/unknown_link.png";
- const roastPrefix = "https://roastidio.us/roast?url=";
+ const roastidious = "https://roastidio.us";
+ const roastPrefix = roastidious + "/roast?url=";
  const airssPrefix = "https://airss.roastidio.us/";
 
  // fundimental states of the app
@@ -309,23 +310,26 @@
 	  {:else if $length == 0}
 	  <h2>No news is bad news</h2>
 	  <p>
-	      Airss is a <a href="https://en.wikipedia.org/wiki/Web_feed">web feed</a> reader that runs entirely in your browser. For a detail description, please visit its <a href="https://github.com/derek-zhou/airss">Github page.</a>
+	      Airss is a web feed reader that runs entirely in your browser. <b>For the impatients, you will need to login to <a href={roastidious}>roastidio.us</a>, then check the "Load feeds with roastidio.us" checkbox in the 🔧 screen from above.</b> There are other ways that do not involve a login; for a detail description, please visit its <a href="https://github.com/derek-zhou/airss">Github page</a>.
+	  </p>
+	  <p>
+	      After the necessary setup, you can subscribe any feeds by clicking the 🍼 button from above and paste the URL, or you can use of one of the following tricks: 
 	  </p>
 	  <h3>Desktop browser users</h3>
 	  <p>
-	      Install this bookmarklet <a class="button" href="javascript:location.href='{airssPrefix}?url='+encodeURIComponent(window.location.href)">Subscribe it in Airss</a> by <b>dragging</b> it to your bookmarks. Whenever you encounter something interesting on the web, be it a blog, a news website or whatever, you can click this bookmarklet to subscribe. Chances are they support RSS feeds so you will always stay updated.
+	      Install this bookmarklet <a class="button" href="javascript:location.href='{airssPrefix}?url='+encodeURIComponent(window.location.href)">Subscribe it in Airss</a> <b>by dragging it to your bookmarks</b>. Whenever you encounter something interesting on the web, be it a blog, a news website or whatever, you can click this bookmarklet to subscribe. Chances are they support RSS feeds so you will always stay updated.
 	  </p>
 	  <h3>Mobile browser users</h3>
 	  <p>
-	      Android users can install this app: <a href="https://f-droid.org/en/packages/net.daverix.urlforward/">URL Forwarder</a> (Thank you, David Laurell!) then add a filter as:
+	      Android users can install this APP: <a href="https://f-droid.org/en/packages/net.daverix.urlforward/">URL Forwarder</a> (Thank you, David Laurell!) then add a filter as:
 	  </p>
 	  <pre>
 {airssPrefix}?url=@url
 	  </pre>
 	  <p>
-	      Then you can share links here to subscribe. Chances are they support RSS feeds so you will always stay updated.
+	      Then you can share links to the APP and select the menu to subscribe, if it support RSS feeds.
 	  </p>
-	  <h3>Bloggers</h3>
+	  <h2>To my fellow bloggers</h2>
 	  <p>
 	      Please make sure you have your feed <a href="https://www.rssboard.org/rss-autodiscovery">auto-discoverable</a> from your homepage. And if you can, please enable <a href="https://enable-cors.org/">permissive CORS</a> on your blog to reach out to a broader audience. Lastly, if you really like Airss, you can put a link on your homepage:
 	  </p>
