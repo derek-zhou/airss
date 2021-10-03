@@ -317,7 +317,7 @@
 	  </p>
 	  <h3>Mobile browser users</h3>
 	  <p>
-	      Android users can install this app: <a href="https://play.google.com/store/apps/details?id=net.daverix.urlforward">URL Forwarder</a> (Thank you, David Laurell!) then add a filter as:
+	      Android users can install this app: <a href="https://f-droid.org/en/packages/net.daverix.urlforward/">URL Forwarder</a> (Thank you, David Laurell!) then add a filter as:
 	  </p>
 	  <pre>
 {airssPrefix}?url=@url
