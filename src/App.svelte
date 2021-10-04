@@ -329,6 +329,9 @@
 	  <p>
 	      Then you can share links to the APP and select the menu to subscribe, if it support RSS feeds.
 	  </p>
+	  <p>
+	      iOS Safari users can use the bookmarklet method as mentioned earlier by syncing the bookmarklet from your Mac.
+	  </p>
 	  <h2>To my fellow bloggers</h2>
 	  <p>
 	      Please make sure you have your feed <a href="https://www.rssboard.org/rss-autodiscovery">auto-discoverable</a> from your homepage. And if you can, please enable <a href="https://enable-cors.org/">permissive CORS</a> on your blog to reach out to a broader audience. Lastly, if you really like Airss, you can put a link on your homepage:
