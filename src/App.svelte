@@ -246,7 +246,7 @@
 <div id="layout" class="viewport">
     <div class="header">
 	<div class="brand">
-	    <span class="title">Airss</span>
+	    <a href="/"><img src="/images/airss_logo.png"></a>
 	    <span class="info">{$cursor+1}/{$length}</span>
 	</div>
       <div class="nav">
