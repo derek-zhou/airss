@@ -162,7 +162,7 @@ async function cb_load(prev) {
 }
 
 function myFetch(url) {
-    if (BounceLoad) {
+    if (BounceLoad && !url.startsWith(BouncerRoot)) {
 	return fetch(Bouncer + encodeURIComponent(url), {
 	    mode: "cors",
 	    credentials: "include",
