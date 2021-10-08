@@ -307,7 +307,7 @@
 		     href={roastPrefix + encodeURIComponent($currentItem.url)}>🔥</a>
 	      {/if}
 	  </div>
-	  {:else if $length == 0}
+	  {:else}
 	  <h2>No news is bad news</h2>
 	  <p>
 	      Airss is a web feed reader that runs entirely in your browser. <b>For the impatients, you will need to login to <a href={roastidious}>roastidio.us</a>, then check the "Load feeds with roastidio.us" checkbox in the 🔧 screen from above.</b> There are other ways that do not involve a login; for a detail description, please visit its <a href="https://github.com/derek-zhou/airss">Github page</a>.
@@ -342,13 +342,6 @@
 	  <p>
 	      So your readers can have an even easier time to follow you.
 	  </p>
-	  {:else}
-	  <h4>
-	      News are here. You can
-	      <button class="button"
-		      on:click={clickRight}>forward</button>
-	      to read
-	  </h4>
 	  {/if}
       </div>
   {:else if screen == Screens.shutdown}
