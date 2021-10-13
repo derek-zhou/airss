@@ -273,8 +273,16 @@ async function sanitize(url) {
 function processItems(rawItems, feed, parseFunc) {
     let now = new Date();
     let items = [];
+    let counter = 0;
+
     for (let item of rawItems.values()) {
+	// never look pass more than MaxKeptItems from the top. Some feeds are long
+	if (counter > MaxKeptItems)
+	    break;
+	else
+	    counter ++;
 	item = parseFunc(item);
+	// some items are invalid
 	if (!item)
 	    continue;
 	if (now - item.datePublished <= MaxKeptPeriod*24*3600*1000) {
@@ -282,8 +290,6 @@ function processItems(rawItems, feed, parseFunc) {
 	    item.feedTitle = feed.title;
 	    item.feedId = feed.id;
 	    items = [...items, item];
-	    if (items.length >= MaxKeptItems)
-		break;
 	} else
 	    break;
     }
