@@ -11,7 +11,7 @@ import * as Items from './items.js';
 import * as Loader from './loader.js';
 
 // exported client side functions. all return promises or null
-export {currentState, shutdown, clearData, warn,
+export {currentState, shutdown, clearData, warn, error,
 	forwardItem, backwardItem, deleteItem, currentItem,
 	subscribe, unsubscribe,
 	getLoadCandidate, addFeed, deleteFeed, addItems, fetchFeed, updateFeed};
@@ -83,6 +83,11 @@ async function cb_shutdown(prev) {
 async function cb_warn(prev, msg) {
     await prev;
     emitModelWarning(msg);
+}
+
+async function cb_error(prev, msg) {
+    await prev;
+    emitModelError(msg);
 }
 
 async function cb_clearData(prev) {
@@ -352,6 +357,12 @@ function clearData() {
 // print a warning
 function warn(msg) {
     state = cb_warn(state, msg);
+    return state;
+}
+
+// print a error
+function error(msg) {
+    state = cb_error(state, msg);
     return state;
 }
 

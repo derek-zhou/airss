@@ -37,30 +37,36 @@ async function cb_loadFeedsFromAirtable(prev, feedIds) {
     let remoteFeedIds = new Set();
     // add every feeds that exist in remote but not local
     // this is not in the sort order of lastLoadTime though
-    while (true) {
-	let remoteFeeds = await Airtable.loadFeedsBeyond(remoteLastId);
-	if (remoteFeeds.length == 0)
-	    break;
-	for (let feed of remoteFeeds.values()) {
-	    remoteFeedIds.add(feed.id);
-	    if (feed.id > localLastId)
-		Model.addFeed(feed);
+    try {
+	while (true) {
+	    let remoteFeeds = await Airtable.loadFeedsBeyond(remoteLastId);
+	    if (remoteFeeds.length == 0)
+		break;
+	    for (let feed of remoteFeeds.values()) {
+		remoteFeedIds.add(feed.id);
+		if (feed.id > localLastId)
+		    Model.addFeed(feed);
+	    }
+	    remoteLastId = remoteFeeds[remoteFeeds.length - 1].id;
 	}
-	remoteLastId = remoteFeeds[remoteFeeds.length - 1].id;
-    }
-    // two modes of action. if remote is empty, we push everything.
-    // else we trust the remote and delete what remote doesn't have
-    if (remoteLastId == 0) {
-	for (let id of feedIds.values()) {
-	    let feed = await Model.fetchFeed(id);
-	    Airtable.insertFeed(feed);
+	// two modes of action. if remote is empty, we push everything.
+	// else we trust the remote and delete what remote doesn't have
+	if (remoteLastId == 0) {
+	    for (let id of feedIds.values()) {
+		let feed = await Model.fetchFeed(id);
+		Airtable.insertFeed(feed);
+	    }
+	} else {
+	    for (let id of feedIds.values()) {
+		if (remoteFeedIds.has(id))
+		    continue;
+		Model.deleteFeed(id);
+	    }
 	}
-    } else {
-	for (let id of feedIds.values()) {
-	    if (remoteFeedIds.has(id))
-		continue;
-	    Model.deleteFeed(id);
-	}
+    } catch (e) {
+	console.error("Failed to load airtable. check your configuration");
+	Model.error("Failed to load airtable. check your configuration");
+	return null;
     }
 }
 
@@ -69,20 +75,26 @@ async function cb_loadItemsFromAirtable(prev, itemIds) {
     let remoteLastId = 0;
     let localIds = new Set(itemIds);
 
-    while (true) {
-	let remoteIds = await Airtable.loadItemsBeyond(remoteLastId);
-	let missingItems = [];
-	if (remoteIds.length == 0)
-	    break;
-	for (let id of remoteIds.values()) {
-	    if (!localIds.has(id)) {
-		let item = await Airtable.fetchItem(id);
+    try {
+	while (true) {
+	    let remoteIds = await Airtable.loadItemsBeyond(remoteLastId);
+	    let missingItems = [];
+	    if (remoteIds.length == 0)
+		break;
+	    for (let id of remoteIds.values()) {
+		if (!localIds.has(id)) {
+		    let item = await Airtable.fetchItem(id);
 		console.info("fetched missing item " + item.url + " with id: " + item.id);
-		missingItems.push(item);
+		    missingItems.push(item);
+		}
 	    }
+	    Model.addItems(missingItems);
+	    remoteLastId = remoteIds[remoteIds.length - 1];
 	}
-	Model.addItems(missingItems);
-	remoteLastId = remoteIds[remoteIds.length - 1];
+    } catch (e) {
+	console.error("Failed to load airtable. check your configuration");
+	Model.error("Failed to load airtable. check your configuration");
+	return null;
     }
 }
 

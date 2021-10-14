@@ -424,13 +424,13 @@
 	      <label for="input-api-key">
 		  Your Airtable API key:
 	      </label>
-	      <input id="input-api-key" type="text" bind:value={apiKey}>
+	      <input id="input-api-key" type="text" class="code" bind:value={apiKey}>
 	  </div>
 	  <div class="field">
 	      <label for="input-base-token">
 		  The ID of your base:
 	      </label>
-	      <input id="input-base-token" type="text" bind:value={baseToken}>
+	      <input id="input-base-token" type="text" class="code" bind:value={baseToken}>
 	  </div>
 	  {#if baseToken}
 	      <div class="footnote">

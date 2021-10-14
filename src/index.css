@@ -229,6 +229,9 @@
 		.preview {
 		    @apply border rounded bg-yellow-50 p-2;
 		}
+		.code {
+		    @apply font-mono;
+		}
                 input[type="number"] {
                     @apply w-16 leading-relaxed border rounded border-gray-600;
                 }
