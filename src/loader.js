@@ -297,13 +297,14 @@ function processItems(rawItems, feed, parseFunc) {
 	// some items are invalid
 	if (!item)
 	    continue;
-	if (now - item.datePublished <= MaxKeptPeriod*24*3600*1000) {
+	else if (item.datePublished > now)
+	    continue;
+	else if (now - item.datePublished <= MaxKeptPeriod*24*3600*1000) {
 	    // duplicate info for simple access
 	    item.feedTitle = feed.title;
 	    item.feedId = feed.id;
 	    items = [...items, item];
-	} else
-	    break;
+	}
     }
     return items;
 }
@@ -371,7 +372,7 @@ function parseJSONItem(json) {
     else
 	item.contentHtml = "";
     item.url = enforceURL(json.url);
-    if (!item.url)
+    if (!item.url || !item.datePublished)
 	return null;
     item.imageUrl = json.image;
     item.title = json.title;
@@ -412,7 +413,7 @@ function parseRSS2Item(elem) {
 	    item.imageUrl = enclosure;
     }
     item.url = enforceURL(link);
-    if (!item.url)
+    if (!item.url || !item.datePublished)
 	return null;
     if (title)
 	item.title = title;
@@ -455,7 +456,7 @@ function parseATOMItem(elem) {
 	item.url = enforceURL(alternate);
     else
 	item.url = enforceURL(link);
-    if (!item.url)
+    if (!item.url || !item.datePublished)
 	return null;
     if (title)
 	item.title = title;
