@@ -262,13 +262,8 @@ async function cb_updateFeed(prev, feed, items) {
     // push items in reverse order
     for(let i = items.length - 1; i>= 0; i--) {
 	let item = items[i];
-	if (item.datePublished < lastPubDate) {
-	    console.info("Skiiping item because it was published " +
-			 item.datePublished.toLocaleString() +
-			 ", which is before " +
-			 lastPubDate.toLocaleString());
+	if (item.datePublished < lastPubDate)
 	    continue;
-	}
 	try {
 	    await Items.pushItem(db, item);
 	} catch(e) {
