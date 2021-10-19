@@ -2,6 +2,7 @@
  * The items schema, based on jsonfeed
  */
 import * as Airtable from './airtable_server.js';
+import * as Feeds from './feeds.js';
 
 const Store = "items";
 
@@ -82,6 +83,8 @@ async function deleteCurrentItem(db) {
 
 async function pushItem(db, item) {
     let id = await db.add(Store, item);
+    if (!isDummyItem(item))
+	Feeds.addDate(item.feedId, item.datePublished);
     items.push(id);
     item.id = id;
     // we do not await it and just hope it will land
@@ -92,6 +95,8 @@ async function pushItem(db, item) {
 async function addItem(db, item) {
     // may throw
     await db.add(Store, item);
+    if (!isDummyItem(item))
+	Feeds.addDate(item.feedId, item.datePublished);
     // already has id, must comming from airtable
     items.push(item.id);
     if (item.read && known == items.length - 2)
@@ -103,6 +108,11 @@ function upgrade(db) {
     let store = db.createObjectStore(
 	Store, {keyPath: "id", autoIncrement: true});
     store.createIndex("url", "url", {unique: true});
+}
+
+function isDummyItem(item) {
+    let tags = item.tags;
+    return tags.length == 1 && tags[0] == "_error";
 }
 
 async function load(db) {
@@ -125,6 +135,8 @@ async function load(db) {
 	    buffer.push(cursor.key);
 	    counter ++;
 	    perFeedCounter.set(feedId, thisCount + 1);
+	    if (!isDummyItem(cursor.value))
+		Feeds.addDate(feedId, cursor.value.datePublished);
 	    // items from the beginning up to a point are read
 	    if (!cursor.value.read)
 		unread = counter;

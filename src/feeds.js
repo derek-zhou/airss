@@ -10,9 +10,12 @@ const Store = "feeds";
 // is the oldest
 let feeds = [];
 
+// last datePublished of a feed in a Map
+let lastPublished = new Map();
+
 // public apis
 export {upgrade, load, get, first, rotate, addFeed, updateFeed, touchFeed,
-	removeFeed, deleteFeed};
+	removeFeed, deleteFeed, addDate, lastDate};
 
 function upgrade(db) {
     // the store holds all the feeds
@@ -85,4 +88,21 @@ function removeFeed(db, id) {
 function deleteFeed(db, id) {
     feeds = feeds.filter(i => i != id);
     return db.delete(Store, id);
+}
+
+function addDate(id, date) {
+    if (lastPublished.has(id)) {
+	let last_date = lastPublished.get(id);
+	if (last_date < date)
+	    lastPublished.set(id, date);
+    } else {
+	lastPublished.set(id, date);
+    }
+}
+
+function lastDate(id) {
+    if (lastPublished.has(id))
+	return lastPublished.get(id);
+    else
+	return new Date(0);
 }

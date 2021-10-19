@@ -258,10 +258,19 @@ async function cb_updateFeed(prev, feed, items) {
     await prev;
     let oldCount = Items.length();
     let now = new Date();
+    let lastPubDate = Feeds.lastDate(feed.id);
     // push items in reverse order
     for(let i = items.length - 1; i>= 0; i--) {
+	let item = items[i];
+	if (item.datePublished < lastPubDate) {
+	    console.info("Skiiping item because it was published " +
+			 item.datePublished.toLocaleString() +
+			 ", which is before " +
+			 lastPubDate.toLocaleString());
+	    continue;
+	}
 	try {
-	    await Items.pushItem(db, items[i]);
+	    await Items.pushItem(db, item);
 	} catch(e) {
 	    if (e instanceof DOMException) {
 		// it is common that an item cannot be add
