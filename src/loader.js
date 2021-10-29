@@ -4,7 +4,7 @@
 
 import * as Model from './airss_model.js';
 import * as Airtable from './airtable_server.js';
-
+import HtmlSanitizer from './HtmlSanitizer.js';
 export {subscribe, load, loadAirtable};
 
 // keep at most 100 items from feed
@@ -303,6 +303,8 @@ function processItems(rawItems, feed, parseFunc) {
 	    // duplicate info for simple access
 	    item.feedTitle = feed.title;
 	    item.feedId = feed.id;
+	    item.title = HtmlSanitizer.SanitizeHtml(item.title);
+	    item.contentHtml = HtmlSanitizer.SanitizeHtml(item.contentHtml);
 	    items = [...items, item];
 	}
     }
