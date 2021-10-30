@@ -7,7 +7,7 @@ module.exports = {
     ],
     mount: {
 	"src": "/dist",
-	"public": {url: "/", static: true, resolve: false}
+	"public": "/"
     },
     plugins: [
 	"@snowpack/plugin-svelte",
@@ -30,5 +30,10 @@ module.exports = {
     },
     buildOptions: {
 	/* ... */
+    },
+    optimize: {
+	bundle: true,
+	minify: true,
+	target: 'es2018',
     },
 };
