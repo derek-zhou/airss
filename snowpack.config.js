@@ -33,7 +33,8 @@ module.exports = {
     },
     optimize: {
 	bundle: true,
-	minify: true,
-	target: 'es2018',
+	minify: false,
+	sourcemap: false,
+	target: 'es2017',
     },
 };
