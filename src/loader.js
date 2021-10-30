@@ -4,7 +4,6 @@
 
 import * as Model from './airss_model.js';
 import * as Airtable from './airtable_server.js';
-import HtmlSanitizer from './HtmlSanitizer.js';
 export {subscribe, load, loadAirtable};
 
 // keep at most 100 items from feed
@@ -19,6 +18,12 @@ const FeedType = {
     json: 1,
     xml: 2
 }
+
+const attributeSet = new Set(['alt', 'height', 'href', 'src', 'width']);
+const tagSet = new Set(['A', 'ABBR', 'B', 'BLOCKQUOTE', 'BR', 'CENTER', 'CODE', 'DIV', 'EM',
+			'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'HR', 'I', 'IMG', 'LABEL', 'LI',
+			'OL', 'P', 'PRE', 'SMALL', 'SOURCE', 'SPAN', 'STRONG', 'TABLE',
+			'TBODY', 'TR', 'TD', 'TH', 'UL', 'U', 'VIDEO']);
 
 /*
  * callback side state and entry points
@@ -282,6 +287,49 @@ async function sanitize(url) {
     throw "Unrecognized mime";
 }
 
+function sanitizeText(input) {
+    var iframe = document.querySelector("iframe#sanitizer");
+    var iframe_body = iframe.contentDocument.body;
+    iframe_body.innerHTML = input;
+    return iframe_body.textContent;
+}
+
+function sanitizeHtml(input) {
+    var iframe = document.querySelector("iframe#sanitizer");
+    var iframe_body = iframe.contentDocument.body;
+    iframe_body.innerHTML = input;
+    var sanitized = iframe.contentDocument.createElement('Body');
+    sanitizeChildren(iframe_body, iframe.contentDocument, sanitized);
+    return sanitized.innerHTML;
+}
+
+function sanitizeChildren(node, container, newNode) {
+    for (let i = 0; i < node.childNodes.length; i++) {
+	let subNode = sanitizeNode(node.childNodes[i], container);
+	if (subNode)
+            newNode.appendChild(subNode);
+    }
+}
+
+function sanitizeAttributes(node, newNode) {
+    for (let i = 0; i < node.attributes.length; i++) {
+	let attr = node.attributes[i];
+	if (attributeSet.has(attr.name) && attr.value.indexOf("javascript:") != 0)
+	    newNode.setAttribute(attr.name, attr.value);
+    }
+}
+
+function sanitizeNode(node, container) {
+    if (node.nodeType == Node.TEXT_NODE) {
+        return node.cloneNode(true);
+    } else if (node.nodeType == Node.ELEMENT_NODE && tagSet.has(node.tagName)) {
+	let newNode = container.createElement(node.tagName);
+	sanitizeAttributes(node, newNode);
+	sanitizeChildren(node, container, newNode);
+	return newNode;
+    }
+}
+
 function processItems(rawItems, feed, parseFunc) {
     let now = new Date();
     let items = [];
@@ -303,8 +351,8 @@ function processItems(rawItems, feed, parseFunc) {
 	    // duplicate info for simple access
 	    item.feedTitle = feed.title;
 	    item.feedId = feed.id;
-	    item.title = HtmlSanitizer.SanitizeHtml(item.title);
-	    item.contentHtml = HtmlSanitizer.SanitizeHtml(item.contentHtml);
+	    item.title = sanitizeText(item.title);
+	    item.contentHtml = sanitizeHtml(item.contentHtml);
 	    items = [...items, item];
 	}
     }

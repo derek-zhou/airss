@@ -15,7 +15,6 @@
 	"tailwindcss": "^2.2.17"
     },
     "dependencies": {
-	"@jitbit/htmlsanitizer": "^1.0.0",
 	"airtable": "^0.10.1",
 	"idb": "^6.0.0",
 	"svelte": "^3.32.3"

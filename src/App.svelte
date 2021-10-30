@@ -282,7 +282,7 @@
 		      {$currentItem.title}
 		  {:else}
 		      <a href={$currentItem.url} target="_blank" rel="noopener noreferrer">
-                          {@html $currentItem.title}</a>
+                          {$currentItem.title}</a>
 		  {/if}
 	      </h4>
 	  <h5 class="tag-line">
