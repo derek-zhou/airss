@@ -19,11 +19,15 @@ const FeedType = {
     xml: 2
 }
 
-const attributeSet = new Set(['alt', 'height', 'href', 'src', 'width']);
-const tagSet = new Set(['A', 'ABBR', 'B', 'BLOCKQUOTE', 'BR', 'CENTER', 'CODE', 'DIV', 'EM',
-			'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'HR', 'I', 'IMG', 'LABEL', 'LI',
-			'OL', 'P', 'PRE', 'SMALL', 'SOURCE', 'SPAN', 'STRONG', 'TABLE',
-			'TBODY', 'TR', 'TD', 'TH', 'UL', 'U', 'VIDEO']);
+const attributeSet = new Set(['alt', 'height', 'href', 'type', 'src', 'width']);
+const tagSet = new Set(['A', 'ABBR', 'ADDR', 'ARTICLE', 'ASIDE', 'AUDIO', 'B', 'BLOCKQUOTE',
+			'BR', 'CAPTION', 'CITE', 'CODE', 'COL', 'COLGROUP', 'DD', 'DEL', 'DFN',
+			'DIV', 'DL', 'DT', 'EM', 'FIGCAPTION', 'FIGURE', 'FOOTER', 'HEADER',
+			'HGROUP', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'HR', 'I', 'IMG', 'INS',
+			'LABEL', 'LI', 'LINK', 'MAIN', 'MARK', 'NAV', 'OL', 'P', 'PICTURE',
+			'PRE', 'Q', 'S', 'SAMP', 'SECTION', 'SMALL', 'SOURCE', 'SPAN', 'STRONG',
+			'SUB', 'SUP', 'SVG', 'TABLE', 'TBODY', 'TD', 'TFOOT', 'TH', 'THEAD',
+			'TIME', 'TR', 'TRACK', 'U', 'UL', 'VIDEO', 'WBR']);
 
 /*
  * callback side state and entry points
