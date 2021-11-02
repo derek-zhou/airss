@@ -19,7 +19,8 @@ let known = -1;
 // public apis
 export {upgrade, load, length,
 	readingCursor, knownCursor, forwardCursor, backwardCursor, unreadCount,
-	markRead, getCurrentItem, deleteCurrentItem, pushItem, addItem};
+	markRead, getCurrentItem, deleteCurrentItem, deleteAllItemsOfFeed,
+	pushItem, addItem};
 
 function readingCursor() {
     return reading;
@@ -79,6 +80,36 @@ async function deleteCurrentItem(db) {
     reading--;
     known--;
     return true;
+}
+
+async function deleteAllItemsOfFeed(db, feedId) {
+    let after = [];
+    let above_reading = false;
+    let above_known = false;
+    let reading_shrink = 0;
+    let known_shrink = 0;
+    for (let i = 0; i < items.length; i++) {
+	let id = items[i];
+	let item = await db.get(Store, id);
+	if (item.feedId == feedId) {
+	    await db.delete(Store, id);
+	    // we do not await it and just hope it will land
+	    Airtable.deleteItem(id);
+	    if (!above_reading)
+		reading_shrink++;
+	    if (!above_known)
+		known_shrink++;
+	} else {
+	    after.push(id);
+	}
+	if (i == reading)
+	    above_reading = true;
+	if (i == known)
+	    above_known = true;
+    }
+    items = [...after];
+    reading = reading - reading_shrink;
+    known = known - known_shrink;
 }
 
 async function pushItem(db, item) {

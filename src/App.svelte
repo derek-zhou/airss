@@ -196,13 +196,15 @@
 
  function clickTrash() {
      clearAlert();
+     shouldUnsubscribe = !dummy;
      screen = Screens.trash;
  }
 
  function clickConfirmDelete() {
      if (shouldUnsubscribe)
 	 unsubscribe($currentItem.feedId);
-     deleteItem();
+     else
+	 deleteItem();
      screen = Screens.browse;
  }
 

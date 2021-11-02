@@ -163,6 +163,11 @@ async function cb_unsubscribe(prev, id) {
 	    throw e;
 	}
     }
+    await Items.deleteAllItemsOfFeed(db, id);
+    emitModelItemsLoaded({
+	length: Items.length(),
+	cursor: Items.readingCursor()
+    });
 }
 
 async function cb_addFeed(prev, feed) {

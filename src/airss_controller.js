@@ -75,9 +75,10 @@ export function clearData() {
     return Model.clearData();
 }
 
-export function unsubscribe(id) {
+export async function unsubscribe(id) {
     actionPreamble();
-    Model.unsubscribe(id);
+    await Model.unsubscribe(id);
+    currentItem.set(await Model.currentItem());
 }
 
 export function subscribe(url) {
