@@ -18,5 +18,9 @@
 	"airtable": "^0.10.1",
 	"idb": "^6.0.0",
 	"svelte": "^3.32.3"
-    }
+    },
+    "browserslist": [
+	"defaults",
+	"not IE 11"
+    ]
 }
