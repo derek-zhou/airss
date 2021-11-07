@@ -4,13 +4,13 @@ Airss is a light weight RSS feed reader that runs entirely in your browser.
 
 ## Introduction
 
-Airss is an opinionated feed reader that is designed to aggregate and read blogs and news. It provides only the essential functionalities on the surface: You give it a bunch of feeds, it will feed you all the news, one item at a time. The benefits are:
+Airss is an opinionated feed reader that is designed to aggregate blogs and news in one place for you to read. It provides only the essential functionalities on the surface: You give it a bunch of feeds, it will feed you all the news, one item at a time. The benefits are:
 
 * No software to install, no service to sign up, no middle man, no cookie, no tracking, completely free with no string attached.
 * You can __optionally__ use your own [airtable](https://airtable.com) to store your feeds so you can hop between several devices.
-* It is tiny: <100KB transfer size (the airtable client being the bulk of it) for now, and that's html, style, scripts all put together, and I don't even bother with minifying or bundling.
+* It is tiny: <100KB transfer size (the airtable client being the bulk of it) for now, and that's html, style, scripts all put together, and I don't even bother with minifying.
 * Supports [JSON feeds](https://www.jsonfeed.org/), [RSS2 feeds](https://validator.w3.org/feed/docs/rss2.html) and [Atom feeds](https://tools.ietf.org/html/rfc4287). Also automatically figures out feed url from typical web pages through [rel=alternate links](https://developer.mozilla.org/en-US/docs/Web/HTML/Link_types)
-* You can also use the [roastidio.us](https://roastidio.us) commenting service (written and operated by me) to write your comment with a click of the button (🔥). The integration is just a simple link, there is no data sharing.
+* You can __optionally__ use the [roastidio.us](https://roastidio.us) commenting service (written and operated by me) to write your comment with a click of the button (🔥). The integration is just a simple link, there is no data sharing.
 * You can __optionally__ use [roastidio.us](https://roastidio.us) to load feeds to bypass the [CORS](https://enable-cors.org/) restriction (more on this later).
 
 You need a ES6 compliant browser (sorry, IE fans). The main branch is auto-deployed here: [airss.roastidio.us](https://airss.roastidio.us) which is on [Vercel](https://vercel.com). All are welcome to use it. Since the software is open sourced, you can also clone it and host it somewhere else; it is all upto you.
@@ -50,13 +50,13 @@ So it is completely safe. **If you are a blogger and operate your own web server
 
 ## Cures for CORS
 
-Hope is not lost, even today. Via browser add-ons such as: [CORS everywhere](https://addons.mozilla.org/en-US/firefox/addon/cors-everywhere/?utm_source=addons.mozilla.org&utm_medium=referral&utm_content=search) and [CORS changer](https://chrome.google.com/webstore/detail/moesif-origin-cors-change/digfbfaphojjndkpccljibejjbppifbc?hl=en) Firefox and Chrome users can enjoy Airss today on any feed. Please install one of the add-ons, whitelist `https://airss.roastidio.us` and everything shall be fine. Safafi users can turn on the develop menu and disable the cross-origin restrictions from the menu. Mobile users please see the next section. If you are really paranoided, you are welcome to audit my source code to make sure there is nothing funny going on.
+Hope is not lost, even today. If you use a user script manager such as [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/), [Violentmonkey](https://violentmonkey.github.io/), or [Tampermonkey](https://www.tampermonkey.net/), you can [install this user script](https://greasyfork.org/en/scripts/433329-airss-cors-bypass). Installing it will immediately make the Airss instance on airss.roastidio.us be able to access all feed URLs, including ones that are cross-origin or http only. (Access for other instances can be added by editing the script.)
 
-If you use a user script manager such as [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/), [Violentmonkey](https://violentmonkey.github.io/), or [Tampermonkey](https://www.tampermonkey.net/), you can [install this user script](https://greasyfork.org/en/scripts/433329-airss-cors-bypass). Installing it will immediately make the Airss instance on airss.roastidio.us be able to access all feed URLs, including ones that are cross-origin or http only. (Access for other instances can be added by editing the script.)
+CORS restriction can also be turned off by browser add-ons such as: [CORS everywhere](https://addons.mozilla.org/en-US/firefox/addon/cors-everywhere/?utm_source=addons.mozilla.org&utm_medium=referral&utm_content=search) and [CORS changer](https://chrome.google.com/webstore/detail/moesif-origin-cors-change/digfbfaphojjndkpccljibejjbppifbc?hl=en), on Firefox and Chrome. Please install one of the add-ons, whitelist `https://airss.roastidio.us` and everything shall be fine. Safafi users can turn on the develop menu and disable the cross-origin restrictions from the menu. Mobile users please see the next section. If you are really paranoided, you are welcome to audit my source code to make sure there is nothing funny going on.
 
 ## Proxy
 
-Because of the caveat mentioned in the previous section, I provide a proxy service to anyone logged in to [roastidio.us](https://roastidio.us), so the CORS restriction can be circumvented. All you need to do is to login to [roastidio.us](https://roastidio.us) in the same browser; Then you can just check the box `Load feeds with roastidio.us` in the config page and all should be good; no browser plugin or developer menu is required. However:
+I provide a proxy service to anyone logged in to [roastidio.us](https://roastidio.us), so the CORS restriction can be circumvented, no user scripts or browser add-ons are needed. All you need to do is to login to [roastidio.us](https://roastidio.us) in the same browser; Then you can just check the box `Load feeds with roastidio.us` in the config page and all should be good; no browser plugin or developer menu is required. However:
 
 * Loading feeds will be slower. Once loaded everything is as fast as before 
 * If I turn evil I could invade your privacy or sabotage the feed content
@@ -74,10 +74,10 @@ Then you generate a API key through your account profile, and take a note of the
 
 Airtable's free tier can store upto 1200 records in a base. Each feed is a record, and each news item is a record too. If you subscribe to a lot of feeds, you may have to limit history depth to stay in the bound. Alternatively, you can hop onto airtable to delete old items manually.
 
-Please also keep in mind that Airss does not do a robust two-way data syncing or resolve conflicts. you may see some items missing or double-fetched on some of your devices.
+Please also keep in mind that the two-way data syncing and conflicts resolution of Airss is not very robust and it tries to be consevertive when in doubt. You may see some items double-fetched on some of your devices.
 
 ## Disclaimer
 
 The software shall be consider beta quality right now. Use it at your own risk.
 
-Do not use Airss with Airtable on a device that you do not control; Airss stores the API key in the local storage unencrypted. A local super user could steal it. 
+Do not use Airss with Airtable on a device that you do not control; Airss stores the API key in the local storage unencrypted. A local super user could steal the credential and sabotage your Airtable.
