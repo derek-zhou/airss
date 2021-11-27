@@ -63,11 +63,8 @@ export async function backwardItem() {
 
 export async function deleteItem() {
     actionPreamble();
-    if (await Model.deleteItem()) {
-	length.update(n => n - 1);
-	cursor.update(n => n - 1);
- 	currentItem.set(await Model.currentItem());
-    }
+    await Model.deleteItem();
+    currentItem.set(await Model.currentItem());
 }
 
 export function clearData() {

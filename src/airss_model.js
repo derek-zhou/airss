@@ -134,7 +134,13 @@ async function cb_backwardItem(prev) {
 
 async function cb_deleteItem(prev) {
     await prev;
-    return Items.deleteCurrentItem(db);
+    await Items.deleteCurrentItem(db);
+    // forward can fail, but it is ok
+    Items.forwardCursor();
+    emitModelItemsLoaded({
+	length: Items.length(),
+	cursor: Items.readingCursor()
+    });
 }
 
 async function cb_loadMore(prev) {
