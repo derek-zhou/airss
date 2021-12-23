@@ -17,7 +17,8 @@
     "dependencies": {
 	"airtable": "^0.10.1",
 	"idb": "^6.0.0",
-	"svelte": "^3.32.3"
+	"svelte": "^3.32.3",
+	"topbar": "^1.0.1"
     },
     "browserslist": [
 	"defaults",

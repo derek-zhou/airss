@@ -7,6 +7,7 @@
 
 import * as Model from './airss_model.js';
 import { writable } from 'svelte/store';
+import topbar from 'topbar';
 
 // timeout for the model to shutdown itself for inactivity
 const TimeoutPeriod = 3600 * 1000;
@@ -99,6 +100,14 @@ document.addEventListener("AirSSModelShutDown", () => {
     running.set(false);
 });
 
+document.addEventListener("AirSSModelStartLoading", () => {
+    topbar.show();
+});
+
+document.addEventListener("AirSSModelStopLoading", () => {
+    topbar.hide();
+});
+
 document.addEventListener("AirSSModelInitDone", () => {
     // do I have a incoming api call to subscribe a feed
     if (location.search) {
@@ -112,3 +121,5 @@ document.addEventListener("AirSSModelInitDone", () => {
     }
     loadCurrentItem();
 });
+
+topbar.show();

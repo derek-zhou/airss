@@ -13,7 +13,7 @@ import * as Loader from './loader.js';
 // exported client side functions. all return promises or null
 export {currentState, shutdown, clearData, warn, error,
 	forwardItem, backwardItem, deleteItem, currentItem,
-	subscribe, unsubscribe,
+	subscribe, unsubscribe, loadingDone,
 	getLoadCandidate, addFeed, deleteFeed, addItems, fetchFeed, updateFeed};
 
 // when the cursor is this close to the end I load more
@@ -65,6 +65,14 @@ function emitModelShutDown() {
     window.document.dispatchEvent(new Event("AirSSModelShutDown"));
 }
 
+function emitModelStartLoading() {
+    window.document.dispatchEvent(new Event("AirSSModelStartLoading"));
+}
+
+function emitModelStopLoading() {
+    window.document.dispatchEvent(new Event("AirSSModelStopLoading"));
+}
+
 /*
  * callback side state and entry points
  */
@@ -83,6 +91,11 @@ async function cb_shutdown(prev) {
 async function cb_warn(prev, msg) {
     await prev;
     emitModelWarning(msg);
+}
+
+async function cb_loadingDone(prev) {
+    await prev;
+    emitModelStopLoading();
 }
 
 async function cb_error(prev, msg) {
@@ -228,11 +241,12 @@ async function cb_addItems(prev, items) {
 	    }
 	}
     }
-    if (cnt > 0)
+    if (cnt > 0) {
 	emitModelItemsLoaded({
 	    length: Items.length(),
 	    cursor: Items.readingCursor()
-    });
+	});
+    }
 }
 
 function oopsItem(feed) {
@@ -270,6 +284,7 @@ async function cb_updateFeed(prev, feed, items) {
     let oldCount = Items.length();
     let now = new Date();
     let lastPubDate = Feeds.lastDate(feed.id);
+    emitModelStopLoading();
     // push items in reverse order
     for(let i = items.length - 1; i>= 0; i--) {
 	let item = items[i];
@@ -326,6 +341,7 @@ async function cb_getLoadCandidate(prev) {
     if (feed.lastLoadTime > now - MinReloadWait * 3600 * 1000)
 	return null;
     Feeds.rotate();
+    emitModelStartLoading();
     return feed;
 }
 
@@ -429,6 +445,11 @@ function addFeed(feed) {
 // delete a feed by id. do not touch airtable
 function deleteFeed(id) {
     state = cb_deleteFeed(state, id);
+}
+
+// notify loading is done
+function loadingDone() {
+    state = cb_loadingDone(state);
 }
 
 // add a item. this is for the callback from loading the airtable

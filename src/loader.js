@@ -105,6 +105,7 @@ async function cb_loadItemsFromAirtable(prev, itemIds) {
 	Model.error("Failed to load airtable. check your configuration");
 	return null;
     }
+    Model.loadingDone();
 }
 
 async function cb_subscribe(prev, url) {
