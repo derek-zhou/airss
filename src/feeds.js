@@ -61,7 +61,7 @@ async function addFeed(db, feed) {
 	return feed.id;
     } else {
 	let id = await db.add(Store, feed);
-	feeds = [id, ...feeds];
+	feeds.push(id);
 	feed.id = id;
 	// we do not await it and just hope it will land
 	Airtable.insertFeed(feed);

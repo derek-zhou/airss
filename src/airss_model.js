@@ -13,7 +13,7 @@ import * as Loader from './loader.js';
 // exported client side functions. all return promises or null
 export {currentState, shutdown, clearData, warn, error,
 	forwardItem, backwardItem, deleteItem, currentItem,
-	subscribe, unsubscribe, loadingDone,
+	subscribe, unsubscribe, loadingStart, loadingDone,
 	getLoadCandidate, addFeed, deleteFeed, addItems, fetchFeed, updateFeed};
 
 // when the cursor is this close to the end I load more
@@ -91,6 +91,11 @@ async function cb_shutdown(prev) {
 async function cb_warn(prev, msg) {
     await prev;
     emitModelWarning(msg);
+}
+
+async function cb_loadingStart(prev) {
+    await prev;
+    emitModelStartLoading();
 }
 
 async function cb_loadingDone(prev) {
@@ -191,21 +196,9 @@ async function cb_unsubscribe(prev, id) {
 
 async function cb_addFeed(prev, feed) {
     await prev;
-    if (feed.error) {
-	emitModelError("The feed '" + feed.feedUrl +
-		       "' is not valid");
-	console.error("The feed '" + feed.feedUrl +
-		      "' is not valid: " + feed.error);
-	return;
-    }
     try {
-	// if the feed come in with an id then it is from airtable
-	let newFeed = (feed.id === undefined);
 	let id = await Feeds.addFeed(db, feed);
 	console.info("added feed " + feed.feedUrl + " with id: " + id);
-	if (newFeed) {
-	    emitModelInfo("The feed '" + feed.feedUrl + "' is now subscribed");
-	}
     } catch (e) {
 	if (e instanceof DOMException) {
 	    emitModelError("The feed '" + feed.feedUrl +
@@ -283,8 +276,24 @@ async function cb_updateFeed(prev, feed, items) {
     await prev;
     let oldCount = Items.length();
     let now = new Date();
-    let lastPubDate = Feeds.lastDate(feed.id);
-    emitModelStopLoading();
+    let lastPubDate;
+    if (feed.id === undefined) {
+	// must be new feed
+	try {
+	    let id = await Feeds.addFeed(db, feed);
+	    console.info("added feed " + feed.feedUrl + " with id: " + id);
+	    emitModelInfo("The feed '" + feed.feedUrl + "' is now subscribed");
+	    lastPubDate = new Date(0);
+	} catch (e) {
+	    if (e instanceof DOMException) {
+		emitModelError("The feed '" + feed.feedUrl + "' is already subscribed");
+	    } else {
+		throw e;
+	    }
+	}
+    } else {
+	lastPubDate = Feeds.lastDate(feed.id);
+    }
     // push items in reverse order
     for(let i = items.length - 1; i>= 0; i--) {
 	let item = items[i];
@@ -341,7 +350,6 @@ async function cb_getLoadCandidate(prev) {
     if (feed.lastLoadTime > now - MinReloadWait * 3600 * 1000)
 	return null;
     Feeds.rotate();
-    emitModelStartLoading();
     return feed;
 }
 
@@ -445,6 +453,11 @@ function addFeed(feed) {
 // delete a feed by id. do not touch airtable
 function deleteFeed(id) {
     state = cb_deleteFeed(state, id);
+}
+
+// notify loading started
+function loadingStart() {
+    state = cb_loadingStart(state);
 }
 
 // notify loading is done

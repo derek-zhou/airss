@@ -112,24 +112,24 @@ async function cb_subscribe(prev, url) {
     await prev;
     if (!enabled)
 	return;
-    let feed;
     try {
-	feed = await sanitize(url);
+	Model.loadingStart();
+	let feed = await sanitize(url);
+	if (!feed)
+	    Model.warn("Unauthorized. Please login to <a href=\""
+		       + BouncerRoot + "\">roastidio.us</a> then reload Airss");
+	Model.loadingDone();
     } catch (e) {
 	if (typeof e === 'string' || (e instanceof TypeError)) {
-	    feed = {
-		feedUrl: url,
-		error: e.toString()
-	    };
-	} else {
+	    Model.error("The feed '" + feed.feedUrl + "' is not valid");
+	    console.error("The feed '" + feed.feedUrl + "' is not valid: " + feed.error);
+	    Model.loadingDone();
+	    return;
+ 	} else {
+	    Model.loadingDone();
 	    throw e;
 	}
     }
-    if (feed)
-	Model.addFeed(feed);
-    else
-	Model.warn("Unauthorized. Please login to <a href=\""
-		   + BouncerRoot + "\">roastidio.us</a> then reload Airss");
 }
 
 async function cb_load(prev) {
@@ -141,46 +141,42 @@ async function cb_load(prev) {
 	console.info("Nothing to load, sleeping");
 	return;
     }
-    let data;
     try {
-	data = await loadFeed(feed);
+	Model.loadingStart();
+	let data = await loadFeed(feed);
+	if (data)
+	    Model.updateFeed(feed, loadItems(data, feed));
+	else
+	    Model.warn("Unauthorized. Please login to <a href=\""
+		       + BouncerRoot + "\">roastidio.us</a> then reload Airss");
+	Model.loadingDone();
     } catch (e) {
 	if (typeof e === 'string' || (e instanceof TypeError)) {
 	    feed.error = e.toString();
 	    Model.updateFeed(feed, []);
+	    Model.loadingDone();
 	    return;
 	} else {
+	    Model.loadingDone();
 	    throw e;
 	}
     }
-    if (data) {
-	let updated = feed;
-	let items = [];
-	switch (feed.type) {
-	case FeedType.json:
-	    updated = parseJSONFeed(feed, data);
-	    if (data.items)
-		items = processItems(data.items, updated, parseJSONItem);
-	    break;
-	case FeedType.xml:
-	    let rss2Feed = data.querySelector("channel");
-	    let atomFeed = data.querySelector("feed");
-	    if (rss2Feed) {
-		updated = parseRSS2Feed(feed, rss2Feed);
-		items = processItems(rss2Feed.querySelectorAll("item"),
-				     updated, parseRSS2Item);
-	    } else if (atomFeed) {
-		updated = parseATOMFeed(feed, atomFeed);
-		items = processItems(atomFeed.querySelectorAll("entry"),
-				     updated, parseATOMItem);
-	    }
-	    break;
-	}
-	Model.updateFeed(updated, items);
-    } else {
-	Model.warn("Unauthorized. Please login to <a href=\""
-		   + BouncerRoot + "\">roastidio.us</a> then reload Airss");
+}
+
+function loadItems(data, feed) {
+    switch (feed.type) {
+    case FeedType.json:
+	if (data.items)
+	    return processItems(data.items, feed, parseJSONItem);
+    case FeedType.xml:
+	let rss2Feed = data.querySelector("channel");
+	if (rss2Feed)
+	    return processItems(rss2Feed.querySelectorAll("item"), feed, parseRSS2Item);
+	let atomFeed = data.querySelector("feed");
+	if (atomFeed)
+	    return processItems(atomFeed.querySelectorAll("entry"), feed, parseATOMItem);
     }
+    return [];
 }
 
 function myFetch(url) {
@@ -205,7 +201,7 @@ async function loadFeed(feed) {
 	throw "fetching failed in loadFeed";
     switch (feed.type) {
     case FeedType.json:
-	return response.json();
+	return await response.json();
     case FeedType.xml:
 	let parser = new DOMParser();
 	let text = await response.text();
@@ -245,6 +241,38 @@ function strictMimeToType(mime) {
     }
 }
 
+async function loadInitFeed(response, feed) {
+    switch (feed.type) {
+    case FeedType.json:
+	let data = await response.json();
+	let updated = parseJSONFeed(feed, data);
+	let items = processItems(data.items, updated, parseJSONItem);
+	Model.updateFeed(updated, items);
+	return updated;
+    case FeedType.xml:
+	let parser = new DOMParser();
+	let text = await response.text();
+	let doc = parser.parseFromString(text, "text/xml");
+	if (doc.documentElement.tagName == 'parsererror')
+	    throw doc.documentElement.textContent;
+	let rss2Feed = doc.querySelector("channel");
+	if (rss2Feed) {
+	    let updated = parseRSS2Feed(feed, rss2Feed);
+	    let items = processItems(rss2Feed.querySelectorAll("item"), updated, parseRSS2Item)
+	    Model.updateFeed(updated, items);
+	    return updated;
+	}
+	let atomFeed = doc.querySelector("feed");
+	if (atomFeed) {
+	    let updated = parseATOMFeed(feed, atomFeed);
+	    let items = processItems(rss2Feed.querySelectorAll("item"), updated, parseRSS2Item)
+	    Model.updateFeed(updated, items);
+	    return updated;
+	}
+    }
+    throw "Illegal feed content";
+}
+
 // return a feed object if url is ok, or throw
 async function sanitize(url) {
     // first we need to make sure it is a valid url. If not,
@@ -267,7 +295,7 @@ async function sanitize(url) {
     feed.lastLoadTime = 0;
     feed.type = mimeToType(mime);
     if (feed.type != null)
-	return feed;
+	return await loadInitFeed(response, feed);
 
     switch (mime) {
     case "text/html":
@@ -286,8 +314,17 @@ async function sanitize(url) {
 	    feed.type = type;
 	    let mergedUrl = new URL(href, url);
 	    feed.feedUrl = mergedUrl.toString();
-	    return feed;
+	    let response = await myFetch(feed.feedUrl);
+	    if (BounceLoad && response.status == 401) {
+		enabled = false;
+		return false;
+	    }
+	    else if (response.status != 200) {
+		throw "fetching failed in sanitize";
+	    }
+	    return await loadInitFeed(response, feed);
 	}
+	throw "No feed discovered";
     }
     throw "Unrecognized mime";
 }
@@ -340,25 +377,27 @@ function processItems(rawItems, feed, parseFunc) {
     let items = [];
     let counter = 0;
 
-    for (let item of rawItems.values()) {
-	// never look pass more than MaxKeptItems from the top. Some feeds are long
-	if (counter > MaxKeptItems)
-	    break;
-	else
-	    counter ++;
-	item = parseFunc(item);
-	// some items are invalid
-	if (!item)
-	    continue;
-	else if (item.datePublished > now)
-	    continue;
-	else if (now - item.datePublished <= MaxKeptPeriod*24*3600*1000) {
-	    // duplicate info for simple access
-	    item.feedTitle = feed.title;
-	    item.feedId = feed.id;
-	    item.title = sanitizeText(item.title);
-	    item.contentHtml = sanitizeHtml(item.contentHtml);
-	    items = [...items, item];
+    if (rawItems) {
+	for (let item of rawItems.values()) {
+	    // never look pass more than MaxKeptItems from the top. Some feeds are long
+	    if (counter > MaxKeptItems)
+		break;
+	    else
+		counter ++;
+	    item = parseFunc(item);
+	    // some items are invalid
+	    if (!item)
+		continue;
+	    else if (item.datePublished > now)
+		continue;
+	    else if (now - item.datePublished <= MaxKeptPeriod*24*3600*1000) {
+		// duplicate info for simple access
+		item.feedTitle = feed.title;
+		item.feedId = feed.id;
+		item.title = sanitizeText(item.title);
+		item.contentHtml = sanitizeHtml(item.contentHtml);
+		items = [...items, item];
+	    }
 	}
     }
     return items;
