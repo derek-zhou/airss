@@ -350,7 +350,8 @@ async function cb_getLoadCandidate(prev) {
     if (feed.lastLoadTime > now - MinReloadWait * 3600 * 1000)
 	return null;
     Feeds.rotate();
-    return feed;
+    let items = await Items.allUrlsOfFeed(db, feedId);
+    return {feed: feed, items: items};
 }
 
 /*

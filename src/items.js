@@ -20,7 +20,7 @@ let known = -1;
 export {upgrade, load, length,
 	readingCursor, knownCursor, forwardCursor, backwardCursor, unreadCount,
 	markRead, getCurrentItem, deleteCurrentItem, deleteAllItemsOfFeed,
-	pushItem, addItem};
+	allUrlsOfFeed, pushItem, addItem};
 
 function readingCursor() {
     return reading;
@@ -110,6 +110,18 @@ async function deleteAllItemsOfFeed(db, feedId) {
     items = [...after];
     reading = reading - reading_shrink;
     known = known - known_shrink;
+}
+
+async function allUrlsOfFeed(db, feedId) {
+    let list = [];
+    for (let i = 0; i < items.length; i++) {
+	let id = items[i];
+	let item = await db.get(Store, id);
+	if (item.feedId == feedId) {
+	    list.push(item.url);
+	}
+    }
+    return list;
 }
 
 async function pushItem(db, item) {

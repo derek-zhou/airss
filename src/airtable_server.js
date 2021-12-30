@@ -9,6 +9,7 @@ export {loadItemsBeyond, fetchItem, markRead, addItem, deleteItem};
 
 const ApiKey = localStorage.getItem('AIRTABLE_API_KEY');
 const BaseToken = localStorage.getItem('AIRTABLE_BASE_TOKEN');
+const BounceLoad = localStorage.getItem("BOUNCE_LOAD") == "true";
 
 // table names
 const FeedsTable = "feeds";
@@ -120,7 +121,7 @@ async function cb_deleteFeed(prev, id) {
 
 async function cb_loadItemsBeyond(prev, min) {
     await prev;
-    if (base === null)
+    if (base === null || BounceLoad)
 	return [];
     let items = await base(ItemsTable).select({
 	fields: ["id"],
@@ -144,7 +145,7 @@ async function cb_loadItemsBeyond(prev, min) {
 
 async function cb_markRead(prev, id) {
     await prev;
-    if (base === null)
+    if (base === null || BounceLoad)
 	return;
     let key = itemsKeyMap.get(id);
     if (key !== undefined) {
@@ -155,7 +156,7 @@ async function cb_markRead(prev, id) {
 
 async function cb_addItem(prev, item) {
     await prev;
-    if (base === null)
+    if (base === null || BounceLoad)
 	return;
     if (itemsKeyMap.has(item.id)) {
 	console.warn("item id " + item.id + " already exist");
@@ -177,7 +178,7 @@ async function cb_addItem(prev, item) {
 
 async function cb_fetchItem(prev, id) {
     await prev;
-    if (base === null)
+    if (base === null || BounceLoad)
 	throw "base is not opened";
     let key = itemsKeyMap.get(id);
     if (key === undefined)
@@ -203,7 +204,7 @@ async function cb_fetchItem(prev, id) {
 
 async function cb_deleteItem(prev, id) {
     await prev;
-    if (base === null)
+    if (base === null || BounceLoad)
 	return;
     let key = itemsKeyMap.get(id);
     if (key === undefined) {

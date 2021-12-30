@@ -14,6 +14,7 @@ const MaxKeptPeriod = localStorage.getItem("MAX_KEPT_PERIOD") || 180;
 const BounceLoad = localStorage.getItem("BOUNCE_LOAD") == "true";
 const BouncerRoot = "https://roastidio.us"
 const Bouncer = BouncerRoot + "/bounce?url=";
+const Buffer = BouncerRoot + "/buffer";
 const FeedType = {
     json: 1,
     xml: 2
@@ -136,24 +137,24 @@ async function cb_load(prev) {
     await prev;
     if (!enabled)
 	return;
-    let feed = await Model.getLoadCandidate();
-    if (!feed) {
+    let obj = await Model.getLoadCandidate();
+    if (!obj) {
 	console.info("Nothing to load, sleeping");
 	return;
     }
     try {
 	Model.loadingStart();
-	let data = await loadFeed(feed);
+	let data = await loadFeed(obj.feed, obj.items);
 	if (data)
-	    Model.updateFeed(feed, loadItems(data, feed));
+	    Model.updateFeed(obj.feed, loadItems(data, obj.feed));
 	else
 	    Model.warn("Unauthorized. Please login to <a href=\""
 		       + BouncerRoot + "\">roastidio.us</a> then reload Airss");
 	Model.loadingDone();
     } catch (e) {
 	if (typeof e === 'string' || (e instanceof TypeError)) {
-	    feed.error = e.toString();
-	    Model.updateFeed(feed, []);
+	    obj.feed.error = e.toString();
+	    Model.updateFeed(obj.feed, []);
 	    Model.loadingDone();
 	    return;
 	} else {
@@ -191,14 +192,35 @@ function myFetch(url) {
     }
 }
 
-async function loadFeed(feed) {
-    let response = await myFetch(feed.feedUrl);
+function bufferFetch(url, except) {
+    if (BounceLoad) {
+	return fetch(Buffer, {
+	    method: "POST",
+	    headers: {
+		'Accept': 'application/json',
+		'Content-Type': 'application/json'
+	    },
+	    body: JSON.stringify({url: url, except: except}),
+	    mode: "cors",
+	    credentials: "include",
+	    redirect: "error"
+	});
+    } else {
+	return fetch(url);
+    }
+}
+
+async function loadFeed(feed, except) {
+    let response = await bufferFetch(feed.feedUrl, except);
     if (BounceLoad && response.status == 401) {
 	enabled = false;
 	return false;
     }
     else if (response.status != 200)
 	throw "fetching failed in loadFeed";
+    // buffer load is always in JSON
+    if (BounceLoad)
+	return await response.json();
     switch (feed.type) {
     case FeedType.json:
 	return await response.json();
