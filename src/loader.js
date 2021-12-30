@@ -144,9 +144,9 @@ async function cb_load(prev) {
     }
     try {
 	Model.loadingStart();
-	let data = await loadFeed(obj.feed, obj.items);
-	if (data)
-	    Model.updateFeed(obj.feed, loadItems(data, obj.feed));
+	let items = await loadFeed(obj.feed, obj.items);
+	if (items)
+	    Model.updateFeed(obj.feed, items);
 	else
 	    Model.warn("Unauthorized. Please login to <a href=\""
 		       + BouncerRoot + "\">roastidio.us</a> then reload Airss");
@@ -162,22 +162,6 @@ async function cb_load(prev) {
 	    throw e;
 	}
     }
-}
-
-function loadItems(data, feed) {
-    switch (feed.type) {
-    case FeedType.json:
-	if (data.items)
-	    return processItems(data.items, feed, parseJSONItem);
-    case FeedType.xml:
-	let rss2Feed = data.querySelector("channel");
-	if (rss2Feed)
-	    return processItems(rss2Feed.querySelectorAll("item"), feed, parseRSS2Item);
-	let atomFeed = data.querySelector("feed");
-	if (atomFeed)
-	    return processItems(atomFeed.querySelectorAll("entry"), feed, parseATOMItem);
-    }
-    return [];
 }
 
 function myFetch(url) {
@@ -219,18 +203,28 @@ async function loadFeed(feed, except) {
     else if (response.status != 200)
 	throw "fetching failed in loadFeed";
     // buffer load is always in JSON
-    if (BounceLoad)
-	return await response.json();
+    if (BounceLoad) {
+	let data = await response.json();
+	if (data.error)
+	    throw data.error;
+	return processItems(data.items, feed, parseJSONItem);
+    }
     switch (feed.type) {
     case FeedType.json:
-	return await response.json();
+	let data = await response.json();
+	return processItems(data.items, feed, parseJSONItem);
     case FeedType.xml:
 	let parser = new DOMParser();
 	let text = await response.text();
 	let doc = parser.parseFromString(text, "text/xml");
 	if (doc.documentElement.tagName == 'parsererror')
 	    throw doc.documentElement.textContent;
-	return doc;
+	let rss2Feed = doc.querySelector("channel");
+	if (rss2Feed)
+	    return processItems(rss2Feed.querySelectorAll("item"), feed, parseRSS2Item);
+	let atomFeed = doc.querySelector("feed");
+	if (atomFeed)
+	    return processItems(atomFeed.querySelectorAll("entry"), feed, parseATOMItem);
     }
     throw "internal error in loadFeed";
 }
