@@ -168,7 +168,6 @@ function myFetch(url) {
     if (BounceLoad && !url.startsWith(BouncerRoot)) {
 	return fetch(Bouncer + encodeURIComponent(url), {
 	    mode: "cors",
-	    credentials: "include",
 	    redirect: "error"
 	});
     } else {
@@ -186,7 +185,6 @@ function bufferFetch(url, except) {
 	    },
 	    body: JSON.stringify({url: url, except: except}),
 	    mode: "cors",
-	    credentials: "include",
 	    redirect: "error"
 	});
     } else {
@@ -207,12 +205,12 @@ async function loadFeed(feed, except) {
 	let data = await response.json();
 	if (data.error)
 	    throw data.error;
-	return processItems(data.items, feed, parseJSONItem);
+	return processItems(data.items, feed, parseJSONItem, false);
     }
     switch (feed.type) {
     case FeedType.json:
 	let data = await response.json();
-	return processItems(data.items, feed, parseJSONItem);
+	return processItems(data.items, feed, parseJSONItem, true);
     case FeedType.xml:
 	let parser = new DOMParser();
 	let text = await response.text();
@@ -221,10 +219,10 @@ async function loadFeed(feed, except) {
 	    throw doc.documentElement.textContent;
 	let rss2Feed = doc.querySelector("channel");
 	if (rss2Feed)
-	    return processItems(rss2Feed.querySelectorAll("item"), feed, parseRSS2Item);
+	    return processItems(rss2Feed.querySelectorAll("item"), feed, parseRSS2Item, true);
 	let atomFeed = doc.querySelector("feed");
 	if (atomFeed)
-	    return processItems(atomFeed.querySelectorAll("entry"), feed, parseATOMItem);
+	    return processItems(atomFeed.querySelectorAll("entry"), feed, parseATOMItem, true);
     }
     throw "internal error in loadFeed";
 }
@@ -262,7 +260,7 @@ async function loadInitFeed(response, feed) {
     case FeedType.json:
 	let data = await response.json();
 	let updated = parseJSONFeed(feed, data);
-	let items = processItems(data.items, updated, parseJSONItem);
+	let items = processItems(data.items, updated, parseJSONItem, true);
 	Model.updateFeed(updated, items);
 	return updated;
     case FeedType.xml:
@@ -274,14 +272,14 @@ async function loadInitFeed(response, feed) {
 	let rss2Feed = doc.querySelector("channel");
 	if (rss2Feed) {
 	    let updated = parseRSS2Feed(feed, rss2Feed);
-	    let items = processItems(rss2Feed.querySelectorAll("item"), updated, parseRSS2Item)
+	    let items = processItems(rss2Feed.querySelectorAll("item"), updated, parseRSS2Item, true)
 	    Model.updateFeed(updated, items);
 	    return updated;
 	}
 	let atomFeed = doc.querySelector("feed");
 	if (atomFeed) {
 	    let updated = parseATOMFeed(feed, atomFeed);
-	    let items = processItems(rss2Feed.querySelectorAll("item"), updated, parseRSS2Item)
+	    let items = processItems(rss2Feed.querySelectorAll("item"), updated, parseRSS2Item, true)
 	    Model.updateFeed(updated, items);
 	    return updated;
 	}
@@ -388,7 +386,7 @@ function sanitizeNode(node, container) {
     }
 }
 
-function processItems(rawItems, feed, parseFunc) {
+function processItems(rawItems, feed, parseFunc, sanitize) {
     let now = new Date();
     let items = [];
     let counter = 0;
@@ -411,7 +409,7 @@ function processItems(rawItems, feed, parseFunc) {
 		item.feedTitle = feed.title;
 		item.feedId = feed.id;
 		item.title = sanitizeText(item.title);
-		item.contentHtml = sanitizeHtml(item.contentHtml);
+		item.contentHtml = sanitize ? sanitizeHtml(item.contentHtml) : item.contentHtml;
 		items = [...items, item];
 	    }
 	}

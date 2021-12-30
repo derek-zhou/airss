@@ -242,7 +242,7 @@ async function cb_addItems(prev, items) {
     }
 }
 
-function oopsItem(feed) {
+function oopsItem(feed, id) {
     let item = new Object();
     item.datePublished = new Date();
     item.contentHtml = "If you see this, this feed '" + feed.feedUrl +
@@ -253,11 +253,11 @@ function oopsItem(feed) {
     item.title = "Oops...";
     item.tags = ["_error"];
     item.feedTitle = feed.title;
-    item.feedId = feed.id;
+    item.feedId = id;
     return item;
 }
 
-function dummyItem(feed) {
+function dummyItem(feed, id) {
     let item = new Object();
     item.datePublished = new Date();
     item.contentHtml = "If you see this, this feed '" + feed.feedUrl +
@@ -268,7 +268,7 @@ function dummyItem(feed) {
     item.title = "Errrr...";
     item.tags = ["_error"];
     item.feedTitle = feed.title;
-    item.feedId = feed.id;
+    item.feedId = id;
     return item;
 }
 
@@ -276,29 +276,29 @@ async function cb_updateFeed(prev, feed, items) {
     await prev;
     let oldCount = Items.length();
     let now = new Date();
-    let lastPubDate;
+    let feedId;
     if (feed.id === undefined) {
 	// must be new feed
 	try {
 	    let id = await Feeds.addFeed(db, feed);
 	    console.info("added feed " + feed.feedUrl + " with id: " + id);
 	    emitModelInfo("The feed '" + feed.feedUrl + "' is now subscribed");
-	    lastPubDate = new Date(0);
+	    feedId = id;
 	} catch (e) {
 	    if (e instanceof DOMException) {
 		emitModelError("The feed '" + feed.feedUrl + "' is already subscribed");
+		return;
 	    } else {
 		throw e;
 	    }
 	}
     } else {
-	lastPubDate = Feeds.lastDate(feed.id);
+	feedId = feed.id;
     }
     // push items in reverse order
     for(let i = items.length - 1; i>= 0; i--) {
 	let item = items[i];
-	if (item.datePublished < lastPubDate)
-	    continue;
+	item.feedId = feedId;
 	try {
 	    await Items.pushItem(db, item);
 	} catch(e) {
@@ -317,12 +317,12 @@ async function cb_updateFeed(prev, feed, items) {
 		       "' faild to load");
 	console.error("The feed '" + feed.feedUrl +
 		       "' faild to load: " + feed.error);
-	await Items.pushItem(db, oopsItem(feed));
+	await Items.pushItem(db, oopsItem(feed, feedId));
 	delete feed.error;
 	num ++;
     } else if (num == 0 &&
 	       feed.lastLoadTime < now - MaxKeptPeriod*24*3600*1000) {
-	await Items.pushItem(db, dummyItem(feed));
+	await Items.pushItem(db, dummyItem(feed, feedId));
 	num ++;
     }
     feed.lastLoadTime = now;
