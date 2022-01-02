@@ -10,12 +10,12 @@ const Store = "feeds";
 // is the oldest
 let feeds = [];
 
-// last datePublished of a feed in a Map
-let lastPublished = new Map();
+// all items of a feed in a Map
+let itemSet = new Map();
 
 // public apis
 export {upgrade, load, get, first, rotate, addFeed, updateFeed, touchFeed,
-	removeFeed, deleteFeed, addDate, lastDate};
+	removeFeed, deleteFeed, addItem, removeItem, itemsOf};
 
 function upgrade(db) {
     // the store holds all the feeds
@@ -82,6 +82,7 @@ function touchFeed(db, feed) {
 function removeFeed(db, id) {
     // we do not await it and just hope it will land
     Airtable.deleteFeed(id);
+    itemSet.delete(id);
     return deleteFeed(db, id);
 }
 
@@ -90,19 +91,21 @@ function deleteFeed(db, id) {
     return db.delete(Store, id);
 }
 
-function addDate(id, date) {
-    if (lastPublished.has(id)) {
-	let last_date = lastPublished.get(id);
-	if (last_date < date)
-	    lastPublished.set(id, date);
-    } else {
-	lastPublished.set(id, date);
-    }
+function addItem(id, item_id) {
+    if (itemSet.has(id))
+	itemSet.get(id).add(item_id);
+    else
+	itemSet.set(id, new Set([item_id]));
 }
 
-function lastDate(id) {
-    if (lastPublished.has(id))
-	return lastPublished.get(id);
+function removeItem(id, item_id) {
+    if (itemSet.has(id))
+	itemSet.get(id).delete(item_id);
+}
+
+function itemsOf(id) {
+    if (itemSet.has(id))
+	return itemSet.get(id);
     else
-	return new Date(0);
+	return new Set();
 }

@@ -177,6 +177,7 @@ async function cb_markRead(prev) {
 
 async function cb_unsubscribe(prev, id) {
     await prev;
+    await Items.deleteAllItemsOfFeed(db, id);
     try {
 	await Feeds.removeFeed(db, id);
 	emitModelInfo("Feed unsubscribed");
@@ -187,7 +188,6 @@ async function cb_unsubscribe(prev, id) {
 	    throw e;
 	}
     }
-    await Items.deleteAllItemsOfFeed(db, id);
     emitModelItemsLoaded({
 	length: Items.length(),
 	cursor: Items.readingCursor()

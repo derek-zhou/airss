@@ -73,7 +73,9 @@ function getCurrentItem(db) {
 async function deleteCurrentItem(db) {
     if (reading < 0)
 	return false;
+    let item = await db.get(items[reading]);
     await db.delete(Store, items[reading]);
+    Feeds.removeItem(item.feedId, items[reading]);
      // we do not await it and just hope it will land
     Airtable.deleteItem(items[reading]);
     items = items.slice(0, reading).concat(items.slice(reading + 1));
@@ -88,10 +90,10 @@ async function deleteAllItemsOfFeed(db, feedId) {
     let above_known = false;
     let reading_shrink = 0;
     let known_shrink = 0;
+    let itemSet = Feeds.itemsOf(feedId);
     for (let i = 0; i < items.length; i++) {
 	let id = items[i];
-	let item = await db.get(Store, id);
-	if (item.feedId == feedId) {
+	if (itemSet.has(id)) {
 	    await db.delete(Store, id);
 	    // we do not await it and just hope it will land
 	    Airtable.deleteItem(id);
@@ -114,12 +116,10 @@ async function deleteAllItemsOfFeed(db, feedId) {
 
 async function allUrlsOfFeed(db, feedId) {
     let list = [];
-    for (let i = 0; i < items.length; i++) {
-	let id = items[i];
+    let itemSet = Feeds.itemsOf(feedId);
+    for (let id of itemSet.values()) {
 	let item = await db.get(Store, id);
-	if (item.feedId == feedId) {
-	    list.push(item.url);
-	}
+	list.push(item.url);
     }
     return list;
 }
@@ -127,7 +127,7 @@ async function allUrlsOfFeed(db, feedId) {
 async function pushItem(db, item) {
     let id = await db.add(Store, item);
     if (!isDummyItem(item))
-	Feeds.addDate(item.feedId, item.datePublished);
+	Feeds.addItem(item.feedId, id);
     items.push(id);
     item.id = id;
     // we do not await it and just hope it will land
@@ -139,7 +139,7 @@ async function addItem(db, item) {
     // may throw
     await db.add(Store, item);
     if (!isDummyItem(item))
-	Feeds.addDate(item.feedId, item.datePublished);
+	Feeds.addItem(item.feedId, item.id);
     // already has id, must comming from airtable
     items.push(item.id);
     if (item.read && known == items.length - 2)
@@ -179,7 +179,7 @@ async function load(db) {
 	    counter ++;
 	    perFeedCounter.set(feedId, thisCount + 1);
 	    if (!isDummyItem(cursor.value))
-		Feeds.addDate(feedId, cursor.value.datePublished);
+		Feeds.addItem(feedId, cursor.value.id);
 	    // items from the beginning up to a point are read
 	    if (!cursor.value.read)
 		unread = counter;
