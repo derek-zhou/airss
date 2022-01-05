@@ -122,8 +122,8 @@ async function cb_subscribe(prev, url) {
 	Model.loadingDone();
     } catch (e) {
 	if (typeof e === 'string' || (e instanceof TypeError)) {
-	    Model.error("The feed '" + feed.feedUrl + "' is not valid");
-	    console.error("The feed '" + feed.feedUrl + "' is not valid: " + feed.error);
+	    Model.error("The feed '" + url + "' is not valid");
+	    console.error("The feed '" + url + "' is not valid: " + e);
 	    Model.loadingDone();
 	    return;
  	} else {
