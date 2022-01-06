@@ -14,7 +14,7 @@ let feeds = [];
 let itemSet = new Map();
 
 // public apis
-export {upgrade, load, get, first, rotate, addFeed, updateFeed, touchFeed,
+export {upgrade, load, get, first, rotate, addFeed, updateFeed,
 	removeFeed, deleteFeed, addItem, removeItem, itemsOf};
 
 function upgrade(db) {
@@ -46,7 +46,8 @@ function first() {
 }
 
 function rotate() {
-    feeds = [...feeds.slice(1), feeds[0]];
+    // throw away the first one. we do not load a feed twice in one session
+    feeds = [...feeds.slice(1)];
 }
 
 async function get(db, id) {
@@ -72,10 +73,6 @@ async function addFeed(db, feed) {
 function updateFeed(db, feed) {
     // we do not await it and just hope it will land
     Airtable.updateFeed(feed);
-    return db.put(Store, feed);
-}
-
-function touchFeed(db, feed) {
     return db.put(Store, feed);
 }
 

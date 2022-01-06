@@ -54,10 +54,12 @@ async function cb_loadFeedsBeyond(prev, min) {
 	    feedsToBeDeleted.delete(id);
 	} else {
 	    feedsKeyMap.set(id, each.getId());
+	    // throw away lastLoadTime if bounce loading. We don't update feed in load anyway.
+	    let lastLoadTime = BounceLoad ? 0 : each.get("lastLoadTime") * 1000;
 	    rets.push({
 		id: id,
 		feedUrl: each.get("feedUrl"),
-		lastLoadTime: each.get("lastLoadTime") * 1000,
+		lastLoadTime: lastLoadTime,
 		type: feedType(each.get("type")),
 		title: each.get("title") || "",
 		homePageUrl: each.get("homePageUrl") || ""
@@ -69,7 +71,7 @@ async function cb_loadFeedsBeyond(prev, min) {
 
 async function cb_updateFeed(prev, feed) {
     await prev;
-    if (base === null)
+    if (base === null || BounceLoad)
 	return feed.id;
     let key = feedsKeyMap.get(feed.id);
 

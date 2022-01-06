@@ -325,15 +325,13 @@ async function cb_updateFeed(prev, feed, items) {
 	await Items.pushItem(db, dummyItem(feed, feedId));
 	num ++;
     }
-    feed.lastLoadTime = now;
     if (num > 0) {
+	feed.lastLoadTime = now;
 	await Feeds.updateFeed(db, feed);
 	emitModelItemsLoaded({
 	    length: Items.length(),
 	    cursor: Items.readingCursor()
 	});
-    } else {
-	await Feeds.touchFeed(db, feed);
     }
     Loader.load();
 }
