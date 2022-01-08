@@ -73,9 +73,9 @@ function getCurrentItem(db) {
 async function deleteCurrentItem(db) {
     if (reading < 0)
 	return false;
-    let item = await db.get(items[reading]);
-    await db.delete(Store, items[reading]);
+    let item = await db.get(Store, items[reading]);
     Feeds.removeItem(item.feedId, items[reading]);
+    await db.delete(Store, items[reading]);
      // we do not await it and just hope it will land
     Airtable.deleteItem(items[reading]);
     items = items.slice(0, reading).concat(items.slice(reading + 1));
