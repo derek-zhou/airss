@@ -60,6 +60,7 @@ async function cb_loadFeedsBeyond(prev, min) {
 		id: id,
 		feedUrl: each.get("feedUrl"),
 		lastLoadTime: lastLoadTime,
+		lastFetchTime: lastLoadTime,
 		type: feedType(each.get("type")),
 		title: each.get("title") || "",
 		homePageUrl: each.get("homePageUrl") || ""
@@ -77,10 +78,9 @@ async function cb_updateFeed(prev, feed) {
 
     // we do not update every field
     let patch = new Object();
+    patch.lastLoadTime = Math.floor(feed.lastFetchTime / 1000);
     if (feed.title !== undefined)
 	patch.title = feed.title;
-    if (feed.lastLoadTime !== undefined)
-	patch.lastLoadTime = Math.floor(feed.lastLoadTime / 1000);
     if (feed.homePageUrl !== undefined)
 	patch.homePageUrl = feed.homePageUrl;
     await base(FeedsTable).update(key, patch);
@@ -98,7 +98,7 @@ async function cb_insertFeed(prev, feed) {
     let record = await base(FeedsTable).create({
 	id: feed.id,
 	feedUrl: feed.feedUrl,
-	lastLoadTime: Math.floor(feed.lastLoadTime / 1000),
+	lastLoadTime: Math.floor(feed.lastFetchTime / 1000),
 	type: feedTypeStr(feed.type),
 	title: feed.title || "",
 	homePageUrl: feed.homePageUrl || ""

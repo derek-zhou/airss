@@ -321,17 +321,22 @@ async function cb_updateFeed(prev, feed, items) {
 	delete feed.error;
 	num ++;
     } else if (num == 0 &&
-	       feed.lastLoadTime < now - MaxKeptPeriod*24*3600*1000) {
+	       feed.lastFetchTime < now - MaxKeptPeriod*24*3600*1000) {
 	await Items.pushItem(db, dummyItem(feed, feedId));
 	num ++;
     }
+    // lastLoadTime is the time we attempted to load
+    // lastFetchTime is the time we actually loaded something
+    feed.lastLoadTime = now;
     if (num > 0) {
-	feed.lastLoadTime = now;
+	feed.lastFetchTime = now;
 	await Feeds.updateFeed(db, feed);
 	emitModelItemsLoaded({
 	    length: Items.length(),
 	    cursor: Items.readingCursor()
 	});
+    } else {
+	await Feeds.touchFeed(db, feed);
     }
     Loader.load();
 }

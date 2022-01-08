@@ -307,6 +307,7 @@ async function sanitize(url) {
     mime = parts[0];
     feed.feedUrl = url;
     feed.lastLoadTime = 0;
+    feed.lastFetchTime = 0;
     feed.type = mimeToType(mime);
     if (feed.type != null)
 	return await loadInitFeed(response, feed);
