@@ -66,7 +66,7 @@
  ];
  let maxItemsPerFeedCurrent = localStorage.getItem("MAX_ITEMS_PER_FEED") || 100;
 
- let bounceLoad = localStorage.getItem("BOUNCE_LOAD") == "true";
+ let bounceLoad = localStorage.getItem("BOUNCE_LOAD") != "false";
 
  let apiKey = localStorage.getItem('AIRTABLE_API_KEY') || "";
  let baseToken = localStorage.getItem('AIRTABLE_BASE_TOKEN') || "";

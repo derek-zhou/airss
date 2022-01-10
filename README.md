@@ -7,15 +7,15 @@ Airss is a light weight RSS feed reader that runs entirely in your browser.
 Airss is an opinionated feed reader that is designed to aggregate blogs and news in one place for you to read. It provides only the essential functionalities on the surface: You give it a bunch of feeds, it will feed you all the news, one item at a time. The benefits are:
 
 * No software to install, no service to sign up, no middle man, no cookie, no tracking, completely free with no string attached.
-* You can __optionally__ use your own [airtable](https://airtable.com) to store your feeds so you can hop between several devices.
-* It is tiny: <100KB transfer size (the airtable client being the bulk of it) for now, and that's html, style, scripts all put together, and I don't even bother with minifying.
+* It is tiny: <100KB transfer size (the airtable client being the bulk of it) for now, and that's html, style, and scripts all put together. I don't even bother with minifying them.
 * Supports [JSON feeds](https://www.jsonfeed.org/), [RSS2 feeds](https://validator.w3.org/feed/docs/rss2.html) and [Atom feeds](https://tools.ietf.org/html/rfc4287). Also automatically figures out feed url from typical web pages through [rel=alternate links](https://developer.mozilla.org/en-US/docs/Web/HTML/Link_types)
-* You can __optionally__ use the [roastidio.us](https://roastidio.us) commenting service (written and operated by me) to write your comment with a click of the button (🔥). The integration is just a simple link, there is no data sharing.
+* You can __optionally__ use your own [airtable](https://airtable.com) to store your feeds so you can hop between several devices.
 * You can __optionally__ use [roastidio.us](https://roastidio.us) to load feeds to bypass the [CORS](https://enable-cors.org/) restriction (more on this later).
+* You can __optionally__ use the [roastidio.us](https://roastidio.us) commenting service (written and operated by me) to write your comment with a click of the button (🔥). The integration is just a simple link, there is no data sharing.
 
-You need a ES6 compliant browser (sorry, IE fans). The main branch is auto-deployed here: [airss.roastidio.us](https://airss.roastidio.us) which is on [Vercel](https://vercel.com). All are welcome to use it. Since the software is open sourced, you can also clone it and host it somewhere else; it is all upto you.
+You need a ES2017 compliant browser (sorry, IE fans). The main branch is auto-deployed here: [airss.roastidio.us](https://airss.roastidio.us) which is on [Vercel](https://vercel.com). All are welcome to use it. Since the software is open sourced, you can also clone it and host it somewhere else; it is all upto you.
 
-There are only a few buttons, so just try it out. If you close the tab or browser, don't be afraid: your data is not lost and you can pick up right at where you left off the next time you open it. For the curious minds, the application state is persisted locally via [indexed db](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API); nothing go out to the internet. 
+There are only a few buttons, so just try it out. If you close the tab or the browser, don't be afraid: your data is not lost and you can pick up right at where you left off the next time you open it. For the curious minds, the application state is persisted locally via [indexed db](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API); nothing goes out to the internet. 
 
 To subscribe to a feed, you can click the (🍼) button then paste in a link. The link could be a feed (RSS2, Atom or JSON) link or a web page that the proper [rel=alternate links](https://developer.mozilla.org/en-US/docs/Web/HTML/Link_types). Airss will figure it out automatically. 
 
@@ -56,25 +56,34 @@ CORS restriction can also be turned off by browser add-ons such as: [CORS everyw
 
 ## Proxy
 
-I provide a proxy service to anyone logged in to [roastidio.us](https://roastidio.us), so the CORS restriction can be circumvented, no user scripts or browser add-ons are needed. All you need to do is to login to [roastidio.us](https://roastidio.us) in the same browser; Then you can just check the box `Load feeds with roastidio.us` in the config page and all should be good; no browser plugin or developer menu is required. However:
+I provide a proxy service through [Roastidio.us](https://roastidio.us) to anyone, without needing to login, so the CORS restriction can be circumvented, no user scripts or browser add-ons are needed. Just check the box `Load feeds with roastidio.us` (default checked now) in the config page and all should be good; no browser plugin or developer menu is required.
 
-* Loading feeds will be slower. Once loaded everything is as fast as before 
-* If I turn evil I could invade your privacy or sabotage the feed content
-* On the bright side, the feed owners will not know your IP or browser fingerprint so you remain completely anonymous
+* Loading feeds should be faster because Roastidio.us will load feeds in the background and cache the results
+* If I turn evil I could sabotage the feed content, but your privacy will not be harmed
+* The feed owners will not know your IP or browser fingerprint so you remain completely anonymous
 
-[Roastidio.us](https://roastidio.us) is a free commenting service open to everyone, and is written and operated by the me. The cookie will keep you logged in for up to 30 days. If you suddenly see feed loading failures en mass, the most likely culprit is an expired cookie.
+[Roastidio.us](https://roastidio.us) is a free commenting service open to everyone, and is written and operated by the me. To actually post a comment you do need to login (free registration).
 
-By the way, I am accumulating interesting feeds to build a search engine specifically design for feeds. Any feed you load via [roastidio.us](https://roastidio.us) will be indexed. When and who load the feeds are not recorded to respect your privacy. You are welcomed to try the search engine right now: [Roastidio.us Search](https://roastidio.us/search)
+By the way, I am accumulating high quality feeds to build a search engine specifically design for feeds. Any feed you load via [roastidio.us](https://roastidio.us) will be indexed. When and who load the feeds are not recorded to respect your privacy. You are welcomed to try the search engine right now: [Roastidio.us Search](https://roastidio.us/search) (free registration required)
 
 ## Airtable
 
 The folks at Airtable are nice enough to provide anyone free accounts. With Airtable you can share feeds and news between multiple devices that you control, such as your computer + your phone etc., so you can read your news anywhere. There is some setup involved because airtables cannot be setup through API. You will need to setup a dedicated base for Airss, and 2 tables under the base. The easiest way is to just copy this blank template: [airss template](https://airtable.com/shrFm410wa0iyoKpq) into your workspace.
 
-Then you generate a API key through your account profile, and take a note of the base ID from `help` -> `API documentation` in this base. Put them in the config page of airss, then you are done.
+Then you generate a API key through your account profile, and take a note of the base ID from `help` -> `API documentation` in this base. Put them in the config page of Airss, then you are done.
 
 Airtable's free tier can store upto 1200 records in a base. Each feed is a record, and each news item is a record too. If you subscribe to a lot of feeds, you may have to limit history depth to stay in the bound. Alternatively, you can hop onto airtable to delete old items manually.
 
 Please also keep in mind that the two-way data syncing and conflicts resolution of Airss is not very robust and it tries to be consevertive when in doubt. You may see some items double-fetched on some of your devices.
+
+## Modes of operation
+
+Depends on whether you use airtable, roastidio.us or not, there can be 4 modes of operation:
+
+* Use neither. Then Airss remains a pure client-side application with the freedom and technical limitation of a pure client-side application.
+* Use Roastidio.us but not Airtable. Airss would be enhanced with the hack-free, fast background load of feeds.
+* Use Airtable but not Roastidio.us. Feeds and feed items would be synced among all browsers and devices using the same Airtable credential.
+* Use both. In addtion to having the best of both worlds, the usage of Airtable would be greatly reduced. In this mode, only the feeds, not feed items are synced through Airtable, so the 1200 records apply only to feeds you subscribed. That's a lot of feeds!
 
 ## Disclaimer
 
