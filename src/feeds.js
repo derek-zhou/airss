@@ -73,9 +73,10 @@ async function addFeed(db, feed) {
     }
 }
 
-function updateFeed(db, feed) {
+async function updateFeed(db, feed) {
+    let old = await db.get(Store, feed.id);
     // we do not await it and just hope it will land
-    Airtable.updateFeed(feed);
+    Airtable.updateFeed(old, feed);
     return db.put(Store, feed);
 }
 

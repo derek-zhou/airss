@@ -173,8 +173,8 @@ async function load(db) {
 	let thisCount = 0;
 	if (perFeedCounter.has(feedId))
 	    thisCount = perFeedCounter.get(feedId);
- 	if (now - cursor.value.datePublished <= MaxKeptPeriod*24*3600*1000 &&
-	    thisCount <= MaxKeptItems) {
+ 	if (now - cursor.value.datePublished < MaxKeptPeriod*24*3600*1000 &&
+	    thisCount < MaxKeptItems) {
 	    buffer.push(cursor.key);
 	    counter ++;
 	    perFeedCounter.set(feedId, thisCount + 1);

@@ -144,9 +144,9 @@ async function cb_load(prev) {
     }
     try {
 	Model.loadingStart();
-	let items = await loadFeed(obj.feed, obj.items);
-	if (items)
-	    Model.updateFeed(obj.feed, items);
+	let ret = await loadFeed(obj.feed, obj.items);
+	if (ret)
+	    Model.updateFeed(ret.updated, ret.items);
 	else
 	    Model.warn("Unauthorized. Please login to <a href=\""
 		       + BouncerRoot + "\">roastidio.us</a> then reload Airss");
@@ -205,12 +205,16 @@ async function loadFeed(feed, except) {
 	let data = await response.json();
 	if (data.error)
 	    throw data.error;
-	return processItems(data.items, feed, parseJSONItem, false);
+	let updated = parseJSONFeed(feed, data);
+	let items = processItems(data.items, feed, parseJSONItem, false);
+	return {updated: updated, items: items};
     }
     switch (feed.type) {
     case FeedType.json:
 	let data = await response.json();
-	return processItems(data.items, feed, parseJSONItem, true);
+	let updated = parseJSONFeed(feed, data);
+	let items = processItems(data.items, feed, parseJSONItem, true);
+	return {updated: updated, items: items};
     case FeedType.xml:
 	let parser = new DOMParser();
 	let text = await response.text();
@@ -218,11 +222,17 @@ async function loadFeed(feed, except) {
 	if (doc.documentElement.tagName == 'parsererror')
 	    throw doc.documentElement.textContent;
 	let rss2Feed = doc.querySelector("channel");
-	if (rss2Feed)
-	    return processItems(rss2Feed.querySelectorAll("item"), feed, parseRSS2Item, true);
+	if (rss2Feed) {
+	    let updated = parseRSS2Feed(feed, rss2Feed);
+	    let items = processItems(rss2Feed.querySelectorAll("item"), feed, parseRSS2Item, true);
+	    return {updated: updated, items: items};
+	}
 	let atomFeed = doc.querySelector("feed");
-	if (atomFeed)
-	    return processItems(atomFeed.querySelectorAll("entry"), feed, parseATOMItem, true);
+	if (atomFeed) {
+	    let updated = parseATOMFeed(feed, atomFeed);
+	    let items = processItems(atomFeed.querySelectorAll("entry"), feed, parseATOMItem, true);
+	    return {updated: updated, items: items};
+	}
     }
     throw "internal error in loadFeed";
 }

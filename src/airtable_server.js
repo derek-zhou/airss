@@ -70,21 +70,23 @@ async function cb_loadFeedsBeyond(prev, min) {
     return rets;
 }
 
-async function cb_updateFeed(prev, feed) {
+async function cb_updateFeed(prev, from, to) {
     await prev;
-    if (base === null || BounceLoad)
-	return feed.id;
-    let key = feedsKeyMap.get(feed.id);
+    if (base === null)
+	return to.id;
+    let key = feedsKeyMap.get(to.id);
 
     // we do not update every field
     let patch = new Object();
-    patch.lastLoadTime = Math.floor(feed.lastFetchTime / 1000);
-    if (feed.title !== undefined)
-	patch.title = feed.title;
-    if (feed.homePageUrl !== undefined)
-	patch.homePageUrl = feed.homePageUrl;
-    await base(FeedsTable).update(key, patch);
-    return feed.id;
+    if (!BounceLoad)
+	patch.lastLoadTime = Math.floor(to.lastFetchTime / 1000);
+    if (to.title && (to.title != from.title))
+	patch.title = to.title;
+    if (to.homePageUrl && (to.homePageUrl != from.homePageUrl))
+	patch.homePageUrl = to.homePageUrl;
+    if (Object.keys(patch).length > 0)
+	await base(FeedsTable).update(key, patch);
+    return to.id;
 }
 
 async function cb_insertFeed(prev, feed) {
@@ -271,8 +273,8 @@ function loadFeedsBeyond(id) {
 }
 
 // update a feed
-function updateFeed(feed) {
-    state = cb_updateFeed(state, feed);
+function updateFeed(from, to) {
+    state = cb_updateFeed(state, from, to);
     return state;
 }
 
