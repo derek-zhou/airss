@@ -84,7 +84,7 @@ async function cb_updateFeed(prev, from, to) {
 	patch.title = to.title;
     if (to.homePageUrl && (to.homePageUrl != from.homePageUrl))
 	patch.homePageUrl = to.homePageUrl;
-    if (Object.keys(patch).length > 0)
+    if (key && Object.keys(patch).length > 0)
 	await base(FeedsTable).update(key, patch);
     return to.id;
 }

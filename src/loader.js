@@ -206,14 +206,14 @@ async function loadFeed(feed, except) {
 	if (data.error)
 	    throw data.error;
 	let updated = parseJSONFeed(feed, data);
-	let items = processItems(data.items, feed, parseJSONItem, false);
+	let items = processItems(data.items, updated, parseJSONItem, false);
 	return {updated: updated, items: items};
     }
     switch (feed.type) {
     case FeedType.json:
 	let data = await response.json();
 	let updated = parseJSONFeed(feed, data);
-	let items = processItems(data.items, feed, parseJSONItem, true);
+	let items = processItems(data.items, updated, parseJSONItem, true);
 	return {updated: updated, items: items};
     case FeedType.xml:
 	let parser = new DOMParser();
@@ -224,13 +224,13 @@ async function loadFeed(feed, except) {
 	let rss2Feed = doc.querySelector("channel");
 	if (rss2Feed) {
 	    let updated = parseRSS2Feed(feed, rss2Feed);
-	    let items = processItems(rss2Feed.querySelectorAll("item"), feed, parseRSS2Item, true);
+	    let items = processItems(rss2Feed.querySelectorAll("item"), updated, parseRSS2Item, true);
 	    return {updated: updated, items: items};
 	}
 	let atomFeed = doc.querySelector("feed");
 	if (atomFeed) {
 	    let updated = parseATOMFeed(feed, atomFeed);
-	    let items = processItems(atomFeed.querySelectorAll("entry"), feed, parseATOMItem, true);
+	    let items = processItems(atomFeed.querySelectorAll("entry"), updated, parseATOMItem, true);
 	    return {updated: updated, items: items};
 	}
     }
