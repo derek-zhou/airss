@@ -289,7 +289,7 @@ async function loadInitFeed(response, feed) {
 	let atomFeed = doc.querySelector("feed");
 	if (atomFeed) {
 	    let updated = parseATOMFeed(feed, atomFeed);
-	    let items = processItems(rss2Feed.querySelectorAll("item"), updated, parseRSS2Item, true)
+	    let items = processItems(atomFeed.querySelectorAll("entry"), updated, parseATOMItem, true)
 	    Model.updateFeed(updated, items);
 	    return updated;
 	}
