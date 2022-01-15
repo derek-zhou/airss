@@ -14,7 +14,7 @@ let feeds = [];
 let itemSet = new Map();
 
 // public apis
-export {upgrade, load, get, first, rotate, addFeed, updateFeed, touchFeed,
+export {upgrade, load, get, first, rotate, addFeed, updateFeed,
 	removeFeed, deleteFeed, addItem, removeItem, itemsOf};
 
 function upgrade(db) {
@@ -77,10 +77,6 @@ async function updateFeed(db, feed) {
     let old = await db.get(Store, feed.id);
     // we do not await it and just hope it will land
     Airtable.updateFeed(old, feed);
-    return db.put(Store, feed);
-}
-
-function touchFeed(db, feed) {
     return db.put(Store, feed);
 }
 

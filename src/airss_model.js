@@ -330,14 +330,12 @@ async function cb_updateFeed(prev, feed, items) {
     feed.lastLoadTime = now;
     if (num > 0) {
 	feed.lastFetchTime = now;
-	await Feeds.updateFeed(db, feed);
 	emitModelItemsLoaded({
 	    length: Items.length(),
 	    cursor: Items.readingCursor()
 	});
-    } else {
-	await Feeds.touchFeed(db, feed);
     }
+    await Feeds.updateFeed(db, feed);
     Loader.load();
 }
 

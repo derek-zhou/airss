@@ -78,7 +78,7 @@ async function cb_updateFeed(prev, from, to) {
 
     // we do not update every field
     let patch = new Object();
-    if (!BounceLoad)
+    if (!BounceLoad && (to.lastFetchTime != from.lastFetchTime))
 	patch.lastLoadTime = Math.floor(to.lastFetchTime / 1000);
     if (to.title && (to.title != from.title))
 	patch.title = to.title;
