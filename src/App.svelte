@@ -370,81 +370,85 @@
       </form>
   {:else if screen == Screens.config}
       <form on:submit|preventDefault={clickSubmitConfig}>
-	  <div class="field">
-	      <label for="select-water-mark">
-		  Load more when unread items is below:
-	      </label>
-	      <select id="select-water-mark" bind:value={waterMark}>
-		  {#each waterMarkChoices as choice}
-		      <option selected={choice.value == waterMarkCurrent}
-			      value={choice}>{choice.text}</option>
-		  {/each}
-	      </select>
-	  </div>
-	  <div class="field">
-	      <label for="select-min-reload-wait">
-		  Between reloading a feed, wait at least:
-	      </label>
-	      <select id="select-min-reload-wait" bind:value={minReloadWait}>
-		  {#each minReloadWaitChoices as choice}
-		      <option selected={choice.value == minReloadWaitCurrent}
-			      value={choice}>{choice.text}</option>
-		  {/each}
-	      </select>
-	  </div>
-	  <div class="field">
-	      <label for="select-max-kept-period">
-		  Keep read items in the database for:
-	      </label>
-	      <select id="select-max-kept-period" bind:value={maxKeptPeriod}>
-		  {#each maxKeptPeriodChoices as choice}
-		      <option selected={choice.value == maxKeptPeriodCurrent}
-			      value={choice}>{choice.text}</option>
-		  {/each}
-	      </select>
-	  </div>
-	  <div class="field">
-	      <label for="select-max-items-per-feed">
-		  Keep in the database at most per feed:
-	      </label>
-	      <select id="select-max-items-per-feed" bind:value={maxItemsPerFeed}>
-		  {#each maxItemsPerFeedChoices as choice}
-		      <option selected={choice.value == maxItemsPerFeedCurrent}
-			      value={choice}>{choice.text}</option>
-		  {/each}
-	      </select>
-	  </div>
-	  <hr />
-	  <div class="field">
-	      <label for="input-bounce-load">
-		  Load feeds with roastidio.us (<a href="https://github.com/derek-zhou/airss#Proxy">Why</a>):
-	      </label>
-	      <input id="input-bounce-load" type="checkbox" bind:checked={bounceLoad}>
-	  </div>
-	  <hr />
-	  <div class="field">
-	      <label for="input-api-key">
-		  Your Airtable API key:
-	      </label>
-	      <input id="input-api-key" type="text" class="code" bind:value={apiKey}>
-	  </div>
-	  <div class="field">
-	      <label for="input-base-token">
-		  The ID of your base:
-	      </label>
-	      <input id="input-base-token" type="text" class="code" bind:value={baseToken}>
-	  </div>
-	  {#if baseToken}
-	      <div class="footnote">
-		  <a href="https://airtable.com/{baseToken}">
-		      https://airtable.com/{baseToken}
-		  </a>
+	  <section>
+	      <div class="field long">
+		  <label for="select-water-mark">
+		      Load more when unread items is below:
+		  </label>
+		  <select id="select-water-mark" bind:value={waterMark}>
+		      {#each waterMarkChoices as choice}
+			  <option selected={choice.value == waterMarkCurrent}
+				  value={choice}>{choice.text}</option>
+		      {/each}
+		  </select>
 	      </div>
-	  {/if}
+	      <div class="field long">
+		  <label for="select-min-reload-wait">
+		      Between reloading a feed, wait at least:
+		  </label>
+		  <select id="select-min-reload-wait" bind:value={minReloadWait}>
+		      {#each minReloadWaitChoices as choice}
+			  <option selected={choice.value == minReloadWaitCurrent}
+				  value={choice}>{choice.text}</option>
+		      {/each}
+		  </select>
+	      </div>
+	      <div class="field long">
+		  <label for="select-max-kept-period">
+		      Keep read items in the database for:
+		  </label>
+		  <select id="select-max-kept-period" bind:value={maxKeptPeriod}>
+		      {#each maxKeptPeriodChoices as choice}
+			  <option selected={choice.value == maxKeptPeriodCurrent}
+				  value={choice}>{choice.text}</option>
+		      {/each}
+		  </select>
+	      </div>
+	      <div class="field long">
+		  <label for="select-max-items-per-feed">
+		      Keep in the database at most per feed:
+		  </label>
+		  <select id="select-max-items-per-feed" bind:value={maxItemsPerFeed}>
+		      {#each maxItemsPerFeedChoices as choice}
+			  <option selected={choice.value == maxItemsPerFeedCurrent}
+				  value={choice}>{choice.text}</option>
+		      {/each}
+		  </select>
+	      </div>
+	      <div class="field long">
+		  <label for="input-bounce-load">
+		      Load feeds with roastidio.us (<a href="https://github.com/derek-zhou/airss#Proxy">Why</a>):
+		  </label>
+		  <input id="input-bounce-load" type="checkbox" bind:checked={bounceLoad}>
+	      </div>
+	  </section>
+	  <section>
+	      <div class="field">
+		  <label for="input-api-key">
+		      Your Airtable API key:
+		  </label>
+		  <input id="input-api-key" type="text" class="code" bind:value={apiKey}>
+	      </div>
+	      <div class="field">
+		  <label for="input-base-token">
+		      The ID of your base:
+		  </label>
+		  <input id="input-base-token" type="text" class="code" bind:value={baseToken}>
+	      </div>
+	      {#if baseToken}
+		  <div class="field footnote">
+		      <a href="https://airtable.com/{baseToken}">
+			  https://airtable.com/{baseToken}
+		      </a>
+		  </div>
+	      {/if}
+	  </section>
+	  <section>
 	  <div class="field alert alert-danger">
 	      <label for="input-clear-database">Danger! Type "clear database" to delete all data</label>
 	      <input id="input-clear-database" type="text" bind:value={clearDatabase}>
 	  </div>
+	  </section>
 	  <div class="toolbar">
 	      <input class="button" type="submit" value="👌">
 	      <input class="button" type="reset" value="👎"
@@ -453,14 +457,16 @@
       </form>
   {:else if screen == Screens.subscribe}
       <form on:submit|preventDefault={clickSubmitSubscribe}>
-	  <div class="field">
-	      <label for="input-feed-url">
-		  The URL to the feed or the index page:
-	      </label>
-	      <input id="input-feed-url" type="text"
-		     bind:value={subscribeUrl}
-		     placeholder="enter the url to subscribe">
-	  </div>
+	  <section>
+	      <div class="field long">
+		  <label for="input-feed-url">
+		      The URL to the feed or the index page:
+		  </label>
+		  <input id="input-feed-url" type="text" class="long"
+			 bind:value={subscribeUrl}
+			 placeholder="enter the url to subscribe">
+	      </div>
+	  </section>
 	  <div class="toolbar">
 	      <input class="button" type="submit" value="👌">
 	      <input class="button" type="reset" value="👎"
