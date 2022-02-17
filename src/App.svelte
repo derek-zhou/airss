@@ -292,11 +292,6 @@
 	      <span class="site">
 		  | {$currentItem.datePublished.toLocaleString()}
 	      </span>
-	      {#if !dummy}
-		  {#each $currentItem.tags as tag}
-                      <span class="site"> | {tag} </span>
-		  {/each}
-	      {/if}
 	  </h5>
 	  <p id="content_html" class="desc">
 	      {@html $currentItem.contentHtml}
