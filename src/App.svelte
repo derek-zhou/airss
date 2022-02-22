@@ -307,10 +307,7 @@
 	  {:else}
 	  <h2>No news is bad news</h2>
 	  <p>
-	      Airss is a web feed reader that runs entirely in your browser. <b>For the impatients, you will need to login to <a href={roastidious}>roastidio.us</a>, then check the "Load feeds with roastidio.us" checkbox in the 🔧 screen from above.</b> There are other ways that do not involve a login; for a detail description, please visit its <a href="https://github.com/derek-zhou/airss">Github page</a>.
-	  </p>
-	  <p>
-	      After the necessary setup, you can subscribe any feeds by clicking the 🍼 button from above and paste the URL, or you can use of one of the following tricks: 
+	      Airss is a web feed reader that runs entirely in your browser. You can subscribe any feeds by clicking the 🍼 button from above and paste the URL, or you can use of one of the following tricks: 
 	  </p>
 	  <h3>Desktop browser users</h3>
 	  <p>
