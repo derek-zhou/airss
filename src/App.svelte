@@ -138,12 +138,12 @@
  }
 
  function clickLeft() {
-     window.scrollTo({ top: 0, behavior: 'smooth' });
+     window.scrollTo({top: 0});
      backwardItem();
  }
 
  function clickRight() {
-     window.scrollTo({ top: 0, behavior: 'smooth' });
+     window.scrollTo({top: 0});
      forwardItem();
  }
 

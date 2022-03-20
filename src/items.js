@@ -119,15 +119,15 @@ async function allUrlsOfFeed(db, feedId) {
     let itemSet = Feeds.itemsOf(feedId);
     for (let id of itemSet.values()) {
 	let item = await db.get(Store, id);
-	list.push(item.url);
+	if (!isDummyItem(item))
+	    list.push(item.url);
     }
     return list;
 }
 
 async function pushItem(db, item) {
     let id = await db.add(Store, item);
-    if (!isDummyItem(item))
-	Feeds.addItem(item.feedId, id);
+    Feeds.addItem(item.feedId, id);
     items.push(id);
     item.id = id;
     // we do not await it and just hope it will land
@@ -138,8 +138,7 @@ async function pushItem(db, item) {
 async function addItem(db, item) {
     // may throw
     await db.add(Store, item);
-    if (!isDummyItem(item))
-	Feeds.addItem(item.feedId, item.id);
+    Feeds.addItem(item.feedId, item.id);
     // already has id, must comming from airtable
     items.push(item.id);
     if (item.read && known == items.length - 2)
@@ -178,8 +177,7 @@ async function load(db) {
 	    buffer.push(cursor.key);
 	    counter ++;
 	    perFeedCounter.set(feedId, thisCount + 1);
-	    if (!isDummyItem(cursor.value))
-		Feeds.addItem(feedId, cursor.value.id);
+	    Feeds.addItem(feedId, cursor.value.id);
 	    // items from the beginning up to a point are read
 	    if (!cursor.value.read)
 		unread = counter;
