@@ -167,8 +167,7 @@ async function cb_load(prev) {
 function myFetch(url) {
     if (BounceLoad && !url.startsWith(BouncerRoot)) {
 	return fetch(Bouncer + encodeURIComponent(url), {
-	    mode: "cors",
-	    redirect: "error"
+	    mode: "cors"
 	});
     } else {
 	return fetch(url);
@@ -184,8 +183,7 @@ function bufferFetch(url, except) {
 		'Content-Type': 'application/json'
 	    },
 	    body: JSON.stringify({url: url, except: except}),
-	    mode: "cors",
-	    redirect: "error"
+	    mode: "cors"
 	});
     } else {
 	return fetch(url);
@@ -194,25 +192,38 @@ function bufferFetch(url, except) {
 
 async function loadFeed(feed, except) {
     let response = await bufferFetch(feed.feedUrl, except);
+    let updated = {...feed};
     if (BounceLoad && response.status == 401) {
 	enabled = false;
 	return false;
     }
     else if (response.status != 200)
 	throw "fetching failed in loadFeed";
+
+    if (response.redirected) {
+	console.info(url + " redirected to: " + response.url);
+	if (BounceLoad) {
+	    let urlObject = new URL(response.url);
+	    let search = urlObject.searchParams;
+	    let feedUrl = search.get('url');
+	    updated.feedUrl = feedUrl;
+	} else {
+	    updated.feedUrl = response.url;
+	}
+    }
     // buffer load is always in JSON
     if (BounceLoad) {
 	let data = await response.json();
 	if (data.error)
 	    throw data.error;
-	let updated = parseJSONFeed(feed, data);
+	updated = parseJSONFeed(updated, data);
 	let items = processItems(data.items, updated, parseJSONItem, false);
 	return {updated: updated, items: items};
     }
     switch (feed.type) {
     case FeedType.json:
 	let data = await response.json();
-	let updated = parseJSONFeed(feed, data);
+	updated = parseJSONFeed(updated, data);
 	let items = processItems(data.items, updated, parseJSONItem, true);
 	return {updated: updated, items: items};
     case FeedType.xml:
@@ -223,13 +234,13 @@ async function loadFeed(feed, except) {
 	    throw doc.documentElement.textContent;
 	let rss2Feed = doc.querySelector("channel");
 	if (rss2Feed) {
-	    let updated = parseRSS2Feed(feed, rss2Feed);
+	    updated = parseRSS2Feed(updated, rss2Feed);
 	    let items = processItems(rss2Feed.querySelectorAll("item"), updated, parseRSS2Item, true);
 	    return {updated: updated, items: items};
 	}
 	let atomFeed = doc.querySelector("feed");
 	if (atomFeed) {
-	    let updated = parseATOMFeed(feed, atomFeed);
+	    updated = parseATOMFeed(updated, atomFeed);
 	    let items = processItems(atomFeed.querySelectorAll("entry"), updated, parseATOMItem, true);
 	    return {updated: updated, items: items};
 	}
@@ -309,9 +320,20 @@ async function sanitize(url) {
     if (BounceLoad && response.status == 401) {
 	enabled = false;
 	return false;
-    }
-    else if (response.status != 200)
+    } else if (response.status != 200)
 	throw "fetching failed in sanitize";
+
+    if (response.redirected) {
+	console.info(url + " redirected to: " + response.url);
+	if (BounceLoad && !url.startsWith(BouncerRoot)) {
+	    let urlObject = new URL(response.url);
+	    let search = urlObject.searchParams;
+	    let feedUrl = search.get('url');
+	    url = feedUrl;
+	} else {
+	    url = response.url;
+	}
+    }
     let mime = response.headers.get('Content-Type');
     let parts = mime.split(/\s*;\s*/);
     mime = parts[0];
