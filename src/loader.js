@@ -200,16 +200,9 @@ async function loadFeed(feed, except) {
     else if (response.status != 200)
 	throw "fetching failed in loadFeed";
 
-    if (response.redirected) {
-	console.info(feed.feedUrl + " redirected to: " + response.url);
-	if (BounceLoad) {
-	    let urlObject = new URL(response.url);
-	    let search = urlObject.searchParams;
-	    let feedUrl = search.get('url');
-	    updated.feedUrl = feedUrl;
-	} else {
-	    updated.feedUrl = response.url;
-	}
+    if (!BounceLoad && response.redirected) {
+	// trust redirected url for direct load
+	updated.feedUrl = response.url;
     }
     // buffer load is always in JSON
     if (BounceLoad) {
@@ -217,6 +210,8 @@ async function loadFeed(feed, except) {
 	if (data.error)
 	    throw data.error;
 	updated = parseJSONFeed(updated, data);
+	// buffer load is trust worthy for feed_url
+	updated.feedUrl = data.feed_url;
 	let items = processItems(data.items, updated, parseJSONItem, false);
 	return {updated: updated, items: items};
     }
