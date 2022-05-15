@@ -201,7 +201,7 @@ async function loadFeed(feed, except) {
 	throw "fetching failed in loadFeed";
 
     if (response.redirected) {
-	console.info(url + " redirected to: " + response.url);
+	console.info(feed.feedUrl + " redirected to: " + response.url);
 	if (BounceLoad) {
 	    let urlObject = new URL(response.url);
 	    let search = urlObject.searchParams;
