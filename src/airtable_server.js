@@ -9,7 +9,7 @@ export {loadItemsBeyond, fetchItem, markRead, addItem, deleteItem};
 
 const ApiKey = localStorage.getItem('AIRTABLE_API_KEY');
 const BaseToken = localStorage.getItem('AIRTABLE_BASE_TOKEN');
-const BounceLoad = localStorage.getItem("BOUNCE_LOAD") == "true";
+const BounceLoad = localStorage.getItem("BOUNCE_LOAD") != "false";
 
 // table names
 const FeedsTable = "feeds";
