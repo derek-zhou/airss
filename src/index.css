@@ -185,7 +185,7 @@ span {
 		@apply hidden;
 	    }
 	    .long {
-		@apply w-full;
+		@apply text-center w-full;
 	    }
 	    hr {
 		@apply mb-2 border-gray-200;
@@ -411,6 +411,9 @@ span {
 		}
 	    }
 	    .box {
+		img {
+		    @apply max-w-md;
+		}
 		.thumbnail {
                     img {
 			@apply max-w-lg max-h-64;
