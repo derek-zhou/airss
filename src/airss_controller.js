@@ -28,18 +28,6 @@ function actionPreamble() {
     alertText.set("");
 }
 
-// remove thumbnil because it may take a while to load the new thumbnail, and showing
-// the old thumbnail together with the new item is cofusing.
-function clearThumbnail() {
-    currentItem.update(item => {
-	if (!item)
-	    return null;
-	let copy = Object.assign({}, item);
-	copy.imageUrl = null;
-	return copy;
-    });
-}
-
 // shutdown the model layer. return a promise that reject
 // when everything shutdown
 function timeoutShutdown() {
@@ -51,7 +39,6 @@ function timeoutShutdown() {
 }
 
 async function loadCurrentItem() {
-    clearThumbnail();
     let item = await Model.currentItem();
     if (item)
 	currentItem.set(item);
@@ -59,7 +46,6 @@ async function loadCurrentItem() {
 
 export async function forwardItem() {
     actionPreamble();
-    clearThumbnail();
     let item = await Model.forwardItem();
     if (item) {
 	cursor.update(n => n + 1);
@@ -69,7 +55,6 @@ export async function forwardItem() {
 
 export async function backwardItem() {
     actionPreamble();
-    clearThumbnail();
     let item = await Model.backwardItem();
     if (item) {
 	cursor.update(n => n - 1);
@@ -79,7 +64,6 @@ export async function backwardItem() {
 
 export async function deleteItem() {
     actionPreamble();
-    clearThumbnail();
     await Model.deleteItem();
     currentItem.set(await Model.currentItem());
 }
@@ -91,7 +75,6 @@ export function clearData() {
 
 export async function unsubscribe(id) {
     actionPreamble();
-    clearThumbnail();
     await Model.unsubscribe(id);
     currentItem.set(await Model.currentItem());
 }

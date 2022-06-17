@@ -275,7 +275,7 @@
 		  <div class={$currentItem.imageUrl ? "thumbnail" : "thumbnail-missing"}>
 		      <a href={$currentItem.url} target="_blank" rel="noopener noreferrer">
 			  <img src={$currentItem.imageUrl ? $currentItem.imageUrl : UnknownImage}
-			       alt="thumbnail"/>
+			       alt="thumbnail" decoding="sync"/>
 		      </a>
 		  </div>
 	      {/if}
