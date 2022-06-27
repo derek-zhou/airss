@@ -7,7 +7,7 @@
  import { afterUpdate } from 'svelte';
  
  // functions
- import {forwardItem, backwardItem, deleteItem, subscribe, unsubscribe, clearData} from  './airss_controller.js';
+ import {forwardItem, backwardItem, deleteItem, refreshItem, subscribe, unsubscribe, clearData} from  './airss_controller.js';
 
  // constants
  // screen is fundimental content shown in the window
@@ -200,6 +200,11 @@
      screen = Screens.trash;
  }
 
+ function clickRefresh() {
+     clearAlert();
+     refreshItem();
+ }
+
  function clickConfirmDelete() {
      if (shouldUnsubscribe)
 	 unsubscribe($currentItem.feedId);
@@ -299,6 +304,8 @@
 	  <div class="toolbar">
 	      <button class="button button-danger"
 		      on:click={clickTrash}>🗑</button>
+	      <button class="button"
+		      on:click={clickRefresh}>📃</button>
 	      {#if !dummy}
 		  <a class="button" target="roast"
 		     href={roastPrefix + encodeURIComponent($currentItem.url)}>🔥</a>

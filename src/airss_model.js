@@ -12,8 +12,8 @@ import * as Loader from './loader.js';
 
 // exported client side functions. all return promises or null
 export {currentState, shutdown, clearData, warn, error,
-	forwardItem, backwardItem, deleteItem, currentItem,
-	subscribe, unsubscribe, loadingStart, loadingDone,
+	forwardItem, backwardItem, deleteItem, currentItem, refreshItem,
+	subscribe, unsubscribe, loadingStart, loadingDone, updateItemText,
 	getLoadCandidate, addFeed, deleteFeed, addItems, fetchFeed, updateFeed};
 
 // when the cursor is this close to the end I load more
@@ -73,6 +73,10 @@ function emitModelStopLoading() {
     window.document.dispatchEvent(new Event("AirSSModelStopLoading"));
 }
 
+function emitModelItemUpdated(item) {
+    window.document.dispatchEvent(new CustomEvent("AirSSModelItemUpdated", {detail: item}));
+}
+
 /*
  * callback side state and entry points
  */
@@ -103,6 +107,17 @@ async function cb_loadingDone(prev) {
     emitModelStopLoading();
 }
 
+async function cb_updateItemText(prev, text, id) {
+    await prev;
+    let item = await Items.getItem(db, id);
+    if (item) {
+	item.contentHtml = text;
+	await Items.updateItem(db, item);
+	if (Items.isCurrentItem(item))
+	    emitModelItemUpdated(item);
+    }
+}
+
 async function cb_error(prev, msg) {
     await prev;
     emitModelError(msg);
@@ -121,6 +136,14 @@ async function cb_subscribe(prev, url) {
     await prev;
     // we have to make sure init is done
     Loader.subscribe(url);
+}
+
+async function cb_refreshItem(prev) {
+    await prev;
+    let item = await Items.getCurrentItem(db);
+    if (!item || Items.isDummyItem(item))
+	return null;
+    Loader.reloadUrl(item.url, item.id);
 }
 
 async function cb_currentItem(prev) {
@@ -407,6 +430,12 @@ function error(msg) {
     return state;
 }
 
+// update current item with new text
+function refreshItem() {
+    state = cb_refreshItem(state);
+    return state;
+}
+
 // forward the item cursor. return a promise that resolve to a item
 // to display, or null if nothing changed
 function forwardItem() {
@@ -465,6 +494,11 @@ function loadingStart() {
 // notify loading is done
 function loadingDone() {
     state = cb_loadingDone(state);
+}
+
+// notify item updated
+function updateItemText(text, id) {
+    state = cb_updateItemText(state, text, id);
 }
 
 // add a item. this is for the callback from loading the airtable

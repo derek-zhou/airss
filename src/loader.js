@@ -4,7 +4,7 @@
 
 import * as Model from './airss_model.js';
 import * as Airtable from './airtable_server.js';
-export {subscribe, load, loadAirtable};
+export {subscribe, load, loadAirtable, reloadUrl};
 
 // keep at most 100 items from feed
 const MaxKeptItems = localStorage.getItem("MAX_ITEMS_PER_FEED") || 100;
@@ -15,6 +15,7 @@ const BounceLoad = localStorage.getItem("BOUNCE_LOAD") != "false";
 const BouncerRoot = "https://roastidio.us"
 const Bouncer = BouncerRoot + "/bounce?url=";
 const Buffer = BouncerRoot + "/buffer";
+const FullText = BouncerRoot + "/fulltext";
 const FeedType = {
     json: 1,
     xml: 2
@@ -164,6 +165,25 @@ async function cb_load(prev) {
     }
 }
 
+async function cb_reloadUrl(prev, url, id) {
+    await prev;
+    if (!enabled)
+	return null;
+    try {
+	Model.loadingStart();
+	let response = await bufferReload(url);
+	if (response.status != 200)
+	    return null;
+	let data = await response.text();
+	let text = BounceLoad ? data : sanitizeHtml(data);
+	Model.updateItemText(text, id);
+	Model.loadingDone();
+    } catch (e) {
+	Model.error("Reloading of url: " + url + " failed");
+	Model.loadingDone();
+    }
+}
+
 function myFetch(url) {
     if (BounceLoad && !url.startsWith(BouncerRoot)) {
 	return fetch(Bouncer + encodeURIComponent(url), {
@@ -183,6 +203,21 @@ function bufferFetch(url, except) {
 		'Content-Type': 'application/json'
 	    },
 	    body: JSON.stringify({url: url, except: except}),
+	    mode: "cors"
+	});
+    } else {
+	return fetch(url);
+    }
+}
+
+function bufferReload(url) {
+    if (BounceLoad) {
+	return fetch(FullText, {
+	    method: "POST",
+	    headers: {
+		'Content-Type': 'application/json'
+	    },
+	    body: JSON.stringify({url: url}),
 	    mode: "cors"
 	});
     } else {
@@ -619,4 +654,9 @@ function subscribe(url) {
 
 function load() {
     state = cb_load(state);
+}
+
+function reloadUrl(url, id) {
+    state = cb_reloadUrl(state, url, id);
+    return state;
 }

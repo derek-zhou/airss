@@ -53,6 +53,11 @@ export async function forwardItem() {
     }
 }
 
+export async function refreshItem() {
+    actionPreamble();
+    Model.refreshItem();
+}
+
 export async function backwardItem() {
     actionPreamble();
     let item = await Model.backwardItem();
@@ -98,6 +103,10 @@ document.addEventListener("AirSSModelAlert", e => {
 
 document.addEventListener("AirSSModelShutDown", () => {
     running.set(false);
+});
+
+document.addEventListener("AirSSModelItemUpdated", e => {
+    currentItem.set(e.detail);
 });
 
 document.addEventListener("AirSSModelStartLoading", () => {

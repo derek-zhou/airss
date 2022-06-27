@@ -19,8 +19,8 @@ let known = -1;
 // public apis
 export {upgrade, load, length,
 	readingCursor, knownCursor, forwardCursor, backwardCursor, unreadCount,
-	markRead, getCurrentItem, deleteCurrentItem, deleteAllItemsOfFeed,
-	allUrlsOfFeed, pushItem, addItem};
+	markRead, getCurrentItem, getItem, deleteCurrentItem, deleteAllItemsOfFeed,
+	allUrlsOfFeed, pushItem, addItem, updateItem, isDummyItem, isCurrentItem};
 
 function readingCursor() {
     return reading;
@@ -68,6 +68,10 @@ function getCurrentItem(db) {
 	return db.get(Store, items[reading]);
     else
 	return null;
+}
+
+function getItem(db, id) {
+    return db.get(Store, id);
 }
 
 async function deleteCurrentItem(db) {
@@ -135,6 +139,10 @@ async function pushItem(db, item) {
     return id;
 }
 
+async function updateItem(db, item) {
+    return db.put(Store, item);
+}
+
 async function addItem(db, item) {
     // may throw
     await db.add(Store, item);
@@ -155,6 +163,10 @@ function upgrade(db) {
 function isDummyItem(item) {
     let tags = item.tags;
     return tags.length == 1 && tags[0] == "_error";
+}
+
+function isCurrentItem(item) {
+    return item.id == items[reading];
 }
 
 async function load(db) {
