@@ -14,8 +14,8 @@ const MaxKeptPeriod = localStorage.getItem("MAX_KEPT_PERIOD") || 180;
 const BounceLoad = localStorage.getItem("BOUNCE_LOAD") != "false";
 const BouncerRoot = "https://roastidio.us"
 const Bouncer = BouncerRoot + "/bounce?url=";
+const FullText = BouncerRoot + "/fulltext?url=";
 const Buffer = BouncerRoot + "/buffer";
-const FullText = BouncerRoot + "/fulltext";
 const FeedType = {
     json: 1,
     xml: 2
@@ -212,12 +212,7 @@ function bufferFetch(url, except) {
 
 function bufferReload(url) {
     if (BounceLoad) {
-	return fetch(FullText, {
-	    method: "POST",
-	    headers: {
-		'Content-Type': 'application/json'
-	    },
-	    body: JSON.stringify({url: url}),
+	return fetch(FullText + encodeURIComponent(url), {
 	    mode: "cors"
 	});
     } else {
