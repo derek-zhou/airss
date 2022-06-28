@@ -304,9 +304,9 @@
 	  <div class="toolbar">
 	      <button class="button button-danger"
 		      on:click={clickTrash}>🗑</button>
-	      <button class="button"
-		      on:click={clickRefresh}>📃</button>
 	      {#if !dummy}
+		  <button class="button"
+			  on:click={clickRefresh}>📃</button>
 		  <a class="button" target="roast"
 		     href={roastPrefix + encodeURIComponent($currentItem.url)}>🔥</a>
 	      {/if}

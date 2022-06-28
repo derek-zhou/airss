@@ -172,8 +172,11 @@ async function cb_reloadUrl(prev, url, id) {
     try {
 	Model.loadingStart();
 	let response = await bufferReload(url);
-	if (response.status != 200)
+	if (response.status != 200) {
+	    Model.warn("Reloading of url: " + url + " failed with status: " + response.status);
+	    Model.loadingDone();
 	    return null;
+	}
 	let data = await response.text();
 	let text = BounceLoad ? data : sanitizeHtml(data);
 	Model.updateItemText(text, id);
