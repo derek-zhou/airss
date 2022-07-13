@@ -153,7 +153,7 @@
  }
 
  function browseTouchMove(evt) {
-     if ( ! xDown || ! yDown ) {
+     if ( ! xDown || ! yDown || screen != Screens.browse ) {
          return;
      }
      var xUp = evt.touches[0].clientX;
@@ -250,7 +250,9 @@
     <title>Airss Reader({$cursor+1}/{$length})</title>
 </svelte:head>
 
-<div id="layout" class="viewport">
+<div id="layout" class="viewport"
+    on:touchstart|passive={browseTouchStart}
+    on:touchmove|passive={browseTouchMove}>
     <div class="header">
 	<div class="brand">
 	    <a href="/"><img src="/images/airss_logo.png"></a>
@@ -272,9 +274,7 @@
   <p class={alertClass} role="alert" on:click={clearAlert}>{@html $alertText}</p>
   <div class="content">
   {#if screen == Screens.browse}
-      <div class="box"
-	   on:touchstart|passive={browseTouchStart}
-	   on:touchmove|passive={browseTouchMove}>
+      <div class="box">
 	  {#if $currentItem}
 	      {#if !dummy}
 		  <div class={$currentItem.imageUrl ? "thumbnail" : "thumbnail-missing"}>
