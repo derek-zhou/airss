@@ -250,9 +250,7 @@
     <title>Airss Reader({$cursor+1}/{$length})</title>
 </svelte:head>
 
-<div id="layout" class="viewport"
-    on:touchstart|passive={browseTouchStart}
-    on:touchmove|passive={browseTouchMove}>
+<div id="layout" class="viewport">
     <div class="header">
 	<div class="brand">
 	    <a href="/"><img src="/images/airss_logo.png"></a>
@@ -272,7 +270,9 @@
       </div>
   </div>
   <p class={alertClass} role="alert" on:click={clearAlert}>{@html $alertText}</p>
-  <div class="content">
+  <div class="content"
+      on:touchstart|passive={browseTouchStart}
+      on:touchmove|passive={browseTouchMove}>
   {#if screen == Screens.browse}
       <div class="box">
 	  {#if $currentItem}
