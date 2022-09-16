@@ -59,10 +59,10 @@
 
  let maxItemsPerFeed;
  let maxItemsPerFeedChoices = [
+     {value: 10, text: "10 items"},
      {value: 25, text: "25 items"},
      {value: 50, text: "50 items"},
-     {value: 100, text: "100 items"},
-     {value: 200, text: "200 items"}
+     {value: 100, text: "100 items"}
  ];
  let maxItemsPerFeedCurrent = localStorage.getItem("MAX_ITEMS_PER_FEED") || 100;
 
