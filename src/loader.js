@@ -31,6 +31,13 @@ const tagSet = new Set(['A', 'ABBR', 'ADDR', 'ARTICLE', 'ASIDE', 'AUDIO', 'B', '
 			'SUB', 'SUP', 'SVG', 'TABLE', 'TBODY', 'TD', 'TFOOT', 'TH', 'THEAD',
 			'TIME', 'TR', 'TRACK', 'U', 'UL', 'VIDEO', 'WBR']);
 
+// common feed file name that should cover all major SSGs.
+// I left out the names without extension because there is no way to determine type
+const JSONFeedNameSet = new Set(['feed.json', 'index.json']);
+const XMLFeedNameSet = new Set(['rss.xml', 'rss2.xml', 'atom.xml',
+				'index.xml', 'index.rss', 'index.rss2', 'index.atom',
+				'feed.xml', 'feed.rss', 'feed.rss2', 'feed.atom']);
+
 /*
  * callback side state and entry points
  */
@@ -304,6 +311,16 @@ function strictMimeToType(mime) {
     }
 }
 
+function feedTypeFromName(path) {
+    let parts = path.split("/");
+    let name = parts[parts.length - 1];
+    if (JSONFeedNameSet.has(name))
+	return FeedType.json;
+    if (XMLFeedNameSet.has(name))
+	return FeedType.xml;
+    return null;
+}
+
 async function loadInitFeed(response, feed) {
     switch (feed.type) {
     case FeedType.json:
@@ -387,6 +404,29 @@ async function sanitize(url) {
 	    if (!type)
 		continue;
 	    feed.type = type;
+	    let mergedUrl = new URL(href, url);
+	    feed.feedUrl = mergedUrl.toString();
+	    let response = await myFetch(feed.feedUrl);
+	    if (BounceLoad && response.status == 401) {
+		enabled = false;
+		return false;
+	    }
+	    else if (response.status != 200) {
+		throw "fetching failed in sanitize";
+	    }
+	    return await loadInitFeed(response, feed);
+	}
+
+	// try all anchors
+	console.info("No link auto-discovery. trying anchors by name");
+	const anchors = doc.body.querySelectorAll("a");
+	for (let anchor of anchors.values()) {
+	    let href = anchor.getAttribute("href");
+	    if (!href)
+		continue;
+	    feed.type = feedTypeFromName(href);
+	    if (!feed.type)
+		continue;
 	    let mergedUrl = new URL(href, url);
 	    feed.feedUrl = mergedUrl.toString();
 	    let response = await myFetch(feed.feedUrl);
