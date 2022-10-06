@@ -7,9 +7,8 @@ Airss is a light weight RSS feed reader that runs entirely in your browser.
 Airss is an opinionated feed reader that is designed to aggregate blogs and news in one place for you to read. It provides only the essential functionalities on the surface: You give it a bunch of feeds, it will feed you all the news, one item at a time. The benefits are:
 
 * No software to install, no service to sign up, no middle man, no cookie, no tracking, completely free with no string attached.
-* It is tiny: <100KB transfer size (the airtable client being the bulk of it) for now, and that's html, style, and scripts all put together. I don't even bother with minifying them.
+* It is tiny: <100KB transfer size for now, and that's html, style, and scripts all put together. I don't even bother with minifying them.
 * Supports [JSON feeds](https://www.jsonfeed.org/), [RSS2 feeds](https://validator.w3.org/feed/docs/rss2.html) and [Atom feeds](https://tools.ietf.org/html/rfc4287). Also automatically figures out feed url from typical web pages through [rel=alternate links](https://developer.mozilla.org/en-US/docs/Web/HTML/Link_types)
-* You can __optionally__ use your own [airtable](https://airtable.com) to store your feeds so you can hop between several devices.
 * You can __optionally__ use [roastidio.us](https://roastidio.us) to load feeds to bypass the [CORS](https://enable-cors.org/) restriction (more on this later).
 * You can __optionally__ use the [roastidio.us](https://roastidio.us) commenting service (written and operated by me) to write your comment with a click of the button (🔥). The integration is just a simple link, there is no data sharing.
 
@@ -66,27 +65,6 @@ I provide a proxy service through [Roastidio.us](https://roastidio.us) to anyone
 
 By the way, I am accumulating high quality feeds to build a search engine specifically design for feeds. Any feed you load via [roastidio.us](https://roastidio.us) will be indexed. When and who load the feeds are not recorded to respect your privacy. You are welcomed to try the search engine right now: [Roastidio.us Search](https://roastidio.us/search) (free registration required)
 
-## Airtable
-
-The folks at Airtable are nice enough to provide anyone free accounts. With Airtable you can share feeds and news between multiple devices that you control, such as your computer + your phone etc., so you can read your news anywhere. There is some setup involved because airtables cannot be setup through API. You will need to setup a dedicated base for Airss, and 2 tables under the base. The easiest way is to just copy this blank template: [airss template](https://airtable.com/shrFm410wa0iyoKpq) into your workspace.
-
-Then you generate a API key through your account profile, and take a note of the base ID from `help` -> `API documentation` in this base. Put them in the config page of Airss, then you are done.
-
-Airtable's free tier can store upto 1200 records in a base. Each feed is a record, and each news item is a record too. If you subscribe to a lot of feeds, you may have to limit history depth to stay in the bound. Alternatively, you can hop onto airtable to delete old items manually.
-
-Please also keep in mind that the two-way data syncing and conflicts resolution of Airss is not very robust and it tries to be consevertive when in doubt. You may see some items double-fetched on some of your devices.
-
-## Modes of operation
-
-Depends on whether you use airtable, roastidio.us or not, there can be 4 modes of operation:
-
-* Use neither. Then Airss remains a pure client-side application with the freedom and technical limitation of a pure client-side application.
-* Use Roastidio.us but not Airtable. Airss would be enhanced with the hack-free, fast background load of feeds.
-* Use Airtable but not Roastidio.us. Feeds and feed items would be synced among all browsers and devices using the same Airtable credential.
-* Use both. In addtion to having the best of both worlds, the usage of Airtable would be greatly reduced. In this mode, only the feeds, not feed items are synced through Airtable, so the 1200 records apply only to feeds you subscribed. That's a lot of feeds!
-
 ## Disclaimer
 
 The software shall be consider beta quality right now. Use it at your own risk.
-
-Do not use Airss with Airtable on a device that you do not control; Airss stores the API key in the local storage unencrypted. A local super user could steal the credential and sabotage your Airtable.
