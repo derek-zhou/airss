@@ -68,8 +68,6 @@
 
  let bounceLoad = localStorage.getItem("BOUNCE_LOAD") != "false";
 
- let apiKey = localStorage.getItem('AIRTABLE_API_KEY') || "";
- let baseToken = localStorage.getItem('AIRTABLE_BASE_TOKEN') || "";
  let clearDatabase = "";
 
  let xDown = null;
@@ -225,9 +223,6 @@
      localStorage.setItem("MAX_KEPT_PERIOD", maxKeptPeriod.value);
      localStorage.setItem("MAX_ITEMS_PER_FEED", maxItemsPerFeed.value);
      localStorage.setItem("BOUNCE_LOAD", bounceLoad);
-     // airtable_server
-     localStorage.setItem("AIRTABLE_API_KEY", apiKey);
-     localStorage.setItem("AIRTABLE_BASE_TOKEN", baseToken);
      // It is very hard to change config at run time, so I just take
      // shortcut to reload
      if (clearDatabase == "clear database") {
@@ -420,27 +415,6 @@
 		  </label>
 		  <input id="input-bounce-load" type="checkbox" bind:checked={bounceLoad}>
 	      </div>
-	  </section>
-	  <section>
-	      <div class="field">
-		  <label for="input-api-key">
-		      Your Airtable API key:
-		  </label>
-		  <input id="input-api-key" type="text" class="code" bind:value={apiKey}>
-	      </div>
-	      <div class="field">
-		  <label for="input-base-token">
-		      The ID of your base:
-		  </label>
-		  <input id="input-base-token" type="text" class="code" bind:value={baseToken}>
-	      </div>
-	      {#if baseToken}
-		  <div class="field footnote">
-		      <a href="https://airtable.com/{baseToken}">
-			  https://airtable.com/{baseToken}
-		      </a>
-		  </div>
-	      {/if}
 	  </section>
 	  <section>
 	  <div class="field alert alert-danger">

@@ -1,8 +1,6 @@
 /*
  * The feeds schema, based on jsonfeed
  */
-import * as Airtable from './airtable_server.js';
-
 const Store = "feeds";
 
 // in memory state
@@ -59,7 +57,6 @@ async function get(db, id) {
 
 async function addFeed(db, feed) {
     if (feed.id) {
-	// already has id, must comming from airtable
 	feeds.push(feed.id);
 	await db.add(Store, feed);
 	return feed.id;
@@ -67,22 +64,16 @@ async function addFeed(db, feed) {
 	let id = await db.add(Store, feed);
 	feeds.push(id);
 	feed.id = id;
-	// we do not await it and just hope it will land
-	Airtable.insertFeed(feed);
 	return id;
     }
 }
 
 async function updateFeed(db, feed) {
     let old = await db.get(Store, feed.id);
-    // we do not await it and just hope it will land
-    Airtable.updateFeed(old, feed);
     return db.put(Store, feed);
 }
 
 function removeFeed(db, id) {
-    // we do not await it and just hope it will land
-    Airtable.deleteFeed(id);
     itemSet.delete(id);
     return deleteFeed(db, id);
 }

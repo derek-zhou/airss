@@ -130,5 +130,3 @@ document.addEventListener("AirSSModelInitDone", () => {
     }
     loadCurrentItem();
 });
-
-topbar.show();

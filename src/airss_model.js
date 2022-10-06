@@ -394,9 +394,6 @@ async function init() {
 	length: Items.length(),
 	cursor: Items.readingCursor()
     });
-    // this is going to take a while and will use the model so we cannot await
-    // also this need to be called before the controller has any chance to load anything
-    Loader.loadAirtable(feedIds, itemIds);
     emitModelInitDone();
 }
 
@@ -481,7 +478,7 @@ function addFeed(feed) {
     state = cb_addFeed(state, feed);
 }
 
-// delete a feed by id. do not touch airtable
+// delete a feed by id
 function deleteFeed(id) {
     state = cb_deleteFeed(state, id);
 }
@@ -501,7 +498,7 @@ function updateItemText(text, id) {
     state = cb_updateItemText(state, text, id);
 }
 
-// add a item. this is for the callback from loading the airtable
+// add a item
 function addItems(items) {
     state = cb_addItems(state, items);
 }

@@ -1,7 +1,6 @@
 /*
  * The items schema, based on jsonfeed
  */
-import * as Airtable from './airtable_server.js';
 import * as Feeds from './feeds.js';
 
 const Store = "items";
@@ -58,8 +57,6 @@ function markRead(db, item) {
     if (item.read)
 	return;
     item.read = true;
-     // we do not await it and just hope it will land
-    Airtable.markRead(item.id);
     return db.put(Store, item);
 }
 
@@ -80,8 +77,6 @@ async function deleteCurrentItem(db) {
     let item = await db.get(Store, items[reading]);
     Feeds.removeItem(item.feedId, items[reading]);
     await db.delete(Store, items[reading]);
-     // we do not await it and just hope it will land
-    Airtable.deleteItem(items[reading]);
     items = items.slice(0, reading).concat(items.slice(reading + 1));
     reading--;
     known--;
@@ -99,8 +94,6 @@ async function deleteAllItemsOfFeed(db, feedId) {
 	let id = items[i];
 	if (itemSet.has(id)) {
 	    await db.delete(Store, id);
-	    // we do not await it and just hope it will land
-	    Airtable.deleteItem(id);
 	    if (!above_reading)
 		reading_shrink++;
 	    if (!above_known)
@@ -134,8 +127,6 @@ async function pushItem(db, item) {
     Feeds.addItem(item.feedId, id);
     items.push(id);
     item.id = id;
-    // we do not await it and just hope it will land
-    Airtable.addItem(item);
     return id;
 }
 
@@ -147,7 +138,6 @@ async function addItem(db, item) {
     // may throw
     await db.add(Store, item);
     Feeds.addItem(item.feedId, item.id);
-    // already has id, must comming from airtable
     items.push(item.id);
     if (item.read && known == items.length - 2)
 	known ++;
@@ -202,8 +192,6 @@ async function load(db) {
     for (let id of expired.values()) {
 	console.info("deleteing expired item: " + id);
 	await db.delete(Store, id);
-	// we do not await it and just hope it will land
-	Airtable.deleteItem(id);
     }
     items = buffer.reverse();
     // point both cursor at the last read item

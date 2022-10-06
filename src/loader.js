@@ -3,8 +3,7 @@
  */
 
 import * as Model from './airss_model.js';
-import * as Airtable from './airtable_server.js';
-export {subscribe, load, loadAirtable, reloadUrl};
+export {subscribe, load, reloadUrl};
 
 // keep at most 100 items from feed
 const MaxKeptItems = localStorage.getItem("MAX_ITEMS_PER_FEED") || 100;
@@ -43,79 +42,6 @@ const XMLFeedNameSet = new Set(['rss.xml', 'rss2.xml', 'atom.xml',
  */
 
 let enabled = true;
-
-async function cb_loadFeedsFromAirtable(prev, feedIds) {
-    await prev;
-    // numeric sort
-    feedIds.sort((a, b) => a - b);
-    let localLastId = 0;
-    if (feedIds.length > 0)
-	localLastId = feedIds[feedIds.length - 1];
-    let remoteLastId = 0;
-    let remoteFeedIds = new Set();
-    // add every feeds that exist in remote but not local
-    // this is not in the sort order of lastLoadTime though
-    try {
-	while (true) {
-	    let remoteFeeds = await Airtable.loadFeedsBeyond(remoteLastId);
-	    if (remoteFeeds.length == 0)
-		break;
-	    for (let feed of remoteFeeds.values()) {
-		remoteFeedIds.add(feed.id);
-		if (feed.id > localLastId)
-		    Model.addFeed(feed);
-	    }
-	    remoteLastId = remoteFeeds[remoteFeeds.length - 1].id;
-	}
-	// two modes of action. if remote is empty, we push everything.
-	// else we trust the remote and delete what remote doesn't have
-	if (remoteLastId == 0) {
-	    for (let id of feedIds.values()) {
-		let feed = await Model.fetchFeed(id);
-		Airtable.insertFeed(feed);
-	    }
-	} else {
-	    for (let id of feedIds.values()) {
-		if (remoteFeedIds.has(id))
-		    continue;
-		Model.deleteFeed(id);
-	    }
-	}
-    } catch (e) {
-	console.error("Failed to load airtable. check your configuration");
-	Model.error("Failed to load airtable. check your configuration");
-	return null;
-    }
-}
-
-async function cb_loadItemsFromAirtable(prev, itemIds) {
-    await prev;
-    let remoteLastId = 0;
-    let localIds = new Set(itemIds);
-
-    try {
-	while (true) {
-	    let remoteIds = await Airtable.loadItemsBeyond(remoteLastId);
-	    let missingItems = [];
-	    if (remoteIds.length == 0)
-		break;
-	    for (let id of remoteIds.values()) {
-		if (!localIds.has(id)) {
-		    let item = await Airtable.fetchItem(id);
-		console.info("fetched missing item " + item.url + " with id: " + item.id);
-		    missingItems.push(item);
-		}
-	    }
-	    Model.addItems(missingItems);
-	    remoteLastId = remoteIds[remoteIds.length - 1];
-	}
-    } catch (e) {
-	console.error("Failed to load airtable. check your configuration");
-	Model.error("Failed to load airtable. check your configuration");
-	return null;
-    }
-    Model.loadingDone();
-}
 
 async function cb_subscribe(prev, url) {
     await prev;
@@ -678,11 +604,6 @@ function parseATOMItem(elem) {
  */
 
 let state = null;
-
-function loadAirtable(feedIds, itemIds) {
-    state = cb_loadFeedsFromAirtable(state, feedIds);
-    state = cb_loadItemsFromAirtable(state, itemIds);
-}
 
 function subscribe(url) {
     state = cb_subscribe(state, url);
