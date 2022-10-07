@@ -3,7 +3,7 @@
  */
 
 import * as Model from './airss_model.js';
-export {subscribe, load, reloadUrl};
+export {subscribe, load, reloadUrl, saveFeeds, restoreFeeds};
 
 // keep at most 100 items from feed
 const MaxKeptItems = localStorage.getItem("MAX_ITEMS_PER_FEED") || 100;
@@ -15,6 +15,7 @@ const BouncerRoot = "https://roastidio.us"
 const Bouncer = BouncerRoot + "/bounce?url=";
 const FullText = BouncerRoot + "/fulltext?url=";
 const Buffer = BouncerRoot + "/buffer";
+const Stash = BouncerRoot + "/stash";
 const FeedType = {
     json: 1,
     xml: 2
@@ -120,6 +121,63 @@ async function cb_reloadUrl(prev, url, id) {
     }
 }
 
+async function cb_saveFeeds(prev) {
+    await prev;
+    if (!enabled || !BounceLoad)
+	return;
+    let urls = await Model.allFeedUrls();
+    try {
+	Model.loadingStart();
+	let response = await fetch(Stash, {
+	    method: "POST",
+	    headers: {
+		'Accept': 'application/json',
+		'Content-Type': 'application/octet-stream'
+	    },
+	    body: JSON.stringify({feeds: urls}),
+	    mode: "cors"
+	});
+	if (response.status != 200) {
+	    Model.warn("Saving feeds failed with status: " + response.status);
+	    Model.loadingDone();
+	    return;
+	}
+	let data = await response.json();
+	Model.postHandle(data.handle);
+	Model.loadingDone();
+    } catch (e) {
+	Model.error("Saving feeds failed");
+	Model.loadingDone();
+    }
+}
+
+async function cb_restoreFeeds(prev, handle) {
+    await prev;
+    if (!enabled || !BounceLoad)
+	return;
+    try {
+	Model.loadingStart();
+	let response = await fetch(Stash + "/" + handle, {mode: "cors"});
+	if (response.status != 200) {
+	    Model.warn("Restoring feeds failed with status: " + response.status);
+	    Model.loadingDone();
+	    return;
+	}
+	let data = await response.json();
+	for (let url of data.feeds.values()) {
+	    let feed = new Object();
+	    feed.feedUrl = url;
+	    feed.lastLoadTime = 0;
+	    Model.addFeed(feed);
+	}
+	Model.loadingDone();
+	load();
+    } catch (e) {
+	Model.error("Restoring feeds failed");
+	Model.loadingDone();
+    }
+}
+
 function myFetch(url) {
     if (BounceLoad && !url.startsWith(BouncerRoot)) {
 	return fetch(Bouncer + encodeURIComponent(url), {
@@ -187,7 +245,7 @@ async function loadFeed(feed, except) {
 	updated = parseJSONFeed(updated, data);
 	let items = processItems(data.items, updated, parseJSONItem, true);
 	return {updated: updated, items: items};
-    case FeedType.xml:
+    default:
 	let parser = new DOMParser();
 	let text = await response.text();
 	let doc = parser.parseFromString(text, "text/xml");
@@ -617,5 +675,15 @@ function load() {
 
 function reloadUrl(url, id) {
     state = cb_reloadUrl(state, url, id);
+    return state;
+}
+
+function saveFeeds() {
+    state = cb_saveFeeds(state);
+    return state;
+}
+
+function restoreFeeds(handle) {
+    state = cb_restoreFeeds(state, handle);
     return state;
 }

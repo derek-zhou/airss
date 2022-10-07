@@ -14,7 +14,8 @@ import * as Loader from './loader.js';
 export {currentState, shutdown, clearData, warn, error,
 	forwardItem, backwardItem, deleteItem, currentItem, refreshItem,
 	subscribe, unsubscribe, loadingStart, loadingDone, updateItemText,
-	getLoadCandidate, addFeed, deleteFeed, addItems, fetchFeed, updateFeed};
+	getLoadCandidate, addFeed, deleteFeed, addItems, fetchFeed, updateFeed,
+	allFeedUrls, postHandle, saveFeeds, restoreFeeds};
 
 // when the cursor is this close to the end I load more
 const WaterMark = localStorage.getItem("WATER_MARK") || 10;
@@ -378,6 +379,29 @@ async function cb_getLoadCandidate(prev) {
     return {feed: feed, items: items};
 }
 
+async function cb_allFeedUrls(prev) {
+    await prev;
+    return Feeds.allFeedUrls(db);
+}
+
+async function cb_postHandle(prev, handle) {
+    await prev;
+    window.document.dispatchEvent(new CustomEvent(
+	"AirSSModelPostHandle",
+	{detail: {text: handle}}
+    ));
+}
+
+async function cb_saveFeeds(prev) {
+    await prev;
+    Loader.saveFeeds();
+}
+
+async function cb_restoreFeeds(prev, handle) {
+    await prev;
+    Loader.restoreFeeds(handle);
+}
+
 /*
  * internal functions of the callback side
  */
@@ -523,4 +547,21 @@ function fetchFeed(id) {
 function shutdown() {
     state = cb_shutdown(state);
     return state;
+}
+
+function allFeedUrls() {
+    state = cb_allFeedUrls(state);
+    return state;
+}
+
+function postHandle(handle) {
+    state = cb_postHandle(state, handle);
+}
+
+function saveFeeds() {
+    state = cb_saveFeeds(state);
+}
+
+function restoreFeeds(handle) {
+    state = cb_restoreFeeds(state, handle);
 }

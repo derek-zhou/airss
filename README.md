@@ -58,8 +58,9 @@ CORS restriction can also be turned off by browser add-ons such as: [CORS everyw
 I provide a proxy service through [Roastidio.us](https://roastidio.us) to anyone, without needing to login, so the CORS restriction can be circumvented, no user scripts or browser add-ons are needed. Just check the box `Load feeds with roastidio.us` (default checked now) in the config page and all should be good; no browser plugin or developer menu is required.
 
 * Loading feeds should be faster because Roastidio.us will load feeds in the background and cache the results
-* If I turn evil I could sabotage the feed content, but your privacy will not be harmed
+* You can also save your collection of feeds to the backend anonymously, and restore it from another device using a short and time limited secret 
 * The feed owners will not know your IP or browser fingerprint so you remain completely anonymous
+* If I turn evil I could sabotage the feed content, but your privacy will not be harmed
 
 [Roastidio.us](https://roastidio.us) is a free commenting service open to everyone, and is written and operated by the me. To actually post a comment you do need to login (free registration).
 
@@ -67,4 +68,4 @@ By the way, I am accumulating high quality feeds to build a search engine specif
 
 ## Disclaimer
 
-The software shall be consider beta quality right now. Use it at your own risk.
+The software is tailored to my needs and may never become a full-featured Feed reader. I use it everyday, your mileage may vary. 

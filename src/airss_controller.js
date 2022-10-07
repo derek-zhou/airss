@@ -21,6 +21,7 @@ export const alertText = writable("");
 export const alertType = writable("info");
 export const currentItem = writable(null);
 export const running = writable(true);
+export const postHandle = writable("");
 
 function actionPreamble() {
     clearTimeout(idleTimeout);
@@ -89,6 +90,16 @@ export function subscribe(url) {
     Model.subscribe(url);
 }
 
+export function saveFeeds() {
+    actionPreamble();
+    Model.saveFeeds();
+}
+
+export function restoreFeeds(handle) {
+    actionPreamble();
+    Model.restoreFeeds(handle);
+}
+
 document.addEventListener("AirSSModelItemsLoaded", e => {
     length.set(e.detail.length);
     cursor.set(e.detail.cursor);
@@ -103,6 +114,10 @@ document.addEventListener("AirSSModelAlert", e => {
 
 document.addEventListener("AirSSModelShutDown", () => {
     running.set(false);
+});
+
+document.addEventListener("AirSSModelPostHandle", e => {
+    postHandle.set(e.detail.text);
 });
 
 document.addEventListener("AirSSModelItemUpdated", e => {

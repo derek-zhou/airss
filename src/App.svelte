@@ -2,12 +2,13 @@
 
  // stores
  import {length, cursor, alertText, alertType,
-	 currentItem, running} from './airss_controller.js';
+	 currentItem, running, postHandle} from './airss_controller.js';
 
  import { afterUpdate } from 'svelte';
  
  // functions
- import {forwardItem, backwardItem, deleteItem, refreshItem, subscribe, unsubscribe, clearData} from  './airss_controller.js';
+ import {forwardItem, backwardItem, deleteItem, refreshItem, subscribe, unsubscribe,
+	 clearData, saveFeeds, restoreFeeds} from  './airss_controller.js';
 
  // constants
  // screen is fundimental content shown in the window
@@ -69,6 +70,8 @@
  let bounceLoad = localStorage.getItem("BOUNCE_LOAD") != "false";
 
  let clearDatabase = "";
+
+ let restoreHandle = "";
 
  let xDown = null;
  let yDown = null;
@@ -237,6 +240,16 @@
  function clickCancel() {
      clearAlert();
      screen = Screens.browse;
+ }
+
+ function clickSaveFeeds(e) {
+     e.preventDefault();
+     saveFeeds();
+ }
+
+ function clickRestoreFeeds(e) {
+     e.preventDefault();
+     restoreFeeds(restoreHandle);
  }
 
 </script>
@@ -416,6 +429,26 @@
 		  <input id="input-bounce-load" type="checkbox" bind:checked={bounceLoad}>
 	      </div>
 	  </section>
+	  {#if bounceLoad}
+	  <section>
+	      <div class="field">
+		  <button class="button text-button" on:click={clickSaveFeeds}>Save Feeds</button>
+		  {#if $postHandle}
+		      <label class="code">{$postHandle}</label>
+		  {:else}
+		      <label class="code">Not Saved</label>
+		  {/if}
+	      </div>
+	  </section>
+	  <section>
+	      <div class="field">
+		  <button class="button text-button" on:click={clickRestoreFeeds}>
+		      Restore Feeds</button>
+		  <input id="input-restore-handle" type="text" class="short code"
+			 bind:value={restoreHandle}>
+	      </div>
+	  </section>
+	  {/if}
 	  <section>
 	  <div class="field alert alert-danger">
 	      <label for="input-clear-database">Danger! Type "clear database" to delete all data</label>

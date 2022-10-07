@@ -12,7 +12,7 @@ let feeds = [];
 let itemSet = new Map();
 
 // public apis
-export {upgrade, load, get, first, rotate, addFeed, updateFeed,
+export {upgrade, load, get, first, rotate, addFeed, updateFeed, allFeedUrls,
 	removeFeed, deleteFeed, addItem, removeItem, itemsOf};
 
 function upgrade(db) {
@@ -45,6 +45,15 @@ function first() {
 
 function rotate() {
     feeds = [...feeds.slice(1), feeds[0]];
+}
+
+async function allFeedUrls(db) {
+    let urls = [];
+    for (let id of feeds.values()) {
+	let feed = await db.get(Store, id);
+	urls.push(feed.feedUrl);
+    }
+    return urls;
 }
 
 async function get(db, id) {

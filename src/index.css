@@ -200,6 +200,9 @@ span {
             .button[type="submit"] {
 		@apply flex-none cursor-pointer text-white bg-purple-600;
             }
+	    .text-button {
+		@apply px-4 py-0 text-base;
+	    }
 	    .toolbar {
 		@apply pt-2 flex flex-row flex-wrap justify-center gap-x-1;
 	    }
@@ -235,6 +238,9 @@ span {
             }
             input[type="text"].long {
                 @apply w-80;
+            }
+            input[type="text"].short {
+                @apply w-24;
             }
             input[type="email"] {
                 @apply w-80 leading-relaxed border rounded border-gray-600;
