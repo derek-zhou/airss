@@ -479,7 +479,7 @@ function processItems(rawItems, feed, parseFunc, sanitize) {
     if (rawItems) {
 	for (let item of rawItems.values()) {
 	    // never look pass more than TruncateItems from the top. Some feeds are long
-	    if (counter > TruncateItems)
+	    if (counter >= TruncateItems)
 		break;
 	    else
 		counter ++;
