@@ -5,8 +5,8 @@
 import * as Model from './airss_model.js';
 export {subscribe, load, reloadUrl, saveFeeds, restoreFeeds};
 
-// keep at most 100 items from feed
-const MaxKeptItems = localStorage.getItem("MAX_ITEMS_PER_FEED") || 100;
+// truncate to at most 25 items per loading
+const TruncateItems = localStorage.getItem("TRUNCATE_ITEMS_PER_FEED") || 100;
 // kept in days
 const MaxKeptPeriod = localStorage.getItem("MAX_KEPT_PERIOD") || 180;
 // whether to load with bouncer
@@ -478,8 +478,8 @@ function processItems(rawItems, feed, parseFunc, sanitize) {
 
     if (rawItems) {
 	for (let item of rawItems.values()) {
-	    // never look pass more than MaxKeptItems from the top. Some feeds are long
-	    if (counter > MaxKeptItems)
+	    // never look pass more than TruncateItems from the top. Some feeds are long
+	    if (counter > TruncateItems)
 		break;
 	    else
 		counter ++;

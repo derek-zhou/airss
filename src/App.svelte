@@ -60,12 +60,21 @@
 
  let maxItemsPerFeed;
  let maxItemsPerFeedChoices = [
-     {value: 10, text: "10 items"},
      {value: 25, text: "25 items"},
      {value: 50, text: "50 items"},
-     {value: 100, text: "100 items"}
+     {value: 100, text: "100 items"},
+     {value: 200, text: "200 items"}
  ];
  let maxItemsPerFeedCurrent = localStorage.getItem("MAX_ITEMS_PER_FEED") || 100;
+
+ let truncateItemsPerFeed;
+ let truncateItemsPerFeedChoices = [
+     {value: 1, text: "1 item"},
+     {value: 10, text: "10 items"},
+     {value: 25, text: "25 items"},
+     {value: 100, text: "100 items"}
+ ];
+ let truncateItemsPerFeedCurrent = localStorage.getItem("TRUNCATE_ITEMS_PER_FEED") || 25;
 
  let bounceLoad = localStorage.getItem("BOUNCE_LOAD") != "false";
 
@@ -225,6 +234,7 @@
      localStorage.setItem("MIN_RELOAD_WAIT", minReloadWait.value);
      localStorage.setItem("MAX_KEPT_PERIOD", maxKeptPeriod.value);
      localStorage.setItem("MAX_ITEMS_PER_FEED", maxItemsPerFeed.value);
+     localStorage.setItem("TRUNCATE_ITEMS_PER_FEED", truncateItemsPerFeed.value);
      localStorage.setItem("BOUNCE_LOAD", bounceLoad);
      // It is very hard to change config at run time, so I just take
      // shortcut to reload
@@ -418,6 +428,17 @@
 		  <select id="select-max-items-per-feed" bind:value={maxItemsPerFeed}>
 		      {#each maxItemsPerFeedChoices as choice}
 			  <option selected={choice.value == maxItemsPerFeedCurrent}
+				  value={choice}>{choice.text}</option>
+		      {/each}
+		  </select>
+	      </div>
+	      <div class="field long">
+		  <label for="select-truncate-items-per-feed">
+		      Truncate each feed while loading to at most:
+		  </label>
+		  <select id="select-truncate-items-per-feed" bind:value={truncateItemsPerFeed}>
+		      {#each truncateItemsPerFeedChoices as choice}
+			  <option selected={choice.value == truncateItemsPerFeedCurrent}
 				  value={choice}>{choice.text}</option>
 		      {/each}
 		  </select>
