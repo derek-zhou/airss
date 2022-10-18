@@ -311,7 +311,7 @@ async function cb_updateFeed(prev, feed, items) {
 	} catch (e) {
 	    if (e instanceof DOMException) {
 		emitModelError("The feed '" + feed.feedUrl + "' is already subscribed");
-		return;
+		feedId = await Feeds.getFeed(db, feed.feedUrl);
 	    } else {
 		throw e;
 	    }
@@ -319,6 +319,8 @@ async function cb_updateFeed(prev, feed, items) {
     } else {
 	feedId = feed.id;
     }
+    if (!feedId)
+	throw("Feed id is missing");
     // push items in reverse order
     for(let i = items.length - 1; i>= 0; i--) {
 	let item = items[i];

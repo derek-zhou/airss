@@ -43,6 +43,7 @@ const XMLFeedNameSet = new Set(['rss.xml', 'rss2.xml', 'atom.xml',
  */
 
 let enabled = true;
+let loadingOutstanding = false;
 
 async function cb_subscribe(prev, url) {
     await prev;
@@ -70,10 +71,12 @@ async function cb_subscribe(prev, url) {
 
 async function cb_load(prev) {
     await prev;
-    if (!enabled)
+    if (!enabled || loadingOutstanding)
 	return;
+    loadingOutstanding = true;
     let obj = await Model.getLoadCandidate();
     if (!obj) {
+	loadingOutstanding = false;
 	console.info("Nothing to load, sleeping");
 	return;
     }
@@ -665,8 +668,6 @@ let state = null;
 
 function subscribe(url) {
     state = cb_subscribe(state, url);
-    // piggy back loading
-    state = cb_load(state);
 }
 
 function load() {
@@ -675,15 +676,12 @@ function load() {
 
 function reloadUrl(url, id) {
     state = cb_reloadUrl(state, url, id);
-    return state;
 }
 
 function saveFeeds() {
     state = cb_saveFeeds(state);
-    return state;
 }
 
 function restoreFeeds(handle) {
     state = cb_restoreFeeds(state, handle);
-    return state;
 }
