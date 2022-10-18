@@ -68,15 +68,10 @@ async function cb_subscribe(prev, url) {
     }
 }
 
-async function cb_load(prev) {
+async function cb_load(prev, obj) {
     await prev;
     if (!enabled)
 	return;
-    let obj = await Model.getLoadCandidate();
-    if (!obj) {
-	console.info("Nothing to load, sleeping");
-	return;
-    }
     try {
 	Model.loadingStart();
 	let ret = await loadFeed(obj.feed, obj.items);
@@ -666,8 +661,8 @@ function subscribe(url) {
     state = cb_subscribe(state, url);
 }
 
-function load() {
-    state = cb_load(state);
+function load(obj) {
+    state = cb_load(state, obj);
 }
 
 function reloadUrl(url, id) {

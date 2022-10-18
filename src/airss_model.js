@@ -14,7 +14,7 @@ import * as Loader from './loader.js';
 export {currentState, shutdown, clearData, warn, error,
 	forwardItem, backwardItem, deleteItem, currentItem, refreshItem,
 	subscribe, unsubscribe, loadingStart, loadingDone, updateItemText,
-	getLoadCandidate, addFeed, deleteFeed, addItems, fetchFeed, updateFeed,
+	addFeed, deleteFeed, addItems, fetchFeed, updateFeed,
 	allFeedUrls, postHandle, saveFeeds, restoreFeeds};
 
 // when the cursor is this close to the end I load more
@@ -83,6 +83,29 @@ function emitModelItemUpdated(item) {
  */
 
 let db = null;
+let loadingOutstanding = false;
+
+async function try_load() {
+    if (loadingOutstanding)
+	return;
+    if (Items.unreadCount() >= WaterMark)
+	return;
+    let feedId = Feeds.first();
+    if (!feedId)
+	return;
+    let now = new Date();
+    let feed = await Feeds.get(db, feedId);
+    if (feed.lastLoadTime > now - MinReloadWait * 3600 * 1000)
+	return;
+    Feeds.rotate();
+    let items = await Items.allUrlsOfFeed(db, feedId);
+    loadingOutstanding = true;
+    Loader.load({feed: feed, items: items});
+}
+
+async function cb_getLoadCandidate(prev) {
+    await prev;
+}
 
 // the shutdown callback
 async function cb_shutdown(prev) {
@@ -150,7 +173,7 @@ async function cb_refreshItem(prev) {
 async function cb_currentItem(prev) {
     await prev;
     let item = await Items.getCurrentItem(db);
-    Loader.load();
+    await try_load();
     return item;
 }
 
@@ -161,7 +184,7 @@ async function cb_forwardItem(prev) {
 	return null;
     }
     let item = await Items.getCurrentItem(db);
-    Loader.load();
+    await try_load();
     return item;
 }
 
@@ -298,6 +321,7 @@ function dummyItem(feed, id) {
 
 async function cb_updateFeed(prev, feed, items) {
     await prev;
+    loadingOutstanding = false;
     let oldCount = Items.length();
     let now = new Date();
     let feedId;
@@ -362,23 +386,7 @@ async function cb_updateFeed(prev, feed, items) {
 	});
     }
     await Feeds.updateFeed(db, feed);
-    Loader.load();
-}
-
-async function cb_getLoadCandidate(prev) {
-    await prev;
-    if (Items.unreadCount() >= WaterMark)
-	return null;
-    let feedId = Feeds.first();
-    if (!feedId)
-	return null;
-    let now = new Date();
-    let feed = await Feeds.get(db, feedId);
-    if (feed.lastLoadTime > now - MinReloadWait * 3600 * 1000)
-	return null;
-    Feeds.rotate();
-    let items = await Items.allUrlsOfFeed(db, feedId);
-    return {feed: feed, items: items};
+    await try_load();
 }
 
 async function cb_allFeedUrls(prev) {
@@ -532,12 +540,6 @@ function addItems(items) {
 // update a feed with new data. this is for the callback from load
 function updateFeed(feed, items) {
     state = cb_updateFeed(state, feed, items);
-}
-
-// return a feed to load, or null if no such candidate is found
-function getLoadCandidate() {
-    state = cb_getLoadCandidate(state);
-    return state;
 }
 
 // return a single feed fetched from the db
