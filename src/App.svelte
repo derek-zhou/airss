@@ -4,12 +4,11 @@
  import {length, cursor, alertText, alertType,
 	 currentItem, running, postHandle} from './airss_controller.js';
 
- import { afterUpdate } from 'svelte';
- 
  // functions
  import {forwardItem, backwardItem, deleteItem, refreshItem, subscribe, unsubscribe,
 	 clearData, saveFeeds, restoreFeeds} from  './airss_controller.js';
 
+ import Content from './Content.svelte';
  // constants
  // screen is fundimental content shown in the window
  const Screens = {
@@ -91,41 +90,6 @@
  $: screen = !$running ? Screens.shutdown : screen;
  $: alertClass = alertClassFromType($alertType);
  $: dummy = isDummyItem($currentItem);
-
- afterUpdate(() => {
-     let container = document.querySelector("#content_html");
-     if (!container)
-	 return;
-     if (!$currentItem)
-	 return;
-     let baseUrl = $currentItem.url;
-     try {
-	 let url = new URL(baseUrl);
-     } catch (e) {
-	 console.warn(baseUrl + " is not a valid url");
-	 return;
-     }
-     // fix up all img's src
-     for (let img of container.querySelectorAll("img").values()) {
-	 let href = img.getAttribute("src");
-	 try {
-	     let absUrl = new URL(href, baseUrl);
-	     img.setAttribute("src", absUrl.toString());
-	 } catch (e) {
-	     console.warn(href + "is not a valid link");
-	 }
-     }
-     // fixup all a's href
-     for (let link of container.querySelectorAll("a").values()) {
-	 let href = link.getAttribute("href");
-	 try {
-	     let absUrl = new URL(href, baseUrl);
-	     link.setAttribute("href", absUrl.toString());
-	 } catch (e) {
-	     console.warn(href + "is not a valid link");
-	 }
-     }
- });
 
  // view functions
 
@@ -268,41 +232,54 @@
     <title>Airss Reader({$cursor+1}/{$length})</title>
 </svelte:head>
 
-<div id="layout" class="viewport">
-    <div class="header">
-	<div class="brand">
-	    <a href="/"><img src="/images/airss_logo.png"></a>
-	    <span class="info">{$cursor+1}/{$length}</span>
+<div id="layout" class="relative min-h-screen flex flex-col lg:max-w-screen-lg lg:mx-auto">
+    <div class="sticky top-0 bg-gray-100 p-2 flex">
+	<div>
+	    <a href="/"><img src="/images/airss_logo.png" class="inline-block h-8"></a>
+	    <span class="text-gray-600 align-bottom whitespace-nowrap">{$cursor+1}/{$length}</span>
 	</div>
-      <div class="nav">
-	  <button class="button"
+      <div class="flex-grow text-right">
+	  <button class="button py-1 text-purple-600 inline-block rounded appearance-none
+			 font-bold text-lg text-center ml-1 px-1 sm:px-4"
 			 on:click={clickConfig}>🔧</button>
-	  <button class="button"
+	  <button class="button py-1 text-purple-600 inline-block rounded appearance-none
+			 font-bold text-lg text-center ml-1 px-1 sm:px-4"
 		  on:click={clickSubscribe}>🍼</button>
-	  <button class="button"
+	  <button class="button py-1 text-purple-600 inline-block rounded appearance-none
+			 font-bold text-lg text-center ml-1 px-1 sm:px-4"
 		  disabled={leftDisabled}
 		  on:click={clickLeft}>◀</button>
-	  <button class="button"
+	  <button class="button py-1 text-purple-600 inline-block rounded appearance-none
+			 font-bold text-lg text-center ml-1 px-1 sm:px-4"
 		  disabled={rightDisabled}
 		  on:click={clickRight}>▶</button>
       </div>
   </div>
   <p class={alertClass} role="alert" on:click={clearAlert}>{@html $alertText}</p>
-  <div class="content"
+  <div class="flex-grow"
       on:touchstart|passive={browseTouchStart}
       on:touchmove|passive={browseTouchMove}>
   {#if screen == Screens.browse}
-      <div class="box">
+      <div class="bg-white p-2 flow-root w-full overflow-x-hidden">
 	  {#if $currentItem}
 	      {#if !dummy}
-		  <div class={$currentItem.imageUrl ? "thumbnail" : "thumbnail-missing"}>
-		      <a href={$currentItem.url} target="_blank" rel="noopener noreferrer">
-			  <img src={$currentItem.imageUrl ? $currentItem.imageUrl : UnknownImage}
-			       alt="thumbnail" decoding="sync"/>
-		      </a>
-		  </div>
+		  {#if $currentItem.imageUrl}
+		      <div class="sm:float-right sm:ml-2">
+			  <a href={$currentItem.url} target="_blank" rel="noopener noreferrer">
+			      <img src={$currentItem.imageUrl} alt="thumbnail" decoding="sync"
+			      class="w-auto max-w-full max-w-xs max-h-48 md:max-w-lg md:max-h-64"/>
+			  </a>
+		      </div>
+		  {:else}
+		      <div class="float-left mr-2">
+			  <a href={$currentItem.url} target="_blank" rel="noopener noreferrer">
+			      <img src={UnknownImage} alt="thumbnail" decoding="sync"
+			      class="w-16 h-16"/>
+			  </a>
+		      </div>
+		  {/if}
 	      {/if}
-	      <h4 class="title">
+	      <h4 class="font-bold my-2 text-lg leading-snug w-full sm:text-2xl sm:w-auto">
 		  {#if dummy}
 		      {$currentItem.title}
 		  {:else}
@@ -310,61 +287,66 @@
                           {$currentItem.title}</a>
 		  {/if}
 	      </h4>
-	  <h5 class="tag-line">
-	      <span class="site">{$currentItem.feedTitle}</span>
-	      <span class="site">
+	  <h5 class="text-sm leading-snug sm:text-base sm:leading-normal">
+	      <span class="whitespace-nowrap text-gray-400">
+		  {$currentItem.feedTitle}
+	      </span>
+	      <span class="whitespace-nowrap text-gray-400">
 		  | {$currentItem.datePublished.toLocaleString()}
 	      </span>
 	  </h5>
-	  <p id="content_html" class="desc">
-	      {@html $currentItem.contentHtml}
-	  </p>
-	  <div class="toolbar">
-	      <button class="button button-danger"
+	  <Content contentHtml={$currentItem.contentHtml} baseUrl={$currentItem.url}/>
+	  <div class="flex flex-wrap w-full gap-x-1 justify-center">
+	      <button class="button py-1 px-6 inline-block rounded appearance-none font-bold
+			     text-lg text-center border-0 text-white bg-pink-600"
 		      on:click={clickTrash}>🗑</button>
 	      {#if !dummy}
-		  <button class="button"
+		  <button class="button py-1 px-6 inline-block rounded appearance-none font-bold
+			     text-lg text-center border-0 text-white bg-purple-600"
 			  on:click={clickRefresh}>📃</button>
-		  <a class="button" target="roast"
+		  <a class="button py-1 px-6 inline-block rounded appearance-none font-bold
+			     text-lg text-center border-0 text-white bg-purple-600" target="roast"
 		     href={roastPrefix + encodeURIComponent($currentItem.url)}>🔥</a>
 	      {/if}
 	  </div>
 	  {:else}
-	  <h2>No news is bad news</h2>
-	  <p>
-	      Airss is a web feed reader that runs entirely in your browser. You can subscribe any feeds by clicking the 🍼 button from above and paste the URL, or you can use of one of the following tricks: 
-	  </p>
-	  <h3>Desktop browser users</h3>
-	  <p>
-	      Install this bookmarklet <a class="button" href="javascript:location.href='{airssPrefix}?url='+encodeURIComponent(window.location.href)">Subscribe it in Airss</a> <b>by dragging it to your bookmarks</b>. Whenever you encounter something interesting on the web, be it a blog, a news website or whatever, you can click this bookmarklet to subscribe. Chances are they support RSS feeds so you will always stay updated.
-	  </p>
-	  <h3>Mobile browser users</h3>
-	  <p>
-	      Android users can install this APP: <a href="https://f-droid.org/en/packages/net.daverix.urlforward/">URL Forwarder</a> (Thank you, David Laurell!) then add a filter as:
-	  </p>
-	  <pre>
-{airssPrefix}?url=@url
-	  </pre>
-	  <p>
-	      Then you can share links to the APP and select the menu to subscribe, if it support RSS feeds.
-	  </p>
-	  <p>
-	      iOS Safari users can use the bookmarklet method as mentioned earlier by syncing the bookmarklet from your Mac.
-	  </p>
-	  <h2>To my fellow bloggers</h2>
-	  <p>
-	      Please make sure you have your feed <a href="https://www.rssboard.org/rss-autodiscovery">auto-discoverable</a> from your homepage. And if you can, please enable <a href="https://enable-cors.org/">permissive CORS</a> on your blog to reach out to a broader audience. Lastly, if you really like Airss, you can put a link on your homepage:
-	  </p>
-	  <pre>
-	      {'<a href="'+airssPrefix+'?subscribe-referrer" referrerpolicy="no-referrer-when-downgrade">Follow me with Airss!</a>'}
-	  </pre>
-	  <p>
-	      So your readers can have an even easier time to follow you.
-	  </p>
+	  <div id="content_html">
+	      <h2>No news is bad news</h2>
+	      <p>
+		  Airss is a web feed reader that runs entirely in your browser. You can subscribe any feeds by clicking the 🍼 button from above and paste the URL, or you can use of one of the following tricks: 
+	      </p>
+	      <h3>Desktop browser users</h3>
+	      <p>
+		  Install this bookmarklet <a class="button" href="javascript:location.href='{airssPrefix}?url='+encodeURIComponent(window.location.href)">Subscribe it in Airss</a> <b>by dragging it to your bookmarks</b>. Whenever you encounter something interesting on the web, be it a blog, a news website or whatever, you can click this bookmarklet to subscribe. Chances are they support RSS feeds so you will always stay updated.
+	      </p>
+	      <h3>Mobile browser users</h3>
+	      <p>
+		  Android users can install this APP: <a href="https://f-droid.org/en/packages/net.daverix.urlforward/">URL Forwarder</a> (Thank you, David Laurell!) then add a filter as:
+	      </p>
+	      <pre>{airssPrefix}?url=@url</pre>
+	      <p>
+		  Then you can share links to the APP and select the menu to subscribe, if it support RSS feeds.
+	      </p>
+	      <p>
+		  iOS Safari users can use the bookmarklet method as mentioned earlier by syncing the bookmarklet from your Mac.
+	      </p>
+	      <h2>To my fellow bloggers</h2>
+	      <p>
+		  Please make sure you have your feed <a href="https://www.rssboard.org/rss-autodiscovery">auto-discoverable</a> from your homepage. And if you can, please enable <a href="https://enable-cors.org/">permissive CORS</a> on your blog to reach out to a broader audience. Lastly, if you really like Airss, you can put a link on your homepage:
+	      </p>
+	      <pre>&lt;a href="{airssPrefix}?subscribe-referrer"
+referrerpolicy="no-referrer-when-downgrade"&gt;
+Follow me with Airss!
+&lt;/a&gt;</pre>
+	      <p>
+		  So your readers can have an even easier time to follow you.
+	      </p>
+	  </div>
 	  {/if}
       </div>
   {:else if screen == Screens.shutdown}
-      <button class="button"
+      <button class="button py-1 px-6 inline-block rounded appearance-none font-bold
+		     text-lg text-center border-0 text-white bg-purple-600"
 	      on:click={clickReload}>Reload</button>
   {:else if screen == Screens.trash}
       <form on:submit|preventDefault={clickConfirmDelete}>
@@ -387,7 +369,8 @@
       </form>
   {:else if screen == Screens.config}
       <form on:submit|preventDefault={clickSubmitConfig}>
-	  <section>
+	  <section class="pt-2 border-b
+			  lg:flex lg:flex-row lg:flex-wrap lg:gap-x-4 lg:justify-center">
 	      <div class="field long">
 		  <label for="select-water-mark">
 		      Load more when unread items is below:
@@ -502,11 +485,11 @@
       </form>
   {/if}
   </div>
-  <div class="footer">
-      <div class="links">
+  <div class="text-sm text-gray-700 p-2 flex text-center">
+      <div class="w-1/2 text-left">
 	  <a href="https://roastidio.us/roast" referrerpolicy="no-referrer-when-downgrade">Roast me at Roastidious</a>
       </div>
-      <div class="copyright">
+      <div class="w-1/2 text-right">
 	  <a href="https://github.com/derek-zhou/airss" referrerpolicy="no-referrer-when-downgrade">Fork me on GitHub</a>
       </div>
   </div>
