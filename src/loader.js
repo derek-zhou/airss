@@ -68,15 +68,10 @@ async function cb_subscribe(prev, url) {
     }
 }
 
-async function cb_load(prev) {
+async function cb_load(prev, obj) {
     await prev;
     if (!enabled)
 	return;
-    let obj = await Model.getLoadCandidate();
-    if (!obj) {
-	console.info("Nothing to load, sleeping");
-	return;
-    }
     try {
 	Model.loadingStart();
 	let ret = await loadFeed(obj.feed, obj.items);
@@ -91,7 +86,6 @@ async function cb_load(prev) {
 	    obj.feed.error = e.toString();
 	    Model.updateFeed(obj.feed, []);
 	    Model.loadingDone();
-	    return;
 	} else {
 	    Model.loadingDone();
 	    throw e;
@@ -665,25 +659,20 @@ let state = null;
 
 function subscribe(url) {
     state = cb_subscribe(state, url);
-    // piggy back loading
-    state = cb_load(state);
 }
 
-function load() {
-    state = cb_load(state);
+function load(obj) {
+    state = cb_load(state, obj);
 }
 
 function reloadUrl(url, id) {
     state = cb_reloadUrl(state, url, id);
-    return state;
 }
 
 function saveFeeds() {
     state = cb_saveFeeds(state);
-    return state;
 }
 
 function restoreFeeds(handle) {
     state = cb_restoreFeeds(state, handle);
-    return state;
 }

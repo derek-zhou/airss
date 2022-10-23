@@ -2,6 +2,7 @@
  * The feeds schema, based on jsonfeed
  */
 const Store = "feeds";
+const UrlIndex = "feedUrl";
 
 // in memory state
 // feeds is an array of feed ids, in the order of last load time. feeds[0]
@@ -13,7 +14,7 @@ let itemSet = new Map();
 
 // public apis
 export {upgrade, load, get, first, rotate, addFeed, updateFeed, allFeedUrls,
-	removeFeed, deleteFeed, addItem, removeItem, itemsOf};
+	removeFeed, deleteFeed, getFeed, addItem, removeItem, itemsOf};
 
 function upgrade(db) {
     // the store holds all the feeds
@@ -62,6 +63,14 @@ async function get(db, id) {
     if (!feed.lastFetchTime)
 	feed.lastFetchTime = feed.lastLoadTime;
     return feed;
+}
+
+async function getFeed(db, url) {
+    let feed = await db.getFromIndex(Store, UrlIndex, url);
+    if (feed)
+	return feed.id;
+    else
+	return null;
 }
 
 async function addFeed(db, feed) {
