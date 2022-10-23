@@ -1,4 +1,5 @@
 module.exports = {
+    content: ["./public/index.html", "./src/*.svelte"],
     theme: {
 	screens: {
             sm: '512px',

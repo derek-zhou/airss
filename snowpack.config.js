@@ -32,7 +32,7 @@ module.exports = {
 	/* ... */
     },
     optimize: {
-	bundle: true,
+	bundle: false,
 	minify: false,
 	sourcemap: false,
 	target: 'es2017',

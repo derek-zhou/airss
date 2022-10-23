@@ -6,16 +6,15 @@
     },
     "devDependencies": {
 	"@snowpack/plugin-postcss": "^1.4.3",
-	"@snowpack/plugin-svelte": "^3.5.2",
-	"postcss": "^8.4.5",
-	"postcss-cli": "^8.3.1",
+	"@snowpack/plugin-svelte": "^3.7.0",
+	"postcss": "^8.4.8",
 	"postcss-nested": "^5.0.3",
 	"snowpack": "^3.8.8",
-	"tailwindcss": "^3.0.15"
+	"tailwindcss": "^3.2.0"
     },
     "dependencies": {
 	"idb": "^6.0.0",
-	"svelte": "^3.32.3",
+	"svelte": "^3.52.0",
 	"topbar": "^1.0.1"
     }
 }
