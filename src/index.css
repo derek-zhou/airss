@@ -213,24 +213,6 @@ form {
 	h4 {
             @apply text-xl;
 	}
-	h5 {
-            @apply text-lg;
-	}
-	h6 {
-            @apply text-lg;
-	}
-	p {
-            @apply text-lg leading-relaxed;
-	}
-	ol {
-            @apply text-lg;
-	}
-	ul {
-            @apply text-lg;
-	}
-	blockquote {
-            @apply text-lg leading-relaxed;
-	}
 	img {
 	    @apply max-w-sm;
 	}

@@ -35,6 +35,7 @@
  });
 </script>
 
-<div id="content_html" class="font-serif text-gray-800 leading-snug mb-2">
+<div id="content_html"
+     class="font-serif text-gray-800 leading-snug mb-2 sm:text-lg sm:leading-relaxed">
     {@html contentHtml}
 </div>

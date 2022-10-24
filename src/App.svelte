@@ -310,7 +310,8 @@
 	      {/if}
 	  </div>
 	  {:else}
-	  <div id="content_html">
+	  <div id="content_html"
+	       class="font-serif text-gray-800 leading-snug mb-2 sm:text-lg sm:leading-relaxed">
 	      <h2>No news is bad news</h2>
 	      <p>
 		  Airss is a web feed reader that runs entirely in your browser. You can subscribe any feeds by clicking the 🍼 button from above and paste the URL, or you can use of one of the following tricks: 
