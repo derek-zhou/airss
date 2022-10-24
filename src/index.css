@@ -218,6 +218,13 @@ form {
 	}
     }
 }
+@screen md {
+    #content_html {
+	img {
+	    @apply max-w-md;
+	}
+    }
+}
 @screen lg {
     html {
 	@apply text-[18px];
