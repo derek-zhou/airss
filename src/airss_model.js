@@ -18,13 +18,13 @@ export {currentState, shutdown, clearData, warn, error,
 	allFeedUrls, postHandle, saveFeeds, restoreFeeds};
 
 // when the cursor is this close to the end I load more
-const WaterMark = localStorage.getItem("WATER_MARK") || 10;
+const WaterMark = parseInt(localStorage.getItem("WATER_MARK")) || 10;
 
 // the minimal elapsed time before a reload, in hour
-const MinReloadWait = localStorage.getItem("MIN_RELOAD_WAIT") || 12;
+const MinReloadWait = parseInt(localStorage.getItem("MIN_RELOAD_WAIT")) || 12;
 
 // kept in days
-const MaxKeptPeriod = localStorage.getItem("MAX_KEPT_PERIOD") || 180;
+const MaxKeptPeriod = parseInt(localStorage.getItem("MAX_KEPT_PERIOD")) || 180;
 
 // events I post to the document from the callback side
 function emitModelAlert(type, text) {

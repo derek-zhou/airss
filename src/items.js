@@ -6,9 +6,9 @@ import * as Feeds from './feeds.js';
 const Store = "items";
 
 // kept in days
-const MaxKeptPeriod = localStorage.getItem("MAX_KEPT_PERIOD") || 180;
+const MaxKeptPeriod = parseInt(localStorage.getItem("MAX_KEPT_PERIOD")) || 180;
 // keep at most 100 items from feed
-const MaxKeptItems = localStorage.getItem("MAX_ITEMS_PER_FEED") || 100;
+const MaxKeptItems = parseInt(localStorage.getItem("MAX_ITEMS_PER_FEED")) || 100;
 
 // items is an array of item ids in ascending order
 let items = [];

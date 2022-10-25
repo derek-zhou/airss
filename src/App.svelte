@@ -31,50 +31,45 @@
  let subscribeUrl = "";
  let shouldUnsubscribe = false;
 
- let waterMark;
+ let waterMark = parseInt(localStorage.getItem("WATER_MARK")) || 1;
  let waterMarkChoices = [
-     {value: 0, text: "0 items"},
+     {value: 1, text: "1 item"},
      {value: 10, text: "10 items"},
      {value: 100, text: "100 items"},
      {value: 1000, text: "1000 items"}
  ];
- let waterMarkCurrent = localStorage.getItem("WATER_MARK") || 10;
 
- let minReloadWait;
+ let minReloadWait = parseInt(localStorage.getItem("MIN_RELOAD_WAIT")) || 12;
  let minReloadWaitChoices = [
      {value: 1, text: "1 hour"},
      {value: 4, text: "4 hours"},
      {value: 12, text: "12 hours"},
      {value: 24, text: "24 hours"}
  ];
- let minReloadWaitCurrent = localStorage.getItem("MIN_RELOAD_WAIT") || 12;
  
- let maxKeptPeriod;
+ let maxKeptPeriod = parseInt(localStorage.getItem("MAX_KEPT_PERIOD")) || 180;
  let maxKeptPeriodChoices = [
      {value: 30, text: "30 days"},
      {value: 60, text: "60 days"},
      {value: 180, text: "180 days"},
      {value: 999, text: "999 days"}
  ];
- let maxKeptPeriodCurrent = localStorage.getItem("MAX_KEPT_PERIOD") || 180;
 
- let maxItemsPerFeed;
+ let maxItemsPerFeed = parseInt(localStorage.getItem("MAX_ITEMS_PER_FEED")) || 100;
  let maxItemsPerFeedChoices = [
      {value: 25, text: "25 items"},
      {value: 50, text: "50 items"},
      {value: 100, text: "100 items"},
      {value: 200, text: "200 items"}
  ];
- let maxItemsPerFeedCurrent = localStorage.getItem("MAX_ITEMS_PER_FEED") || 100;
 
- let truncateItemsPerFeed;
+ let truncateItemsPerFeed = parseInt(localStorage.getItem("TRUNCATE_ITEMS_PER_FEED")) || 25;
  let truncateItemsPerFeedChoices = [
      {value: 1, text: "1 item"},
      {value: 10, text: "10 items"},
      {value: 25, text: "25 items"},
      {value: 100, text: "100 items"}
  ];
- let truncateItemsPerFeedCurrent = localStorage.getItem("TRUNCATE_ITEMS_PER_FEED") || 25;
 
  let bounceLoad = localStorage.getItem("BOUNCE_LOAD") != "false";
 
@@ -230,11 +225,11 @@
 
  function clickSubmitConfig() {
      // airss_model:
-     localStorage.setItem("WATER_MARK", waterMark.value);
-     localStorage.setItem("MIN_RELOAD_WAIT", minReloadWait.value);
-     localStorage.setItem("MAX_KEPT_PERIOD", maxKeptPeriod.value);
-     localStorage.setItem("MAX_ITEMS_PER_FEED", maxItemsPerFeed.value);
-     localStorage.setItem("TRUNCATE_ITEMS_PER_FEED", truncateItemsPerFeed.value);
+     localStorage.setItem("WATER_MARK", waterMark);
+     localStorage.setItem("MIN_RELOAD_WAIT", minReloadWait);
+     localStorage.setItem("MAX_KEPT_PERIOD", maxKeptPeriod);
+     localStorage.setItem("MAX_ITEMS_PER_FEED", maxItemsPerFeed);
+     localStorage.setItem("TRUNCATE_ITEMS_PER_FEED", truncateItemsPerFeed);
      localStorage.setItem("BOUNCE_LOAD", bounceLoad);
      // It is very hard to change config at run time, so I just take
      // shortcut to reload
@@ -418,8 +413,7 @@ Follow me with Airss!
 		  </label>
 		  <select id="select-water-mark" bind:value={waterMark}>
 		      {#each waterMarkChoices as choice}
-			  <option selected={choice.value == waterMarkCurrent}
-				  value={choice}>{choice.text}</option>
+			  <option value={choice.value}>{choice.text}</option>
 		      {/each}
 		  </select>
 	      </div>
@@ -429,8 +423,7 @@ Follow me with Airss!
 		  </label>
 		  <select id="select-min-reload-wait" bind:value={minReloadWait}>
 		      {#each minReloadWaitChoices as choice}
-			  <option selected={choice.value == minReloadWaitCurrent}
-				  value={choice}>{choice.text}</option>
+			  <option value={choice.value}>{choice.text}</option>
 		      {/each}
 		  </select>
 	      </div>
@@ -440,8 +433,7 @@ Follow me with Airss!
 		  </label>
 		  <select id="select-max-kept-period" bind:value={maxKeptPeriod}>
 		      {#each maxKeptPeriodChoices as choice}
-			  <option selected={choice.value == maxKeptPeriodCurrent}
-				  value={choice}>{choice.text}</option>
+			  <option value={choice.value}>{choice.text}</option>
 		      {/each}
 		  </select>
 	      </div>
@@ -451,8 +443,7 @@ Follow me with Airss!
 		  </label>
 		  <select id="select-max-items-per-feed" bind:value={maxItemsPerFeed}>
 		      {#each maxItemsPerFeedChoices as choice}
-			  <option selected={choice.value == maxItemsPerFeedCurrent}
-				  value={choice}>{choice.text}</option>
+			  <option value={choice.value}>{choice.text}</option>
 		      {/each}
 		  </select>
 	      </div>
@@ -462,8 +453,7 @@ Follow me with Airss!
 		  </label>
 		  <select id="select-truncate-items-per-feed" bind:value={truncateItemsPerFeed}>
 		      {#each truncateItemsPerFeedChoices as choice}
-			  <option selected={choice.value == truncateItemsPerFeedCurrent}
-				  value={choice}>{choice.text}</option>
+			  <option value={choice.value}>{choice.text}</option>
 		      {/each}
 		  </select>
 	      </div>

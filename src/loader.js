@@ -6,9 +6,9 @@ import * as Model from './airss_model.js';
 export {subscribe, load, reloadUrl, saveFeeds, restoreFeeds};
 
 // truncate to at most 25 items per loading
-const TruncateItems = localStorage.getItem("TRUNCATE_ITEMS_PER_FEED") || 100;
+const TruncateItems = parseInt(localStorage.getItem("TRUNCATE_ITEMS_PER_FEED")) || 25;
 // kept in days
-const MaxKeptPeriod = localStorage.getItem("MAX_KEPT_PERIOD") || 180;
+const MaxKeptPeriod = parseInt(localStorage.getItem("MAX_KEPT_PERIOD")) || 180;
 // whether to load with bouncer
 const BounceLoad = localStorage.getItem("BOUNCE_LOAD") != "false";
 const BouncerRoot = "https://roastidio.us"
