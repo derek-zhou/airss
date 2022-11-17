@@ -72,9 +72,9 @@ a:focus, a:hover {
         }
     }
     pre {
-        @apply mb-4 p-2 bg-gray-50;
+        @apply mb-4 p-2 whitespace-pre-wrap;
         > code {
-            @apply whitespace-pre;
+            @apply bg-gray-50 whitespace-pre;
         }
     }
     dd,
