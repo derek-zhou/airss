@@ -289,7 +289,7 @@ async function cb_addItems(prev, items) {
     }
 }
 
-function oopsItem(feed, id) {
+function oopsItem(feed) {
     let item = new Object();
     item.datePublished = new Date();
     item.contentHtml = "If you see this, this feed '" + feed.feedUrl +
@@ -300,11 +300,11 @@ function oopsItem(feed, id) {
     item.title = "Oops...";
     item.tags = ["_error"];
     item.feedTitle = feed.title;
-    item.feedId = id;
+    item.feedId = feed.id;
     return item;
 }
 
-function dummyItem(feed, id) {
+function dummyItem(feed) {
     let item = new Object();
     item.datePublished = new Date();
     item.contentHtml = "If you see this, this feed '" + feed.feedUrl +
@@ -315,7 +315,7 @@ function dummyItem(feed, id) {
     item.title = "Errrr...";
     item.tags = ["_error"];
     item.feedTitle = feed.title;
-    item.feedId = id;
+    item.feedId = feed.id;
     return item;
 }
 
@@ -324,31 +324,25 @@ async function cb_updateFeed(prev, feed, items) {
     loadingOutstanding = false;
     let oldCount = Items.length();
     let now = new Date();
-    let feedId;
     if (feed.id === undefined) {
 	// must be new feed
 	try {
 	    let id = await Feeds.addFeed(db, feed);
 	    console.info("added feed " + feed.feedUrl + " with id: " + id);
 	    emitModelInfo("The feed '" + feed.feedUrl + "' is now subscribed");
-	    feedId = id;
 	} catch (e) {
 	    if (e instanceof DOMException) {
 		emitModelError("The feed '" + feed.feedUrl + "' is already subscribed");
-		feedId = await Feeds.getFeed(db, feed.feedUrl);
+		feed.id = await Feeds.getFeed(db, feed.feedUrl);
 	    } else {
 		throw e;
 	    }
 	}
-    } else {
-	feedId = feed.id;
     }
-    if (!feedId)
-	throw("Feed id is missing");
     // push items in reverse order
     for(let i = items.length - 1; i>= 0; i--) {
 	let item = items[i];
-	item.feedId = feedId;
+	item.feedId = feed.id;
 	try {
 	    await Items.pushItem(db, item);
 	} catch(e) {
@@ -367,12 +361,12 @@ async function cb_updateFeed(prev, feed, items) {
 		       "' faild to load");
 	console.error("The feed '" + feed.feedUrl +
 		       "' faild to load: " + feed.error);
-	await Items.pushItem(db, oopsItem(feed, feedId));
+	await Items.pushItem(db, oopsItem(feed));
 	delete feed.error;
 	num ++;
     } else if (num == 0 &&
 	       feed.lastFetchTime < now - MaxKeptPeriod*24*3600*1000) {
-	await Items.pushItem(db, dummyItem(feed, feedId));
+	await Items.pushItem(db, dummyItem(feed));
 	num ++;
     }
     // lastLoadTime is the time we attempted to load
