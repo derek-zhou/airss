@@ -199,15 +199,17 @@
      screen = Screens.subscribe;
  }
 
- function clickTrash() {
+ function clickTrash(e) {
      clearAlert();
      shouldUnsubscribe = !dummy;
      screen = Screens.trash;
+     e.preventDefault();
  }
 
- function clickRefresh() {
+ function clickRefresh(e) {
      clearAlert();
      refreshItem();
+     e.preventDefault();
  }
 
  function clickConfirmDelete() {
@@ -365,19 +367,23 @@ Follow me with Airss!
 	      {/if}
 	  </div>
 	  {#if $currentItem}
-	  <div class="flex flex-wrap w-full gap-x-1 justify-center">
-	      <button class="button py-1 px-6 inline-block rounded appearance-none font-bold
-			     text-lg text-center border-0 text-white bg-pink-600"
-		      on:click={clickTrash}>🗑</button>
-	      {#if !dummy}
+	  <form class="bg-white flex flex-col gap-y-2 p-0"
+	      method="post" action="https://roastidio.us/post" target="_blank">
+	      <input type="hidden" name="url" value={$currentItem.url}>
+	      <textarea class="leading-relaxed border rounded border-gray-600 h-20 p-1"
+		  name="content"></textarea>
+	      <div class="flex flex-wrap w-full gap-x-1 justify-center">
 		  <button class="button py-1 px-6 inline-block rounded appearance-none font-bold
-			     text-lg text-center border-0 text-white bg-purple-600"
-			  on:click={clickRefresh}>📃</button>
-		  <a class="button py-1 px-6 inline-block rounded appearance-none font-bold
-			     text-lg text-center border-0 text-white bg-purple-600" target="roast"
-		     href={roastPrefix + encodeURIComponent($currentItem.url)}>🔥</a>
-	      {/if}
-	  </div>
+				 text-lg text-center border-0 text-white bg-pink-600"
+			  on:click={clickTrash}>🗑</button>
+		  {#if !dummy}
+		      <button class="button py-1 px-6 inline-block rounded appearance-none font-bold
+				     text-lg text-center border-0 text-white bg-purple-600"
+			      on:click={clickRefresh}>📃</button>
+		  {/if}
+		  <input class="button" type="submit" value="🔥">
+	      </div>
+	  </form>
 	  {/if}
       </div>
   {:else if screen == Screens.shutdown}
