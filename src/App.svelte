@@ -367,7 +367,7 @@ Follow me with Airss!
 	      {/if}
 	  </div>
 	  {#if $currentItem}
-	  <form class="bg-white flex flex-col gap-y-2 p-0"
+	  <form class="bg-white flex flex-col gap-y-2 p-0 w-full"
 	      method="post" action="https://roastidio.us/post" target="_blank">
 	      <input type="hidden" name="url" value={$currentItem.url}>
 	      <textarea class="leading-relaxed border rounded border-gray-600 h-20 p-1"
