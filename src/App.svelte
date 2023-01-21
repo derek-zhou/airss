@@ -90,6 +90,8 @@
  afterUpdate(() => {
      if (!$currentItem)
 	 return;
+     // the form inputs are not reactive
+     document.getElementById('comment-form').reset();
      let container = document.querySelector("#content_html");
      let baseUrl = $currentItem.url;
      if (!container || dummy)
@@ -368,10 +370,12 @@ Follow me with Airss!
 	  </div>
 	  {#if $currentItem}
 	  <form class="bg-white flex flex-col gap-y-2 p-0 w-full"
-	      method="post" action="https://roastidio.us/post" target="_blank">
+	      method="post" action="https://roastidio.us/post" target="_blank" id="comment-form">
 	      <input type="hidden" name="url" value={$currentItem.url}>
-	      <textarea class="leading-relaxed border rounded border-gray-600 h-20 p-1"
-		  name="content"></textarea>
+	      {#if !dummy}
+		  <textarea class="leading-relaxed border rounded border-gray-600 h-20 p-1"
+			    name="content"></textarea>
+	      {/if}
 	      <div class="flex flex-wrap w-full gap-x-1 justify-center">
 		  <button class="button py-1 px-6 inline-block rounded appearance-none font-bold
 				 text-lg text-center border-0 text-white bg-pink-600"
@@ -380,8 +384,8 @@ Follow me with Airss!
 		      <button class="button py-1 px-6 inline-block rounded appearance-none font-bold
 				     text-lg text-center border-0 text-white bg-purple-600"
 			      on:click={clickRefresh}>📃</button>
+		      <input class="button" type="submit" value="🔥">
 		  {/if}
-		  <input class="button" type="submit" value="🔥">
 	      </div>
 	  </form>
 	  {/if}
