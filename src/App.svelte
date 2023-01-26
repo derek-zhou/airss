@@ -91,8 +91,10 @@
      if (!$currentItem)
 	 return;
      // the form inputs are not reactive
-     document.getElementById('comment-form').reset();
-     let container = document.querySelector("#content_html");
+     let form = document.getElementById('comment-form');
+     if (form)
+	 form.reset();
+     let container = document.getElementById('content_html');
      let baseUrl = $currentItem.url;
      if (!container || dummy)
 	 return;
