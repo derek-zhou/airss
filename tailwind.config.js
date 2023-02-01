@@ -1,5 +1,5 @@
 module.exports = {
-    content: ["./public/index.html", "./src/*.svelte"],
+    content: ["./public/index.html", "./src/*.jsx"],
     theme: {
 	screens: {
             sm: '512px',

@@ -1,12 +1,11 @@
 /*
  * The controller layer of AirSS.
- * I export stores for the svelte view to consume;
- * I export functions for the svelte view on actions
- * I handle model emited events
+ * The model layer also send events and change variables as the roots of reactivity
+ * The model founctions are encapsulated for use by the view layer
  */
 
 import * as Model from './airss_model.js';
-import { writable } from 'svelte/store';
+import { createSignal, batch } from "solid-js";
 import topbar from 'topbar';
 
 // timeout for the model to shutdown itself for inactivity
@@ -15,18 +14,35 @@ const TimeoutPeriod = 3600 * 1000;
 // watchdog to shutdown the backend when idel long enough
 let idleTimeout = setTimeout(timeoutShutdown, TimeoutPeriod);
 
-export const length = writable(0);
-export const cursor = writable(-1);
-export const alertText = writable("");
-export const alertType = writable("info");
-export const currentItem = writable(null);
-export const running = writable(true);
-export const postHandle = writable("");
+// module layer driven signals
+const [length, setLength] = createSignal(0);
+const [cursor, setCursor] = createSignal(-1);
+const [alertText, setAlertText] = createSignal("");
+const [alertType, setAlertType] = createSignal("info");
+const [currentItem, setCurrentItem] = createSignal(null);
+const [running, setRunning] = createSignal(true);
+const [postHandle, setPostHandle] = createSignal("");
+
+// only the getters are exported
+export {length, cursor, alertText, alertType, currentItem, running, postHandle};
+
+// screen is fundimental content shown in the window
+export const Screens = {
+    browse: 1,
+    shuutdown: 2,
+    subscribe: 3,
+    trash: 4,
+    config: 5
+};
+
+// read write signals for user interactions
+export const [screen, setScreen, setAlertText] = createSignal(Screens.browse);
+export const [unsubscribeDefault, setUnsubscribeDefault] = createSignal(false);
 
 function actionPreamble() {
     clearTimeout(idleTimeout);
     idleTimeout = setTimeout(timeoutShutdown, TimeoutPeriod);
-    alertText.set("");
+    setAlertText("");
 }
 
 // shutdown the model layer. return a promise that reject
@@ -34,23 +50,27 @@ function actionPreamble() {
 function timeoutShutdown() {
     actionPreamble();
     clearTimeout(idleTimeout);
-    alertType.set("error");
-    alertText.set("Shutdown due to inactivity");
+    batch(() => {
+	setAlertType("error");
+	setAlertText("Shutdown due to inactivity");
+    });
     return Model.shutdown();
 }
 
 async function loadCurrentItem() {
     let item = await Model.currentItem();
     if (item)
-	currentItem.set(item);
+	setCurrentItem(item);
 }
 
 export async function forwardItem() {
     actionPreamble();
     let item = await Model.forwardItem();
     if (item) {
-	cursor.update(n => n + 1);
-	currentItem.set(item);
+	batch(() => {
+	    setCursor(cursor() + 1);
+	    setCurrentItem(item);
+	});
     }
 }
 
@@ -63,15 +83,17 @@ export async function backwardItem() {
     actionPreamble();
     let item = await Model.backwardItem();
     if (item) {
-	cursor.update(n => n - 1);
-	currentItem.set(item);
+	batch(() => {
+	    setCursor(cursor() - 1);
+	    setCurrentItem(item);
+	});
     }
 }
 
 export async function deleteItem() {
     actionPreamble();
     await Model.deleteItem();
-    currentItem.set(await Model.currentItem());
+    setCurrentItem(await Model.currentItem());
 }
 
 export function clearData() {
@@ -82,7 +104,7 @@ export function clearData() {
 export async function unsubscribe(id) {
     actionPreamble();
     await Model.unsubscribe(id);
-    currentItem.set(await Model.currentItem());
+    setCurrentItem(await Model.currentItem());
 }
 
 export function subscribe(url) {
@@ -101,27 +123,31 @@ export function restoreFeeds(handle) {
 }
 
 document.addEventListener("AirSSModelItemsLoaded", e => {
-    length.set(e.detail.length);
-    cursor.set(e.detail.cursor);
+    batch(() => {
+	setLength(e.detail.length);
+	setCursor(e.detail.cursor);
+    });
     if (e.detail.length > 0 && e.detail.cursor == -1)
 	forwardItem();
 });
 
 document.addEventListener("AirSSModelAlert", e => {
-    alertType.set(e.detail.type);
-    alertText.set(e.detail.text);
+    batch(() => {
+	alertType(e.detail.type);
+	alertText(e.detail.text);
+    });
 });
 
 document.addEventListener("AirSSModelShutDown", () => {
-    running.set(false);
+    setRunning(false);
 });
 
 document.addEventListener("AirSSModelPostHandle", e => {
-    postHandle.set(e.detail.text);
+    setPostHandle(e.detail.text);
 });
 
 document.addEventListener("AirSSModelItemUpdated", e => {
-    currentItem.set(e.detail);
+    setCurrentItem(e.detail);
 });
 
 document.addEventListener("AirSSModelStartLoading", () => {

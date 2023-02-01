@@ -10,7 +10,6 @@ module.exports = {
 	"public": "/"
     },
     plugins: [
-	"@snowpack/plugin-svelte",
 	"@snowpack/plugin-postcss"
     ],
     routes: [
