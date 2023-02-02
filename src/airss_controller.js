@@ -17,14 +17,12 @@ let idleTimeout = setTimeout(timeoutShutdown, TimeoutPeriod);
 // module layer driven signals
 const [length, setLength] = createSignal(0);
 const [cursor, setCursor] = createSignal(-1);
-const [alertText, setAlertText] = createSignal("");
-const [alertType, setAlertType] = createSignal("info");
 const [currentItem, setCurrentItem] = createSignal(null);
 const [running, setRunning] = createSignal(true);
 const [postHandle, setPostHandle] = createSignal("");
 
 // only the getters are exported
-export {length, cursor, alertText, alertType, currentItem, running, postHandle};
+export {length, cursor, currentItem, running, postHandle};
 
 // screen is fundimental content shown in the window
 export const Screens = {
@@ -36,8 +34,10 @@ export const Screens = {
 };
 
 // read write signals for user interactions
-export const [screen, setScreen, setAlertText] = createSignal(Screens.browse);
+export const [screen, setScreen] = createSignal(Screens.browse);
 export const [unsubscribeDefault, setUnsubscribeDefault] = createSignal(false);
+export const [alertText, setAlertText] = createSignal("");
+export const [alertType, setAlertType] = createSignal("info");
 
 function actionPreamble() {
     clearTimeout(idleTimeout);

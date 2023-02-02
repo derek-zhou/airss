@@ -70,7 +70,7 @@ function clickRight() {
     forwardItem();
 }
 
-export default function Config() {
+export default function App() {
     createEffect(() => {
 	document.title = `Airss Reader(${cursor()+1}/${length()})`;
     });
@@ -79,11 +79,11 @@ export default function Config() {
 <div id="layout" class="relative min-h-screen flex flex-col lg:max-w-screen-lg lg:mx-auto">
   <div class="sticky top-0 bg-gray-100 p-2 flex">
     <div>
-      <a href="/"><img src="/images/airss_logo.png" class="inline-block h-8"></a>
+      <a href="/"><img src="/images/airss_logo.png" class="inline-block h-8" /></a>
       <span class="text-gray-600 align-bottom whitespace-nowrap">{cursor()+1}/{length()}</span>
     </div>
     <div class="flex-grow text-right">
-      <button class="button py-1 text-purple-600 inline-block rounded appearance-none
+	<button class="button py-1 text-purple-600 inline-block rounded appearance-none
 		     font-bold text-lg text-center ml-1 px-1 sm:px-4"
 	      onClick={() => setScreen(Screen.config)}>🔧
       </button>
@@ -103,7 +103,7 @@ export default function Config() {
       </button>
     </div>
   </div>
-      <p class={alertClass()} role="alert" onClick={() -> setAlertText("")}
+      <p class={alertClass()} role="alert" onClick={() => setAlertText("")}
      innerHtml={alertText()} />
   <div class="flex-grow"
        onTouchStart={browseTouchStart}

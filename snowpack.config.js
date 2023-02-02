@@ -31,6 +31,7 @@ module.exports = {
 	/* ... */
     },
     optimize: {
+	entrypoints: ["src/index.jsx"],
 	bundle: true,
 	minify: false,
 	sourcemap: false,

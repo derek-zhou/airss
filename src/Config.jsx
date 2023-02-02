@@ -163,32 +163,32 @@ export default function Config() {
     <section>
       <div class="field">
 	<button class="button text-button" onClick={clickSaveFeeds}>Save Feeds</button>
-	<Show when={postHandle()}
+	<Show when={postHandle()}>
 	      <label class="code">{postHandle()}</label>
+	</Show>
+	<Show when={!postHandle()}>
+	      <label class="code">Not Saved</label>
+	</Show>
+      </div>
+    </section>
+    <section>
+      <div class="field">
+	<button class="button text-button" onClick={clickRestoreFeeds}>Restore Feeds</button>
+	<input id="input-restore-handle" type="text" class="short code"
+	       ref={restoreHandle} value={restoreHandleDefult} />
+      </div>
+    </section>
   </Show>
-  <Show when={!postHandle()}
-	<label class="code">Not Saved</label>
-</Show>
-</div>
-</section>
-<section>
-  <div class="field">
-    <button class="button text-button" onClick={clickRestoreFeeds}>Restore Feeds</button>
-    <input id="input-restore-handle" type="text" class="short code"
-	   ref={restoreHandle} value={restoreHandleDefult} />
+  <section>
+    <div class="field alert alert-danger">
+      <label for="input-clear-database">Danger! Type "clear database" to delete all data</label>
+      <input id="input-clear-database" type="text" ref={clearDatabase} />
+    </div>
+  </section>
+  <div class="toolbar">
+    <input class="button" type="submit" value="👌" />
+    <input class="button" type="reset" value="👎" onClick={clickCancel} />
   </div>
-</section>
-</Show>
-<section>
-  <div class="field alert alert-danger">
-    <label for="input-clear-database">Danger! Type "clear database" to delete all data</label>
-    <input id="input-clear-database" type="text" ref={clearDatabase} />
-  </div>
-</section>
-<div class="toolbar">
-  <input class="button" type="submit" value="👌" />
-  <input class="button" type="reset" value="👎" onClick={clickCancel} />
-</div>
 </form>
     );
 }

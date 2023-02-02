@@ -66,7 +66,7 @@ export default function Article() {
 	<div class="sm:float-right sm:ml-2">
 	  <a href={currentItem().url} target="_blank" rel="noopener noreferrer">
 	    <img src={currentItem().imageUrl} alt="thumbnail" decoding="sync"
-		 class="w-auto max-w-full max-w-xs max-h-48 md:max-w-lg md:max-h-64"/>
+		 class="w-auto max-w-full max-w-xs max-h-48 md:max-w-lg md:max-h-64" />
 	  </a>
 	</div>
       </Show>
@@ -74,7 +74,7 @@ export default function Article() {
 	<div class="float-left mr-2">
 	  <a href={currentItem().url} target="_blank" rel="noopener noreferrer">
 	    <img src={UnknownImage} alt="thumbnail" decoding="sync"
-		 class="w-16 h-16"/>
+		 class="w-16 h-16" />
 	  </a>
 	</div>
       </Show>
@@ -102,7 +102,7 @@ export default function Article() {
 	 innerHTML={currentItem().contentHtml} />
     <form class="bg-white flex flex-col gap-y-2 p-0 w-full"
 	  method="post" action="https://roastidio.us/post" target="_blank" id="comment-form">
-      <input type="hidden" name="url" value={currentItem().url}>
+      <input type="hidden" name="url" value={currentItem().url} />
       <Show when={!dummy()}>
 	<textarea class="leading-relaxed border rounded border-gray-600 h-20 p-1"
 		  name="content"></textarea>
