@@ -17,7 +17,7 @@ function browseTouchStart(evt) {
 }
 
 function browseTouchMove(evt) {
-    if ( ! xDown || ! yDown || screen != Screens.browse ) {
+    if ( ! xDown || ! yDown || screen() != Screens.browse ) {
         return;
     }
     var xUp = evt.touches[0].clientX;
@@ -85,11 +85,11 @@ export default function App() {
     <div class="flex-grow text-right">
 	<button class="button py-1 text-purple-600 inline-block rounded appearance-none
 		     font-bold text-lg text-center ml-1 px-1 sm:px-4"
-	      onClick={() => setScreen(Screen.config)}>🔧
+	      onClick={() => setScreen(Screens.config)}>🔧
       </button>
       <button class="button py-1 text-purple-600 inline-block rounded appearance-none
 		     font-bold text-lg text-center ml-1 px-1 sm:px-4"
-	      onClick={() => setScreen(Screen.subscribe)}>🍼
+	      onClick={() => setScreen(Screens.subscribe)}>🍼
       </button>
       <button class="button py-1 text-purple-600 inline-block rounded appearance-none
 		     font-bold text-lg text-center ml-1 px-1 sm:px-4"
@@ -104,7 +104,7 @@ export default function App() {
     </div>
   </div>
       <p class={alertClass()} role="alert" onClick={() => setAlertText("")}
-     innerHtml={alertText()} />
+     innerHTML={alertText()} />
   <div class="flex-grow"
        onTouchStart={browseTouchStart}
        onTouchMove={browseTouchMove}>

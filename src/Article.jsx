@@ -1,5 +1,6 @@
 import { batch, createEffect, Show } from "solid-js";
-import {refreshItem, currentItem, Screens, setScreen} from  './airss_controller.js';
+import {refreshItem, currentItem, Screens, setScreen,
+       setUnsubscribeDefault} from  './airss_controller.js';
 
 const UnknownImage = "/images/unknown_link.png";
 const airssPrefix = "https://airss.roastidio.us/";
@@ -12,16 +13,16 @@ function dummy() {
 }
 
 function clickRefresh(e) {
-    refreshItem();
     e.preventDefault();
+    refreshItem();
 }
 
 function clickTrash(e) {
+    e.preventDefault();
     batch(() => {
 	setUnsubscribeDefault(dummy());
 	setScreen(Screens.trash);
     });
-    e.preventDefault();
 }
 
 export default function Article() {

@@ -133,8 +133,8 @@ document.addEventListener("AirSSModelItemsLoaded", e => {
 
 document.addEventListener("AirSSModelAlert", e => {
     batch(() => {
-	alertType(e.detail.type);
-	alertText(e.detail.text);
+	setAlertType(e.detail.type);
+	setAlertText(e.detail.text);
     });
 });
 

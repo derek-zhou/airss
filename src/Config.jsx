@@ -11,7 +11,7 @@ const waterMarkChoices = [
     {value: 1000, text: "1000 items"}
 ];
 
-let mnReloadWait;
+let minReloadWait;
 const minReloadWaitDefault = parseInt(localStorage.getItem("MIN_RELOAD_WAIT")) || 12;
 const minReloadWaitChoices = [
     {value: 1, text: "1 hour"},
@@ -57,13 +57,14 @@ let restoreHandle;
 let restoreHandleDefault = "";
 
 function clickSubmitConfig(e) {
+    e.preventDefault();
     // airss_model:
     localStorage.setItem("WATER_MARK", waterMark.value);
     localStorage.setItem("MIN_RELOAD_WAIT", minReloadWait.value);
     localStorage.setItem("MAX_KEPT_PERIOD", maxKeptPeriod.value);
     localStorage.setItem("MAX_ITEMS_PER_FEED", maxItemsPerFeed.value);
     localStorage.setItem("TRUNCATE_ITEMS_PER_FEED", truncateItemsPerFeed.value);
-    localStorage.setItem("BOUNCE_LOAD", bounceLoad.value);
+    localStorage.setItem("BOUNCE_LOAD", bounceLoad.checked);
     // It is very hard to change config at run time, so I just take
     // shortcut to reload
     if (clearDatabase.value == "clear database") {
@@ -73,22 +74,21 @@ function clickSubmitConfig(e) {
     } else {
 	location.reload();
     }
-    e.preventDefault();
 }
 
 function clickCancel(e) {
-    setScreen(Screens.browse);
     e.preventDefault();
+    setScreen(Screens.browse);
 }
 
 function clickSaveFeeds(e) {
-    saveFeeds();
     e.preventDefault();
+    saveFeeds();
 }
 
 function clickRestoreFeeds(e) {
-    restoreFeeds(restoreHandle.value);
     e.preventDefault();
+    restoreFeeds(restoreHandle.value);
 }
 
 export default function Config() {
@@ -113,7 +113,7 @@ export default function Config() {
       </label>
       <select id="select-min-reload-wait" ref={minReloadWait}>
 	<For each={minReloadWaitChoices}>{(choice) =>
-	  <option selected={choice.value == minReloadDefault}
+	  <option selected={choice.value == minReloadWaitDefault}
 		  value={choice.value}>{choice.text}</option>
 	  }</For>
       </select>
@@ -156,7 +156,7 @@ export default function Config() {
 	Load feeds with roastidio.us (<a href="https://github.com/derek-zhou/airss#Proxy">Why</a>):
       </label>
       <input id="input-bounce-load" type="checkbox"
-	     ref={bounceLoad} value={bounceLoadDefault} />
+	     ref={bounceLoad} checked={bounceLoadDefault} />
     </div>
   </section>
   <Show when={bounceLoadDefault}>
@@ -175,7 +175,7 @@ export default function Config() {
       <div class="field">
 	<button class="button text-button" onClick={clickRestoreFeeds}>Restore Feeds</button>
 	<input id="input-restore-handle" type="text" class="short code"
-	       ref={restoreHandle} value={restoreHandleDefult} />
+	       ref={restoreHandle} value={restoreHandleDefault} />
       </div>
     </section>
   </Show>

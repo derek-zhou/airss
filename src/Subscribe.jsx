@@ -3,14 +3,14 @@ import {subscribe, Screens, setScreen} from  './airss_controller.js';
 let subscribeUrl;
 
 function clickSubmitSubscribe(e) {
+    e.preventDefault();
     subscribe(subscribeUrl.value);
     setScreen(Screens.browse);
-    e.preventDefault();
 }
 
 function clickCancel(e) {
-    setScreen(Screens.browse);
     e.preventDefault();
+    setScreen(Screens.browse);
 }
 
 export default function Subscribe() {

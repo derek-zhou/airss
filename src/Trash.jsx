@@ -1,20 +1,20 @@
-import {deleteItem, unsubscribe, Screens, setScreen,
+import {deleteItem, unsubscribe, Screens, setScreen, currentItem,
 	unsubscribeDefault} from  './airss_controller.js';
 
 let shouldUnsubscribe;
 
 function clickConfirmDelete(e) {
+    e.preventDefault();
     if (shouldUnsubscribe.value)
-	unsubscribe(item.feedId);
+	unsubscribe(currentItem().feedId);
     else
 	deleteItem();
     setScreen(Screens.browse);
-    e.preventDefault();
 }
 
 function clickCancel(e) {
-    setScreen(Screens.browse);
     e.preventDefault();
+    setScreen(Screens.browse);
 }
 
 export default function Trash() {
@@ -25,7 +25,7 @@ export default function Trash() {
   </p>
   <div class="field">
     <label for="check-unsubscribe">
-      Unsubscribe <span class="focus">{props.item.feedTitle}</span> too
+      Unsubscribe <span class="focus">{currentItem().feedTitle}</span> too
     </label>
     <input type="checkbox" id="check-unsubscribe" ref={shouldUnsubscribe}
 	   value={unsubscribeDefault()} />
