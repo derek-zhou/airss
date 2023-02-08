@@ -10,7 +10,11 @@
     <meta property="og:image" content="https://airss.roastidio.us/images/airss_logo.png" />
   </head>
   <body class="mx-1 md:mx-0">
-    <script src="dist/index.js" type="module"></script>
+    <script type="module">
+import { createComponent, render } from "solid-js/web";
+import App from '../src/App';
+render(() => createComponent(App, {}), document.body);
+    </script>
     <iframe width="0" height="0" id="sanitizer" hidden sandbox="allow-same-origin"></iframe>
   </body>
 </html>
