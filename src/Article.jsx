@@ -20,7 +20,7 @@ function clickRefresh(e) {
 function clickTrash(e) {
     e.preventDefault();
     batch(() => {
-	setUnsubscribeDefault(dummy());
+	setUnsubscribeDefault(!dummy());
 	setScreen(Screens.trash);
     });
 }

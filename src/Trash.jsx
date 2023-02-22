@@ -5,7 +5,7 @@ let shouldUnsubscribe;
 
 function clickConfirmDelete(e) {
     e.preventDefault();
-    if (shouldUnsubscribe.value)
+    if (shouldUnsubscribe.checked)
 	unsubscribe(currentItem().feedId);
     else
 	deleteItem();
@@ -28,7 +28,7 @@ export default function Trash() {
       Unsubscribe <span class="focus">{currentItem().feedTitle}</span> too
     </label>
     <input type="checkbox" id="check-unsubscribe" ref={shouldUnsubscribe}
-	   value={unsubscribeDefault()} />
+	   checked={unsubscribeDefault()} />
   </div>
   <div class="toolbar">
     <input class="button" type="submit" value="👌" />
