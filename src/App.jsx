@@ -77,7 +77,7 @@ export default function App() {
 
     return (
 <div id="layout" class="relative min-h-screen flex flex-col lg:max-w-screen-lg lg:mx-auto">
-  <div class="sticky top-0 bg-gray-100 p-2 flex">
+  <div class="bg-gray-100 p-2 flex">
     <div>
       <a href="/"><img src="/images/airss_logo.png" class="inline-block h-8" /></a>
       <span class="text-gray-600 align-bottom whitespace-nowrap">{cursor()+1}/{length()}</span>
