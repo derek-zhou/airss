@@ -214,14 +214,14 @@ form {
             @apply text-xl;
 	}
 	img {
-	    @apply max-w-sm;
+	    @apply max-w-md;
 	}
     }
 }
 @screen md {
     #content_html {
 	img {
-	    @apply max-w-md;
+	    @apply max-w-lg;
 	}
     }
 }
