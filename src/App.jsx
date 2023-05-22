@@ -11,6 +11,19 @@ import Trash from './Trash';
 let xDown = null;
 let yDown = null;
 
+function handleKeyDown(evt) {
+    switch (evt.key) {
+    case 'n':
+    case 'N':
+	clickRight();
+	break;
+    case 'p':
+    case 'P':
+	clickLeft();
+	break;
+    }
+}
+
 function browseTouchStart(evt) {
     xDown = evt.touches[0].clientX;
     yDown = evt.touches[0].clientY;
@@ -61,18 +74,23 @@ function alertClass() {
 }
 
 function clickLeft() {
-    window.scrollTo({top: 0});
-    backwardItem();
+    if (screen() == Screens.browse) {
+	window.scrollTo({top: 0});
+	backwardItem();
+    }
 }
 
 function clickRight() {
-    window.scrollTo({top: 0});
-    forwardItem();
+    if (screen() == Screens.browse) {
+	window.scrollTo({top: 0});
+	forwardItem();
+    }
 }
 
 export default function App() {
     createEffect(() => {
 	document.title = `Airss Reader(${cursor()+1}/${length()})`;
+	document.addEventListener('keydown', handleKeyDown);
     });
 
     return (
@@ -103,7 +121,7 @@ export default function App() {
       </button>
     </div>
   </div>
-      <p class={alertClass()} role="alert" onClick={() => setAlertText("")}
+  <p class={alertClass()} role="alert" onClick={() => setAlertText("")}
      innerHTML={alertText()} />
   <div class="flex-grow"
        onTouchStart={browseTouchStart}
