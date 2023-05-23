@@ -106,7 +106,7 @@ export default function Article() {
       <input type="hidden" name="url" value={currentItem().url} />
       <Show when={!dummy()}>
 	  <textarea class="leading-relaxed border rounded border-gray-600 h-20 p-1"
-		    onKeyDown={(e) => e.stopPropagation()}
+		    onKeyDown={(e) => e.stopImmediatePropagation()}
 		    name="content"></textarea>
       </Show>
       <div class="flex flex-wrap w-full gap-x-1 justify-center">
