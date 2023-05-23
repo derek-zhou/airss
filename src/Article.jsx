@@ -105,8 +105,9 @@ export default function Article() {
 	  method="post" action="https://roastidio.us/post" target="_blank" id="comment-form">
       <input type="hidden" name="url" value={currentItem().url} />
       <Show when={!dummy()}>
-	<textarea class="leading-relaxed border rounded border-gray-600 h-20 p-1"
-		  name="content"></textarea>
+	  <textarea class="leading-relaxed border rounded border-gray-600 h-20 p-1"
+		    onKeyDown={(e) => e.stopPropagation()}
+		    name="content"></textarea>
       </Show>
       <div class="flex flex-wrap w-full gap-x-1 justify-center">
 	<button class="button py-1 px-6 inline-block rounded appearance-none font-bold
