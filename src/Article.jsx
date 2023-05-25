@@ -5,6 +5,11 @@ import {refreshItem, currentItem, Screens, setScreen,
 const UnknownImage = "/images/unknown_link.png";
 const airssPrefix = "https://airss.roastidio.us/";
 
+function autoResize(e) {
+    let offset = e.target.offsetHeight - e.target.clientHeight;
+    e.target.style.height = e.target.scrollHeight + offset + 'px';
+}
+
 function dummy() {
     if (!currentItem())
 	return false;
@@ -105,8 +110,9 @@ export default function Article() {
 	  method="post" action="https://roastidio.us/post" target="_blank" id="comment-form">
       <input type="hidden" name="url" value={currentItem().url} />
       <Show when={!dummy()}>
-	  <textarea class="leading-relaxed border rounded border-gray-600 h-20 p-1"
+	  <textarea class="leading-relaxed border rounded resize-none box-border border-gray-600 h-20 p-1"
 		    onKeyDown={(e) => e.stopImmediatePropagation()}
+		    onInput={autoResize}
 		    name="content"></textarea>
       </Show>
       <div class="flex flex-wrap w-full gap-x-1 justify-center">
