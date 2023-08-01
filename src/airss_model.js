@@ -181,6 +181,7 @@ async function cb_forwardItem(prev) {
     await prev;
     if (!Items.forwardCursor()) {
 	emitModelWarning("Already at the end");
+	await try_load();
 	return null;
     }
     let item = await Items.getCurrentItem(db);
