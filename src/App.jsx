@@ -39,7 +39,7 @@ function browseTouchMove(evt) {
     var yDiff = yDown - yUp;
 
     /*most significant*/
-    if ( Math.abs( xDiff ) > 16 && Math.abs( xDiff ) > Math.abs( yDiff ) ) {
+    if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {
 	if ( xDiff > 0 ) {
 	    /* left swipe */
 	    clickRight();
