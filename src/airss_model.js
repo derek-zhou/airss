@@ -9,6 +9,7 @@ import {openDB, deleteDB} from 'idb';
 import * as Feeds from './feeds.js';
 import * as Items from './items.js';
 import * as Loader from './loader.js';
+import * as Sanitizer from './sanitizer.js';
 
 // exported client side functions. all return promises or null
 export {currentState, shutdown, clearData, warn, error,
@@ -423,6 +424,7 @@ async function init() {
 	length: Items.length(),
 	cursor: Items.readingCursor()
     });
+    Sanitizer.setup(document.querySelector("iframe#sanitizer"));
     emitModelInitDone();
 }
 
