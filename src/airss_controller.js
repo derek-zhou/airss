@@ -163,6 +163,9 @@ document.addEventListener("AirSSModelInitDone", () => {
     if (location.search) {
 	let params = new URLSearchParams(location.search.substring(1));
 	let str = params.get("url");
+	// clear location so it is cleaner
+	let url = new URL("/", document.location.href);
+	history.pushState({}, "", url.href);
 	// do I have a refer so I can subscribe?
 	if (params.has("subscribe-referrer") && document.referrer)
 	    Model.subscribe(document.referrer);
