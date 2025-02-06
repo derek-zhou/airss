@@ -4,17 +4,64 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Airss reader" />
-    <link rel="stylesheet" type="text/css" href="/dist/index.css" />
+    <link rel="stylesheet" type="text/css" href="index.css" />
+    <script defer type="module" src="airss_controller.js"></script>
     <title>Airss Reader</title>
     <meta property="og:description" content="Airss is a light weight RSS feed reader that runs entirely in your browser. " />
     <meta property="og:image" content="https://airss.roastidio.us/images/airss_logo.png" />
   </head>
   <body class="mx-1 md:mx-0">
-    <script type="module">
-import { createComponent, render } from "solid-js/web";
-import App from '../src/App';
-render(() => createComponent(App, {}), document.body);
-    </script>
+    <div id="progress-bar" hidden></div>
+    <div class="relative min-h-screen flex flex-col lg:max-w-screen-lg lg:mx-auto">
+      <custom-action type="touchstart" value="AirSSViewTouchStart"></custom-action>
+      <custom-action type="touchmove" value="AirSSViewTouchMove"></custom-action>
+      <div id="application"></div>
+      <div id="article" class="flex-grow"></div>
+      <div class="text-sm text-gray-700 p-2 flex text-center">
+	<div class="w-1/2 text-left">
+	  <a href="https://roastidio.us/roast" referrerpolicy="no-referrer-when-downgrade">
+	    Roast me at Roastidious
+	  </a>
+	</div>
+	<div class="w-1/2 text-right">
+	  <a href="https://github.com/derek-zhou/airss" referrerpolicy="no-referrer-when-downgrade">
+	    Fork me on GitHub
+	  </a>
+	</div>
+      </div>
+    </div>
     <iframe width="0" height="0" id="sanitizer" hidden sandbox="allow-same-origin"></iframe>
+    <template id="dummy-article">
+      <h2>No news is bad news</h2>
+      <p>
+	Airss is a web feed reader that runs entirely in your browser. You can subscribe any feeds by clicking the 🍼 button from above and paste the URL, or you can use of one of the following tricks: 
+      </p>
+      <h3>Desktop browser users</h3>
+      <p>
+	Install this bookmarklet <a class="button" href="javascript:location.href='{airssPrefix}?url='+encodeURIComponent(window.location.href)">Subscribe it in Airss</a> <b>by dragging it to your bookmarks</b>. Whenever you encounter something interesting on the web, be it a blog, a news website or whatever, you can click this bookmarklet to subscribe. Chances are they support RSS feeds so you will always stay updated.
+      </p>
+      <h3>Mobile browser users</h3>
+      <p>
+	Android users can install this APP: <a href="https://f-droid.org/en/packages/net.daverix.urlforward/">URL Forwarder</a> (Thank you, David Laurell!) then add a filter as:
+      </p>
+      <pre>{airssPrefix}?url=@url</pre>
+      <p>
+	Then you can share links to the APP and select the menu to subscribe, if it support RSS feeds.
+      </p>
+      <p>
+	iOS Safari users can use the bookmarklet method as mentioned earlier by syncing the bookmarklet from your Mac.
+      </p>
+      <h2>To my fellow bloggers</h2>
+      <p>
+	Please make sure you have your feed <a href="https://www.rssboard.org/rss-autodiscovery">auto-discoverable</a> from your homepage. And if you can, please enable <a href="https://enable-cors.org/">permissive CORS</a> on your blog to reach out to a broader audience. Lastly, if you really like Airss, you can put a link on your homepage:
+      </p>
+      <pre>&lt;a href="{airssPrefix}?subscribe-referrer"
+	referrerpolicy="no-referrer-when-downgrade"&gt;
+	Follow me with Airss!
+	&lt;/a&gt;</pre>
+      <p>
+	So your readers can have an even easier time to follow you.
+      </p>
+    </template>
   </body>
 </html>

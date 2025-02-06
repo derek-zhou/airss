@@ -5,17 +5,16 @@
  * to the root document
  */
 
-import {openDB, deleteDB} from 'idb';
+import {openDB, deleteDB} from './vendor/idb/index.js';
 import * as Feeds from './feeds.js';
 import * as Items from './items.js';
 import * as Loader from './loader.js';
-import * as Sanitizer from './sanitizer.js';
 
 // exported client side functions. all return promises or null
 export {currentState, shutdown, clearData, warn, error,
-	forwardItem, backwardItem, deleteItem, currentItem, refreshItem,
+	forwardItem, backwardItem, deleteItem, refreshItem,
 	subscribe, unsubscribe, loadingStart, loadingDone, updateItemText,
-	addFeed, deleteFeed, addItems, fetchFeed, updateFeed,
+	addFeed, deleteFeed, fetchFeed, updateFeed,
 	allFeedUrls, postHandle, saveFeeds, restoreFeeds};
 
 // when the cursor is this close to the end I load more
@@ -51,8 +50,6 @@ function emitModelInfo(text) {
 }
 
 function emitModelItemsLoaded(info) {
-    console.info("Items loaded. cursor at: " + info.cursor +
-		" length: " + info.length);
     window.document.dispatchEvent(new CustomEvent(
 	"AirSSModelItemsLoaded",
 	{detail: info}
@@ -63,8 +60,11 @@ function emitModelInitDone() {
     window.document.dispatchEvent(new Event("AirSSModelInitDone"));
 }
 
-function emitModelShutDown() {
-    window.document.dispatchEvent(new Event("AirSSModelShutDown"));
+function emitModelShutDown(type, text) {
+    window.document.dispatchEvent(new CustomEvent(
+	"AirSSModelShutDown",
+	{detail: {type, text}}
+    ));
 }
 
 function emitModelStartLoading() {
@@ -109,12 +109,19 @@ async function cb_getLoadCandidate(prev) {
 }
 
 // the shutdown callback
-async function cb_shutdown(prev) {
+async function cb_shutdown(prev, msg) {
     await prev;
-    await db.close();
-    // so database is safe. future db operation will crash
-    db = null;
-    emitModelShutDown();
+    if (db) {
+	await db.close();
+	// so database is safe. future db operation will crash
+	db = null;
+    }
+    emitModelShutDown("info", msg);
+}
+
+async function cb_info(prev, msg) {
+    await prev;
+    emitModelInfo(msg);
 }
 
 async function cb_warn(prev, msg) {
@@ -150,10 +157,9 @@ async function cb_error(prev, msg) {
 
 async function cb_clearData(prev) {
     await prev;
-    console.info("deleting database");
     await db.close();
     await deleteDB("AirSS");
-    console.info("database deleted");
+    emitModelInfo("Database deleted");
     db = null;
 }
 
@@ -166,16 +172,11 @@ async function cb_subscribe(prev, url) {
 async function cb_refreshItem(prev) {
     await prev;
     let item = await Items.getCurrentItem(db);
-    if (!item || Items.isDummyItem(item))
-	return null;
-    Loader.reloadUrl(item.url, item.id);
-}
-
-async function cb_currentItem(prev) {
-    await prev;
-    let item = await Items.getCurrentItem(db);
-    await try_load();
-    return item;
+    if (item && !Items.isDummyItem(item)) {
+	Loader.reloadUrl(item.url, item.id);
+    } else {
+	emitModelWarning("Item not refreshable");
+    }
 }
 
 async function cb_forwardItem(prev) {
@@ -183,20 +184,29 @@ async function cb_forwardItem(prev) {
     if (!Items.forwardCursor()) {
 	emitModelWarning("Already at the end");
 	await try_load();
-	return null;
+    } else {
+	emitModelItemsLoaded({
+	    length: Items.length(),
+	    cursor: Items.readingCursor()
+	});
+	let item = await Items.getCurrentItem(db);
+	emitModelItemUpdated(item);
+	await try_load();
     }
-    let item = await Items.getCurrentItem(db);
-    await try_load();
-    return item;
 }
 
 async function cb_backwardItem(prev) {
     await prev;
     if (!Items.backwardCursor()) {
 	emitModelWarning("Already at the beginning");
-	return null;
+    } else {
+	emitModelItemsLoaded({
+	    length: Items.length(),
+	    cursor: Items.readingCursor()
+	});
+	let item = await Items.getCurrentItem(db);
+	emitModelItemUpdated(item);
     }
-    return Items.getCurrentItem(db);
 }
 
 async function cb_deleteItem(prev) {
@@ -208,6 +218,8 @@ async function cb_deleteItem(prev) {
 	length: Items.length(),
 	cursor: Items.readingCursor()
     });
+    let item = await Items.getCurrentItem(db);
+    emitModelItemUpdated(item);
 }
 
 async function cb_loadMore(prev) {
@@ -266,29 +278,6 @@ async function cb_deleteFeed(prev, id) {
 async function cb_fetchFeed(prev, id) {
     await prev;
     return Feeds.get(db, id);
-}
-
-async function cb_addItems(prev, items) {
-    await prev;
-    let cnt = 0;
-    for (let item of items.values()) {
-	try {
-	    await Items.addItem(db, item);
-	    cnt ++;
-	} catch (e) {
-	    if (e instanceof DOMException) {
-		// it is common that an item cannot be add
-	    } else {
-		throw e;
-	    }
-	}
-    }
-    if (cnt > 0) {
-	emitModelItemsLoaded({
-	    length: Items.length(),
-	    cursor: Items.readingCursor()
-	});
-    }
 }
 
 function oopsItem(feed) {
@@ -375,6 +364,9 @@ async function cb_updateFeed(prev, feed, items) {
     // lastFetchTime is the time we actually loaded something
     feed.lastLoadTime = now;
     if (num > 0) {
+	if (Items.readingCursor() == -1) {
+	    Items.forwardCursor();
+	}
 	feed.lastFetchTime = now;
 	emitModelItemsLoaded({
 	    length: Items.length(),
@@ -420,11 +412,12 @@ async function init() {
     });
     let feedIds = await Feeds.load(db);
     let itemIds = await Items.load(db);
+    let item = await Items.getCurrentItem(db);
     emitModelItemsLoaded({
 	length: Items.length(),
 	cursor: Items.readingCursor()
     });
-    Sanitizer.setup(document.querySelector("iframe#sanitizer"));
+    emitModelItemUpdated(item);
     emitModelInitDone();
 }
 
@@ -439,10 +432,14 @@ function currentState() {
     return state;
 }
 
-// clear all local data. return a promise that resolve to null
-// when everything initialized.
+// clear all local data
 function clearData() {
     state = cb_clearData(state);
+}
+
+// print a info
+function info(msg) {
+    state = cb_info(state, msg);
     return state;
 }
 
@@ -461,42 +458,27 @@ function error(msg) {
 // update current item with new text
 function refreshItem() {
     state = cb_refreshItem(state);
-    return state;
 }
 
-// forward the item cursor. return a promise that resolve to a item
-// to display, or null if nothing changed
+// forward the item cursor.
 function forwardItem() {
-    let value = state = cb_forwardItem(state);
-    // to piggy back marking and loading here
+    state = cb_forwardItem(state);
     state = cb_markRead(state);
-    return value;
 }
 
-// backward the item cursor. return a promise that resolve to a item
-// to display or null if nothing changed
+// backward the item cursor.
 function backwardItem() {
     state = cb_backwardItem(state);
-    return state;
 }
 
 // delete the item under cursor. 
-// return a promise that resolve to true/false
 function deleteItem() {
     state = cb_deleteItem(state);
-    return state;
-}
-
-// just load the current item, if any
-function currentItem() {
-    let value = state = cb_currentItem(state);
-    return value;
 }
 
 // subscribe to a feed url
 function subscribe(url) {
     state = cb_subscribe(state, url);
-    return state;
 }
 
 // unsubscribe a feed by id
@@ -529,11 +511,6 @@ function updateItemText(text, id) {
     state = cb_updateItemText(state, text, id);
 }
 
-// add a item
-function addItems(items) {
-    state = cb_addItems(state, items);
-}
-
 // update a feed with new data. this is for the callback from load
 function updateFeed(feed, items) {
     state = cb_updateFeed(state, feed, items);
@@ -545,8 +522,8 @@ function fetchFeed(id) {
     return state;
 }
 
-function shutdown() {
-    state = cb_shutdown(state);
+function shutdown(msg) {
+    state = cb_shutdown(state, msg);
     return state;
 }
 

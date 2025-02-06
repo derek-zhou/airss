@@ -1,6 +1,5 @@
-export {setup, sanitizeHtml, sanitizeText};
+export {sanitizeHtml, sanitizeText};
 
-var iframe;
 const attributeSet = new Set(['alt', 'height', 'href', 'type', 'src', 'width']);
 const tagSet = new Set(['A', 'ABBR', 'ADDR', 'ARTICLE', 'ASIDE', 'AUDIO', 'B', 'BLOCKQUOTE',
 			'BR', 'CAPTION', 'CITE', 'CODE', 'COL', 'COLGROUP', 'DD', 'DEL', 'DFN',
@@ -11,17 +10,15 @@ const tagSet = new Set(['A', 'ABBR', 'ADDR', 'ARTICLE', 'ASIDE', 'AUDIO', 'B', '
 			'SUB', 'SUP', 'SVG', 'TABLE', 'TBODY', 'TD', 'TFOOT', 'TH', 'THEAD',
 			'TIME', 'TR', 'TRACK', 'U', 'UL', 'VIDEO', 'WBR']);
 
-function setup(elem) {
-    iframe = elem;
-}
-
 function sanitizeText(input) {
+    var iframe = document.querySelector("iframe#sanitizer");
     var iframe_body = iframe.contentDocument.body;
     iframe_body.innerHTML = input;
     return iframe_body.textContent;
 }
 
 function sanitizeHtml(input) {
+    var iframe = document.querySelector("iframe#sanitizer");
     var iframe_body = iframe.contentDocument.body;
     iframe_body.innerHTML = input;
     var sanitized = iframe.contentDocument.createElement('Body');

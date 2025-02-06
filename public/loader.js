@@ -157,6 +157,7 @@ async function cb_restoreFeeds(prev, handle) {
 	    feed.lastLoadTime = 0;
 	    Model.addFeed(feed);
 	}
+	Model.info("Successfully restoring feeds.");
 	Model.loadingDone();
     } catch (e) {
 	Model.error("Restoring feeds failed");
