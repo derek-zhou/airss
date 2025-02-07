@@ -1,7 +1,33 @@
 import {Screens} from './airss_controller.js';
+
+// ids used in HTML
+const ProgressBarID = "progress-bar";
+const AlertBoxID = "alert-box";
+const ApplicationID = "application";
+const ArticleID = "article";
 /*
  * The view layer of AirSS.
  */
+
+class AutoTextArea extends HTMLElement {
+    constructor() {
+	super();
+    }
+
+    connectedCallback() {
+	let textarea = this.firstElementChild;
+	textarea.addEventListener("keydown", (e) => {
+	    e.stopImmediatePropagation();
+	});
+	textarea.addEventListener("input", () => {
+	    let offset = textarea.offsetHeight - textarea.clientHeight;
+	    textarea.style.height = textarea.scrollHeight + offset + 'px';
+	});
+    }
+}
+
+customElements.define("auto-textarea", AutoTextArea);
+
 function run_custom_actions(e) {
     e.preventDefault();
     let target = e.currentTarget;
@@ -9,7 +35,6 @@ function run_custom_actions(e) {
     for (const current of target.children) {
 	if (current instanceof CustomAction && current.getAttribute("type") == e.type) {
 	    let value = current.getAttribute("value");
-	    console.log("type: " + e.type);
 	    document.dispatchEvent(new CustomEvent(value, {target: target, detail: e}));
 	}
     }
@@ -22,32 +47,35 @@ class CustomAction extends HTMLElement {
 
     connectedCallback() {
 	let type = this.getAttribute("type");
-	let value = this.getAttribute("value");
 	let target = this.parentElement;
-
-	switch (type) {
-	case "mount":
-	    document.dispatchEvent(new CustomEvent(value, {target: target}));
-	    break;
-	case "unmount":
-	    break;
-	default:
-	    target.addEventListener(type, run_custom_actions);
-	}
-    }
-
-    disconnectedCallback() {
-	let type = this.getAttribute("type");
-	let value = this.getAttribute("value");
-	let target = this.parentElement;
-
-	if (type == "unmount") {
-	    document.dispatchEvent(new CustomEvent(value, {target: target}));
-	}
+	target.addEventListener(type, run_custom_actions);
     }
 }
 
 customElements.define("custom-action", CustomAction);
+
+function fixup_links(container, url) {
+    // fix up all img's src
+    for (let img of container.querySelectorAll("img").values()) {
+	let href = img.getAttribute("src");
+	try {
+	    let absUrl = new URL(href, url);
+	    img.setAttribute("src", absUrl.toString());
+	} catch (e) {
+	    console.warn(href + "is not a valid link");
+	}
+    }
+    // fixup all a's href
+    for (let link of container.querySelectorAll("a").values()) {
+	let href = link.getAttribute("href");
+	try {
+	    let absUrl = new URL(href, url);
+	    link.setAttribute("href", absUrl.toString());
+	} catch (e) {
+	    console.warn(href + "is not a valid link");
+	}
+    }
+}
 
 function clear_content(container) {
     let junk = [];
@@ -61,15 +89,18 @@ function clear_content(container) {
 
 function repaint(container, tree) {
     clear_content(container);
-    tree.forEach((each) => {
-	container.append(build_node(each));
-    });
+    tree.forEach((each) => build_node(container, each));
 }
 
-function build_node(tree_node) {
-    if (typeof(tree_node) == "string") {
-	return document.createTextNode(tree_node);
-    } else {
+function build_node(container, tree_node) {
+    switch(typeof(tree_node)) {
+    case "string":
+	container.append(document.createTextNode(tree_node));
+	break;
+    case "function":
+	tree_node(container);
+	break;
+    case "object":
 	let element = document.createElement(tree_node.tag);
 	if (tree_node.attributes) {
 	    Object.keys(tree_node.attributes).forEach((key) => {
@@ -80,11 +111,10 @@ function build_node(tree_node) {
 	    });
 	}
 	if (tree_node.children) {
-	    tree_node.children.forEach((each) => {
-		element.append(build_node(each));
-	    });
+	    tree_node.children.forEach((each) => build_node(element, each));
 	}
-	return element;
+	container.append(element);
+	break;
     }
 }
 
@@ -115,24 +145,78 @@ function alertClass(state) {
     }
 }
 
-export function render_application(state) {
-    let container = document.querySelector("div#application");
-    let tree = application(state);
-    repaint(container, tree);
+// render everything from scratch
+export function render_all(state) {
+    repaint(document.body, body(state));
 }
 
+// render only the application container
+export function render_application(state) {
+    repaint(document.getElementById(ApplicationID), application(state));
+}
+
+// render only the article container
 export function render_article(state) {
-    let container = document.querySelector("div#article");
-    let tree = article(state);
-    repaint(container, tree);
+    repaint(document.getElementById(ArticleID), article(state));
+}
+
+// render only the alert container
+export function render_alert(state) {
+    repaint(document.getElementById(AlertBoxID), alert(state));
+}
+
+// update visibility of various blocks
+export function update_layout(state) {
+    update_hidden(document.getElementById(ArticleID), state.screen != Screens.browse);
+    update_hidden(document.getElementById(ProgressBarID), !state.loading);
+    update_hidden(document.getElementById(AlertBoxID), state.alert.text == "");
+}
+
+function update_hidden(node, should_hide) {
+    if (should_hide) {
+	node.setAttribute("hidden", true);
+    } else {
+	node.removeAttribute("hidden");
+    }
+}
+
+function body(state) {
+    return [
+	el("div", {id: ProgressBarID, hidden: true}, []),
+	el("div", {class: "relative min-h-screen flex flex-col lg:max-w-screen-lg lg:mx-auto"}, [
+	    el("custom-action", {type: "touchstart", value: "AirSSViewTouchStart"}, []),
+	    el("custom-action", {type: "touchmove", value: "AirSSViewTouchMove"}, []),
+	    el("div", {id: AlertBoxID, hidden: true}, alert(state)),
+	    el("div", {id: ApplicationID}, application(state)),
+	    el("div", {id: ArticleID, class: "flex-grow"}, article(state)),
+	    el("div", {class: "text-sm text-gray-700 p-2 flex text-center"}, footer(state))
+	])
+    ];
+}
+
+function footer(state) {
+    return [
+	el("div", {class: "w-1/2 text-left"}, [
+	    el("a", {
+		href: "https://roastidio.us/roast",
+		referrerpolicy: "no-referrer-when-downgrade"}, [
+		    "Roast me at Roastidious"
+		]),
+	]),
+	el("div", {class: "w-1/2 text-right"}, [
+	    el("a", {
+		href: "https://github.com/derek-zhou/airss",
+		referrerpolicy: "no-referrer-when-downgrade"}, [
+		    "Fork me on GitHub"
+		]),
+	])
+    ];
 }
 
 function application(state) {
     return [
 	...navbar(state),
-	...alert(state),
-	...dialog(state),
-	el("custom-action", {type: "mount", value: "AirSSViewMountApplication"}, [])
+	...dialog(state)
     ];
 }
 
@@ -378,12 +462,13 @@ function custom_form(submit_action, reset_action, inner) {
 }
 
 function article(state) {
+    let item = state.currentItem;
+
     return [
 	el("div", {class: "bg-white p-2 flow-root w-full overflow-x-hidden"}, [
-	    ... article_head(state.currentItem),
-	    el("div", {id: "content-html", class: "font-serif text-gray-800 leading-snug mb-2 sm:text-lg sm:leading-relaxed"}, []),
-	    ... article_tail(state.currentItem),
-	el("custom-action", {type: "mount", value: "AirSSViewMountArticle"}, [])
+	    ... item ? article_head(item) : [],
+	    el("div", {id: "content-html", class: "font-serif text-gray-800 leading-snug mb-2 sm:text-lg sm:leading-relaxed"}, article_content(item)),
+	    ... item ? article_tail(item) : []
 	])
     ];
 }
@@ -394,9 +479,6 @@ function dummy(item) {
 }
 
 function article_head(item) {
-    if (!item)
-	return [];
-
     return [
 	... dummy(item) ? [] : article_image(item),
 	... article_title(item),
@@ -458,15 +540,12 @@ function article_byline(item) {
 }
 
 function article_tail(item) {
-    if (!item)
-	return [];
-
     return [
 	el("form", {
 	    class: "bg-white flex flex-col gap-y-2 p-0 w-full",
 	    method: "post", action: "https://roastidio.us/post", target: "_blank"
 	}, [
-	    el("input", {class: "", type: "hidden", name: "url", value: item.url}, []),
+	    el("input", {type: "hidden", name: "url", value: item.url}, []),
 	    ... dummy(item) ? [] : comment_box(),
 	    el("div", {class: "flex flex-wrap w-full gap-x-1 justify-center"}, [
 		trash_button(),
@@ -479,7 +558,9 @@ function article_tail(item) {
 
 function comment_box() {
     return [
-	el("textarea", {class: "leading-relaxed border rounded resize-none box-border border-gray-600 h-20 p-1", name: "content"}, [])
+	el("auto-textarea", {}, [
+	    el("textarea", {class: "leading-relaxed border rounded resize-none box-border border-gray-600 h-20 p-1", name: "content"}, [])
+	])
     ];
 }
 
@@ -499,4 +580,61 @@ function refresh_button() {
 
 function submit_button() {
     return el("imput", {class: "button", type: "submit", value: "🔥"}, []);
+}
+
+function article_content(item) {
+    if (item) {
+	return [
+	    (node) => {node.innerHTML = item.contentHtml},
+	    ... dummy(item) ? [] : [(node) => fixup_links(node, item.url)]
+	];
+    } else {
+	return dummy_article();
+    }
+}
+
+function dummy_article() {
+    return [
+	el("h2", {}, ["No news is bad news"]),
+	el("p", {}, [
+	    "Airss is a web feed reader that runs entirely in your browser. You can subscribe any feeds by clicking the 🍼 button from above and paste the URL, or you can use of one of the following tricks: "
+	]),
+	el("h3", {}, ["Desktop browser users"]),
+	el("p", {}, [
+	    "Install this bookmarklet ",
+	    el("a", {class: "button", href: "javascript:location.href='{airssPrefix}?url='+encodeURIComponent(window.location.href)"}, [
+		" Subscribe it in Airss"
+	    ]),
+	    " ",
+	    el("b", {}, ["by dragging it to your bookmarks"]),
+	    ". Whenever you encounter something interesting on the web, be it a blog, a news website or whatever, you can click this bookmarklet to subscribe. Chances are they support RSS feeds so you will always stay updated."
+	]),
+	el("h3", {}, ["Mobile browser users"]),
+	el("p", {}, [
+	    "Android users can install this APP: ",
+	    el("a", {href: "https://f-droid.org/en/packages/net.daverix.urlforward/"}, [
+		"URL Forwarder"
+	    ]),
+	    " (Thank you, David Laurell!) then add a filter as:"
+	]),
+	el("pre", {}, ["https://airss.roastidio.us/?url=@url"]),
+	el("p", {}, [
+	    "Then you can share links to the APP and select the menu to subscribe, if it support RSS feeds."
+	]),
+	el("p", {}, [
+	    "iOS Safari users can use the bookmarklet method as mentioned earlier by syncing the bookmarklet from your Mac."
+	]),
+	el("h2", {}, ["To my fellow bloggers"]),
+	el("p", {}, [
+	    "Please make sure you have your feed ",
+	    el("a", {href: "https://www.rssboard.org/rss-autodiscovery"}, ["auto-discoverable"]),
+	    " from your homepage. And if you can, please enable ",
+	    el("a", {href: "https://enable-cors.org/"}, ["permissive CORS"]),
+	    " on your blog to reach out to a broader audience. Lastly, if you really like Airss, you can put a link on your homepage:"
+	]),
+	el("pre", {}, [
+	    "<a href=\"https://airss.roastidio.us/?subscribe-referrer\" referrerpolicy=\"no-referrer-when-downgrade\">Follow me with Airss!</a>"
+	]),
+	el("p", {}, ["So your readers can have an even easier time to follow you."])
+    ];
 }

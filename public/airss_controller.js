@@ -29,6 +29,7 @@ var state = {
     cursor: -1,
     currentItem: null,
     postHandle: null,
+    loading: false,
     unsubscribeDefault: false,
     alert: {
 	text: "",
@@ -36,37 +37,7 @@ var state = {
     }
 };
 
-function autoResize(e) {
-    let offset = e.target.offsetHeight - e.target.clientHeight;
-    e.target.style.height = e.target.scrollHeight + offset + 'px';
-}
-
-function preventPropagate(e) {
-    e.stopImmediatePropagation();
-}
-
-function fixup_links(container, url) {
-    // fix up all img's src
-    for (let img of container.querySelectorAll("img").values()) {
-	let href = img.getAttribute("src");
-	try {
-	    let absUrl = new URL(href, url);
-	    img.setAttribute("src", absUrl.toString());
-	} catch (e) {
-	    console.warn(href + "is not a valid link");
-	}
-    }
-    // fixup all a's href
-    for (let link of container.querySelectorAll("a").values()) {
-	let href = link.getAttribute("href");
-	try {
-	    let absUrl = new URL(href, url);
-	    link.setAttribute("href", absUrl.toString());
-	} catch (e) {
-	    console.warn(href + "is not a valid link");
-	}
-    }
-}
+window.application_state = state;
 
 function actionPreamble() {
     clearTimeout(idleTimeout);
@@ -95,7 +66,8 @@ document.addEventListener("AirSSModelItemUpdated", e => {
 document.addEventListener("AirSSModelAlert", e => {
     state.alert.type = e.detail.type;
     state.alert.text = e.detail.text;
-    View.render_application(state);
+    View.render_alert(state);
+    View.update_layout(state);
 });
 
 document.addEventListener("AirSSModelShutDown", e => {
@@ -103,17 +75,19 @@ document.addEventListener("AirSSModelShutDown", e => {
     state.alert.text = e.detail.text;
     state.screen = Screens.shutdown;
     View.render_application(state);
-    View.render_article(state);
+    View.update_layout(state);
 });
 
 document.addEventListener("AirSSModelStartLoading", () => {
-    let bar = document.getElementById("progress-bar");
-    bar.removeAttribute("hidden");
+    state.loading = true;
+    console.log("loading on");
+    View.update_layout(state);
 });
 
 document.addEventListener("AirSSModelStopLoading", () => {
-    let bar = document.getElementById("progress-bar");
-    bar.setAttribute("hidden", "");
+    state.loading = false;
+    console.log("loading off");
+    View.update_layout(state);
 });
 
 document.addEventListener("AirSSModelPostHandle", e => {
@@ -135,6 +109,7 @@ document.addEventListener("AirSSModelInitDone", () => {
 	else if (str)
 	    Model.subscribe(decodeURIComponent(str));
     }
+    View.render_all(state);
 });
 
 // for swipes
@@ -168,6 +143,7 @@ document.addEventListener("AirSSViewTouchMove", (e) => {
 	    }
 	}
     }
+    View.update_layout(state);
     /* reset values */
     xDown = null;
     yDown = null;
@@ -188,6 +164,7 @@ document.addEventListener("keydown", (e) => {
 	Model.backwardItem();
 	break;
     }
+    View.update_layout(state);
 });
 
 document.addEventListener("AirSSViewClickLeft", () => {
@@ -195,6 +172,7 @@ document.addEventListener("AirSSViewClickLeft", () => {
 	return;
     actionPreamble();
     Model.backwardItem();
+    View.update_layout(state);
 });
 
 document.addEventListener("AirSSViewClickRight", () => {
@@ -202,13 +180,14 @@ document.addEventListener("AirSSViewClickRight", () => {
 	return;
     actionPreamble();
     Model.forwardItem();
+    View.update_layout(state);
 });
 
 document.addEventListener("AirSSViewClickAlert", () => {
     if (state.screen == Screen.shutdown)
 	return;
     actionPreamble();
-    View.render_application(state);
+    View.update_layout(state);
 });
 
 document.addEventListener("AirSSViewClickConfig", () => {
@@ -219,6 +198,7 @@ document.addEventListener("AirSSViewClickConfig", () => {
     Model.saveFeeds();
     state.screen = Screens.config;
     View.render_application(state);
+    View.update_layout(state);
 });
 
 document.addEventListener("AirSSViewClickSubscribe", () => {
@@ -227,6 +207,7 @@ document.addEventListener("AirSSViewClickSubscribe", () => {
     actionPreamble();
     state.screen = Screens.subscribe;
     View.render_application(state);
+    View.update_layout(state);
 });
 
 document.addEventListener("AirSSViewClickTrash", () => {
@@ -235,6 +216,7 @@ document.addEventListener("AirSSViewClickTrash", () => {
     actionPreamble();
     state.screen = Screens.trash;
     View.render_application(state);
+    View.update_layout(state);
 });
 
 document.addEventListener("AirSSViewSubmitSubscribe", (e) => {
@@ -245,6 +227,7 @@ document.addEventListener("AirSSViewSubmitSubscribe", (e) => {
     Model.subscribe(data.get("feedUtl"));
     state.screen = Screens.browse;
     View.render_application(state);
+    View.update_layout(state);
 });
 
 document.addEventListener("AirSSViewResetDialog", () => {
@@ -253,6 +236,7 @@ document.addEventListener("AirSSViewResetDialog", () => {
     actionPreamble();
     state.screen = Screens.browse;
     View.render_application(state);
+    View.update_layout(state);
 });
 
 document.addEventListener("AirSSViewSubmitTrash", (e) => {
@@ -268,6 +252,7 @@ document.addEventListener("AirSSViewSubmitTrash", (e) => {
     }
     state.screen = Screens.browse;
     View.render_application(state);
+    View.update_layout(state);
 });
 
 document.addEventListener("AirSSViewSubmitConfig", (e) => {
@@ -295,9 +280,10 @@ document.addEventListener("AirSSViewSubmitConfig", (e) => {
 	// It is very hard to change config at run time, so I just pretend to shutdown
 	state.alertType = "info";
 	state.alertText = "Configuration changed, you must reload for it to take effect.";
+	View.render_alert(state);
 	View.render_application(state);
-	View.render_article(state);
     }
+    View.update_layout(state);
 });
 
 document.addEventListener("AirSSViewClickRefresh", () => {
@@ -305,34 +291,9 @@ document.addEventListener("AirSSViewClickRefresh", () => {
 	return;
     actionPreamble();
     Model.refreshItem();
+    View.update_layout(state);
 });
 
 document.addEventListener("AirSSViewClickReload", () => {
     location.reload();
-});
-
-document.addEventListener("AirSSViewMountArticle", (e) => {
-    let container = e.target.querySelector("div#content-html");
-    let textarea = e.target.querySelector("textarea");
-
-    if (textarea) {
-	textarea.addEventListner("keydown", preventPropagate);
-	textarea.addEventListner("input", autoResize);
-    }
-    if (state.currentItem) {
-	container.innerHTML = state.currentItem.contentHtml;
-	fixup_links(container, state.currentItem.url);
-    } else {
-	let template = document.getElementById("dummy-article");
-	container.appendChild(template.content.cloneNode(true));
-    }
-});
-
-document.addEventListener("AirSSViewMountApplication", (e) => {
-    let article = document.querySelector("div#article");
-    if (state.screen == Screens.browse) {
-	article.removeAttribute("hidden");
-    } else {
-	article.setAttribute("hidden", "");
-    }
 });

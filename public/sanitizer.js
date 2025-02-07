@@ -11,18 +11,17 @@ const tagSet = new Set(['A', 'ABBR', 'ADDR', 'ARTICLE', 'ASIDE', 'AUDIO', 'B', '
 			'TIME', 'TR', 'TRACK', 'U', 'UL', 'VIDEO', 'WBR']);
 
 function sanitizeText(input) {
-    var iframe = document.querySelector("iframe#sanitizer");
-    var iframe_body = iframe.contentDocument.body;
-    iframe_body.innerHTML = input;
-    return iframe_body.textContent;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(input, "text/html");
+    return doc.body.textContent;
 }
 
 function sanitizeHtml(input) {
-    var iframe = document.querySelector("iframe#sanitizer");
-    var iframe_body = iframe.contentDocument.body;
-    iframe_body.innerHTML = input;
-    var sanitized = iframe.contentDocument.createElement('Body');
-    sanitizeChildren(iframe_body, iframe.contentDocument, sanitized);
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(input, "text/html");
+    const input_body = doc.body;
+    var sanitized = doc.createElement('Body');
+    sanitizeChildren(iframe_body, doc, sanitized);
     return sanitized.innerHTML;
 }
 
