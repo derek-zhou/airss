@@ -37,6 +37,7 @@ var state = {
     }
 };
 
+View.render_all(state);
 window.application_state = state;
 
 function actionPreamble() {
@@ -109,7 +110,6 @@ document.addEventListener("AirSSModelInitDone", () => {
 	else if (str)
 	    Model.subscribe(decodeURIComponent(str));
     }
-    View.render_all(state);
 });
 
 // for swipes

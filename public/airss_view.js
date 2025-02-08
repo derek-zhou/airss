@@ -105,7 +105,9 @@ function build_node(container, tree_node) {
 	if (tree_node.attributes) {
 	    Object.keys(tree_node.attributes).forEach((key) => {
 		let value = tree_node.attributes[key];
-		if (value) {
+		if (Array.isArray(value) && value.length > 0) {
+		    element.setAttribute(key, value.join(" "));
+		} else if (value) {
 		    element.setAttribute(key, value);
 		}
 	    });
@@ -183,27 +185,27 @@ function update_hidden(node, should_hide) {
 function body(state) {
     return [
 	el("div", {id: ProgressBarID, hidden: true}, []),
-	el("div", {class: "relative min-h-screen flex flex-col lg:max-w-screen-lg lg:mx-auto"}, [
+	el("div", {class: "viewport"}, [
 	    el("custom-action", {type: "touchstart", value: "AirSSViewTouchStart"}, []),
 	    el("custom-action", {type: "touchmove", value: "AirSSViewTouchMove"}, []),
 	    el("div", {id: AlertBoxID, hidden: true}, alert(state)),
 	    el("div", {id: ApplicationID}, application(state)),
-	    el("div", {id: ArticleID, class: "flex-grow"}, article(state)),
-	    el("div", {class: "text-sm text-gray-700 p-2 flex text-center"}, footer(state))
+	    el("div", {id: ArticleID, class: "article-viewport"}, article(state)),
+	    el("div", {class: "footer"}, footer(state))
 	])
     ];
 }
 
 function footer(state) {
     return [
-	el("div", {class: "w-1/2 text-left"}, [
+	el("div", {class: "left-half"}, [
 	    el("a", {
 		href: "https://roastidio.us/roast",
 		referrerpolicy: "no-referrer-when-downgrade"}, [
 		    "Roast me at Roastidious"
 		]),
 	]),
-	el("div", {class: "w-1/2 text-right"}, [
+	el("div", {class: "right-half"}, [
 	    el("a", {
 		href: "https://github.com/derek-zhou/airss",
 		referrerpolicy: "no-referrer-when-downgrade"}, [
@@ -222,28 +224,28 @@ function application(state) {
 
 function navbar(state) {
     return [
-	el("div", {class: "bg-gray-100 p-2 flex"}, [
+	el("div", {class: "navbar"}, [
 	    el("div", {}, [
 		el("a", {href: "/"}, [
-		    el("img", {src: "images/airss_logo.png", class: "inline-block h-8"}, []),
+		    el("img", {src: "images/airss_logo.png", class: "logo"}, []),
 		]),
-		el("span", {class: "text-gray-600 align-bottom whitespace-nowrap"},
+		el("span", {class: "info"},
 			[`${state.cursor+1}/${state.length}`])
 	    ]),
-	    el("div", {class: "flex-grow text-right"}, [
-		el("button", {class: "button py-1 text-purple-600 inline-block rounded appearance-none font-bold text-lg text-center ml-1 px-1 sm:px-4"}, [
+	    el("div", {class: "toolbar"}, [
+		el("button", {class: "button"}, [
 		    el("custom-action", {type: "click", value: "AirSSViewClickConfig"}, []),
 		    "🔧"
 		]),
-		el("button", {class: "button py-1 text-purple-600 inline-block rounded appearance-none font-bold text-lg text-center ml-1 px-1 sm:px-4"}, [
+		el("button", {class: "button"}, [
 		    el("custom-action", {type: "click", value: "AirSSViewClickSubscribe"}, []),
 		    "🍼"
 		]),
-		el("button", {class: "button py-1 text-purple-600 inline-block rounded appearance-none font-bold text-lg text-center ml-1 px-1 sm:px-4"}, [
+		el("button", {class: "button"}, [
 		    el("custom-action", {type: "click", value: "AirSSViewClickLeft"}, []),
 		    "◀"
 		]),
-		el("button", {class: "button py-1 text-purple-600 inline-block rounded appearance-none font-bold text-lg text-center ml-1 px-1 sm:px-4"}, [
+		el("button", {class: "button"}, [
 		    el("custom-action", {type: "click", value: "AirSSViewClickRight"}, []),
 		    "▶"
 		])
@@ -359,9 +361,11 @@ function config_dialog(state) {
 	    ]),
 	    el("div", {class: "field long"}, [
 		el("label", {}, [
-		    "Load feeds with roastidio.us (",
-		    el("a", {href: "https://github.com/derek-zhou/airss#Proxy"}, ["Why"]),
-		    "):",
+		    el("span", {}, [
+			"Load feeds with roastidio.us (",
+			el("a", {href: "https://github.com/derek-zhou/airss#Proxy"}, ["Why"]),
+			"):"
+		    ]),
 		    el("input", {type: "checkbox", name: "bounceLoad",
 				 checked: bounceLoadDefault()}, [])
 		])
@@ -444,7 +448,7 @@ function truncate_items_per_feed_options() {
 }
 
 function build_options(options, default_value) {
-    return options.forEach((each) =>
+    return options.map((each) =>
 	el("option", {selected: each.value == default_value, value: each.value}, [each.text])
     );
 }
@@ -465,9 +469,9 @@ function article(state) {
     let item = state.currentItem;
 
     return [
-	el("div", {class: "bg-white p-2 flow-root w-full overflow-x-hidden"}, [
+	el("div", {class: "article-container"}, [
 	    ... item ? article_head(item) : [],
-	    el("div", {id: "content-html", class: "font-serif text-gray-800 leading-snug mb-2 sm:text-lg sm:leading-relaxed"}, article_content(item)),
+	    el("div", {class: "content-html"}, article_content(item)),
 	    ... item ? article_tail(item) : []
 	])
     ];
@@ -489,20 +493,19 @@ function article_head(item) {
 function article_image(item) {
     if (item.image.Url) {
 	return [
-	    el("div", {class: "sm:float-right sm:ml-2"}, [
+	    el("div", {class: "article-hero"}, [
 		el("a", {href: item.url, target: "_blank", rel: "noopener noreferrer"}, [
-		    el("img", {
-			src: item.imageUrl, alt: "thumbnail", decoding: "sync",
-			class: "w-auto max-w-full max-w-xs max-h-48 md:max-w-lg md:max-h-64"}, [])
+		    el("img", {src: item.imageUrl, alt: "thumbnail", decoding: "sync"}, [])
 		])
 	    ])
 	];
     } else {
 	return [
-	    el("div", {class: "float-left mr-2"}, [
+	    el("div", {class: "article-antihero"}, [
 		el("a", {href: item.url, target: "_blank", rel: "noopener noreferrer"}, [
-		    el("img", {src: "images/unknown_link.png", alt: "thumbnail",
-			       decoding: "sync", class: "w-16 h-16"}, [])
+		    el("img", {
+			src: "images/unknown_link.png", alt: "thumbnail",
+			decoding: "sync"}, [])
 		])
 	    ])
 	];
@@ -512,14 +515,11 @@ function article_image(item) {
 function article_title(item) {
     if (dummy(item)) {
 	return [
-	    el("h4", {class: "font-bold my-2 text-lg leading-snug w-full sm:text-2xl sm:w-auto"},
-	       [item.title])
+	    el("h4", {class: "article-title"}, [item.title])
 	];
     } else {
 	return [
-	    el("h4", {
-		class: "font-bold my-2 text-lg leading-snug w-full sm:text-2xl sm:w-auto"
-	    }, [
+	    el("h4", {class: "article-title"}, [
 		el("a", {href: item.url, target: "_blank", rel: "noopener noreferrer"},
 		   [item.title])
 	    ])
@@ -529,12 +529,10 @@ function article_title(item) {
 
 function article_byline(item) {
     return [
-	el("h5", {class: "text-sm leading-snug sm:text-base sm:leading-normal"}, [
-	    el("span", {class: "whitespace-nowrap text-gray-400"}, [item.feedTitle]),
-	    el("span", {class: "whitespace-nowrap text-gray-400"}, [" | "]),
-	    el("span", {class: "whitespace-nowrap text-gray-400"}, [
-		item.datePublished.toLocaleString()
-	    ])
+	el("h5", {class: "article-byline"}, [
+	    el("span", {}, [item.feedTitle]),
+	    el("span", {}, [" | "]),
+	    el("span", {}, [item.datePublished.toLocaleString()])
 	])
     ];
 }
@@ -542,12 +540,14 @@ function article_byline(item) {
 function article_tail(item) {
     return [
 	el("form", {
-	    class: "bg-white flex flex-col gap-y-2 p-0 w-full",
-	    method: "post", action: "https://roastidio.us/post", target: "_blank"
+	    class: "comment-form",
+	    method: "post",
+	    action: "https://roastidio.us/post",
+	    target: "_blank"
 	}, [
 	    el("input", {type: "hidden", name: "url", value: item.url}, []),
 	    ... dummy(item) ? [] : comment_box(),
-	    el("div", {class: "flex flex-wrap w-full gap-x-1 justify-center"}, [
+	    el("div", {class: "toolbar"}, [
 		trash_button(),
 		... dummy(item) ? [] : [refresh_button()],
 		... dummy(item) ? [] : [submit_button()]
@@ -557,22 +557,18 @@ function article_tail(item) {
 }
 
 function comment_box() {
-    return [
-	el("auto-textarea", {}, [
-	    el("textarea", {class: "leading-relaxed border rounded resize-none box-border border-gray-600 h-20 p-1", name: "content"}, [])
-	])
-    ];
+    return [el("auto-textarea", {}, [el("textarea", {name: "content"}, [])])];
 }
 
 function trash_button() {
-    return el("button", {class: "button py-1 px-6 inline-block rounded appearance-none font-bold text-lg text-center border-0 text-white bg-pink-600"}, [
+    return el("button", {class: "button"}, [
 	el("custom-action", {type: "click", value: "AirSSViewClickTrash"}, []),
 	"🗑 "
     ]);
 }
 
 function refresh_button() {
-    return el("button", {class: "button py-1 px-6 inline-block rounded appearance-none font-bold text-lg text-center border-0 text-white bg-pink-600"}, [
+    return el("button", {class: "button"}, [
 	el("custom-action", {type: "click", value: "AirSSViewClickRefresh"}, []),
 	"📃"
     ]);

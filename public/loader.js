@@ -113,6 +113,8 @@ async function cb_saveFeeds(prev) {
     if (!enabled || !BounceLoad)
 	return;
     let urls = await Model.allFeedUrls();
+    if (urls.length == 0)
+	return;
     try {
 	Model.loadingStart();
 	let response = await fetch(Stash, {
