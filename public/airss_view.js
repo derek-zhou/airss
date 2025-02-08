@@ -1,5 +1,23 @@
 import {Screens} from './airss_controller.js';
 
+// events that I emit
+export const Events = {
+    touchStart: "AirSSViewTouchStart",
+    touchMove: "AirSSViewTouchMove",
+    clickLeft: "AirSSViewClickLeft",
+    clickRight: "AirSSViewClickRight",
+    clickAlert: "AirSSViewClickAlert",
+    clickConfig: "AirSSViewClickConfig",
+    clickSubscribe: "AirSSViewClickSubscribe",
+    clickTrash: "AirSSViewClickTrash",
+    clickRefresh: "AirSSViewClickRefresh",
+    clickReload: "AirSSViewClickReload",
+    submitSubscribe: "AirSSViewSubmitSubscribe",
+    submitTrash: "AirSSViewSubmitTrash",
+    submitConfig: "AirSSViewSubmitConfig",
+    resetDialog: "AirSSViewResetDialog"
+};
+
 // ids used in HTML
 const ProgressBarID = "progress-bar";
 const AlertBoxID = "alert-box";
@@ -186,8 +204,8 @@ function body(state) {
     return [
 	el("div", {id: ProgressBarID, hidden: true}, []),
 	el("div", {class: "viewport"}, [
-	    el("custom-action", {type: "touchstart", value: "AirSSViewTouchStart"}, []),
-	    el("custom-action", {type: "touchmove", value: "AirSSViewTouchMove"}, []),
+	    el("custom-action", {type: "touchstart", value: Events.touchStart}, []),
+	    el("custom-action", {type: "touchmove", value: Events.touchMove}, []),
 	    el("div", {id: AlertBoxID, hidden: true}, alert(state)),
 	    el("div", {id: ApplicationID}, application(state)),
 	    el("div", {id: ArticleID, class: "article-viewport"}, article(state)),
@@ -234,19 +252,19 @@ function navbar(state) {
 	    ]),
 	    el("div", {class: "toolbar"}, [
 		el("button", {class: "button"}, [
-		    el("custom-action", {type: "click", value: "AirSSViewClickConfig"}, []),
+		    el("custom-action", {type: "click", value: Events.clickConfig}, []),
 		    "🔧"
 		]),
 		el("button", {class: "button"}, [
-		    el("custom-action", {type: "click", value: "AirSSViewClickSubscribe"}, []),
+		    el("custom-action", {type: "click", value: Events.clickSubscribe}, []),
 		    "🍼"
 		]),
 		el("button", {class: "button"}, [
-		    el("custom-action", {type: "click", value: "AirSSViewClickLeft"}, []),
+		    el("custom-action", {type: "click", value: Events.clickLeft}, []),
 		    "◀"
 		]),
 		el("button", {class: "button"}, [
-		    el("custom-action", {type: "click", value: "AirSSViewClickRight"}, []),
+		    el("custom-action", {type: "click", value: Events.clickRight}, []),
 		    "▶"
 		])
 	    ])
@@ -260,7 +278,7 @@ function alert(state) {
     } else {
 	return [
 	    el("p", {class: alertClass(state)}, [
-		el("custom-action", {type: "click", value: "AirSSViewClickAlert"}, []),
+		el("custom-action", {type: "click", value: Events.clickAlert}, []),
 		state.alert.text
 	    ])
 	];
@@ -284,7 +302,7 @@ function dialog(state) {
 
 function reload_dialog(state) {
     return [
-	custom_form("AirSSViewClickReload", null, [
+	custom_form(Events.clickReload, null, [
 	    el("p", {}, ["AirSS is shut down. Reload?"])
 	])
     ];
@@ -292,7 +310,7 @@ function reload_dialog(state) {
 
 function subscribe_dialog(state) {
     return [
-	custom_form("AirSSViewSubmitSubscribe", "AirSSViewResetDialog", [
+	custom_form(Events.submitSubscribe, Events.resetDialog, [
 	    el("div", {class: "field long"}, [
 		el("label", {}, [
 		    "The URL to the feed or the index page:",
@@ -306,7 +324,7 @@ function subscribe_dialog(state) {
 
 function trash_dialog(state) {
     return [
-	custom_form("AirSSViewSubmitTrash", "AirSSViewResetDialog", [
+	custom_form(Events.submitTrash, Events.resetDialog, [
 	    el("p", {}, ["Are you sure you want to delete this item?"]),
 	    el("div", {class: "field"}, [
 		el("label", {}, [
@@ -323,7 +341,7 @@ function trash_dialog(state) {
 
 function config_dialog(state) {
     return [
-	custom_form("AirSSViewSubmitConfig", "AirSSViewResetDialog", [
+	custom_form(Events.submitConfig, Events.resetDialog, [
 	    el("div", {class: "field long"}, [
 		el("label", {}, [
 		    "Load more when unread items is below:",
@@ -562,14 +580,14 @@ function comment_box() {
 
 function trash_button() {
     return el("button", {class: "button"}, [
-	el("custom-action", {type: "click", value: "AirSSViewClickTrash"}, []),
+	el("custom-action", {type: "click", value: Events.clickTrash}, []),
 	"🗑 "
     ]);
 }
 
 function refresh_button() {
     return el("button", {class: "button"}, [
-	el("custom-action", {type: "click", value: "AirSSViewClickRefresh"}, []),
+	el("custom-action", {type: "click", value: Events.clickRefresh}, []),
 	"📃"
     ]);
 }

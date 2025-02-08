@@ -53,25 +53,25 @@ function timeoutShutdown() {
     Model.shutdown("Shutdown due to inactivity");
 }
 
-document.addEventListener("AirSSModelItemsLoaded", e => {
+document.addEventListener(Model.Events.itemsLoaded, e => {
     state.length = e.detail.length;
     state.cursor = e.detail.cursor;
     View.render_application(state);
 });
 
-document.addEventListener("AirSSModelItemUpdated", e => {
+document.addEventListener(Model.Events.itemUpdated, e => {
     state.currentItem = e.detail;
     View.render_article(state);
 });
 
-document.addEventListener("AirSSModelAlert", e => {
+document.addEventListener(Model.Events.alert, e => {
     state.alert.type = e.detail.type;
     state.alert.text = e.detail.text;
     View.render_alert(state);
     View.update_layout(state);
 });
 
-document.addEventListener("AirSSModelShutDown", e => {
+document.addEventListener(Model.Events.shutDown, e => {
     state.alert.type = e.detail.type;
     state.alert.text = e.detail.text;
     state.screen = Screens.shutdown;
@@ -79,24 +79,24 @@ document.addEventListener("AirSSModelShutDown", e => {
     View.update_layout(state);
 });
 
-document.addEventListener("AirSSModelStartLoading", () => {
+document.addEventListener(Model.Events.startLoading, () => {
     state.loading = true;
     console.log("loading on");
     View.update_layout(state);
 });
 
-document.addEventListener("AirSSModelStopLoading", () => {
+document.addEventListener(Model.Events.stopLoading, () => {
     state.loading = false;
     console.log("loading off");
     View.update_layout(state);
 });
 
-document.addEventListener("AirSSModelPostHandle", e => {
+document.addEventListener(Model.Events.postHandle, e => {
     state.postHandle = e.detail.text;
     View.render_application(state);
 });
 
-document.addEventListener("AirSSModelInitDone", () => {
+document.addEventListener(Model.Events.initDone, () => {
     // do I have a incoming api call to subscribe a feed
     if (location.search) {
 	let params = new URLSearchParams(location.search.substring(1));
@@ -112,16 +112,34 @@ document.addEventListener("AirSSModelInitDone", () => {
     }
 });
 
+document.addEventListener("keydown", (e) => {
+    if (state.screen == Screen.shutdown)
+	return;
+    actionPreamble();
+
+    switch (e.key) {
+    case 'n':
+    case 'N':
+	Model.forwardItem();
+	break;
+    case 'p':
+    case 'P':
+	Model.backwardItem();
+	break;
+    }
+    View.update_layout(state);
+});
+
 // for swipes
 let xDown = null;
 let yDown = null;
 
-document.addEventListener("AirSSViewTouchStart", (e) => {
+document.addEventListener(View.Events.touchStart, (e) => {
     xDown = e.detail.touches[0].clientX;
     yDown = e.detail.touches[0].clientY;
 });
 
-document.addEventListener("AirSSViewTouchMove", (e) => {
+document.addEventListener(View.Events.touchMove, (e) => {
     if (state.screen == Screen.shutdown)
 	return;
     actionPreamble();
@@ -149,25 +167,7 @@ document.addEventListener("AirSSViewTouchMove", (e) => {
     yDown = null;
 });
 
-document.addEventListener("keydown", (e) => {
-    if (state.screen == Screen.shutdown)
-	return;
-    actionPreamble();
-
-    switch (e.key) {
-    case 'n':
-    case 'N':
-	Model.forwardItem();
-	break;
-    case 'p':
-    case 'P':
-	Model.backwardItem();
-	break;
-    }
-    View.update_layout(state);
-});
-
-document.addEventListener("AirSSViewClickLeft", () => {
+document.addEventListener(View.Events.clickLeft, () => {
     if (state.screen == Screen.shutdown)
 	return;
     actionPreamble();
@@ -175,7 +175,7 @@ document.addEventListener("AirSSViewClickLeft", () => {
     View.update_layout(state);
 });
 
-document.addEventListener("AirSSViewClickRight", () => {
+document.addEventListener(View.Events.clickRight, () => {
     if (state.screen == Screen.shutdown)
 	return;
     actionPreamble();
@@ -183,14 +183,14 @@ document.addEventListener("AirSSViewClickRight", () => {
     View.update_layout(state);
 });
 
-document.addEventListener("AirSSViewClickAlert", () => {
+document.addEventListener(View.Events.clickAlert, () => {
     if (state.screen == Screen.shutdown)
 	return;
     actionPreamble();
     View.update_layout(state);
 });
 
-document.addEventListener("AirSSViewClickConfig", () => {
+document.addEventListener(View.Events.clickConfig, () => {
     if (state.screen == Screen.shutdown)
 	return;
     actionPreamble();
@@ -201,7 +201,7 @@ document.addEventListener("AirSSViewClickConfig", () => {
     View.update_layout(state);
 });
 
-document.addEventListener("AirSSViewClickSubscribe", () => {
+document.addEventListener(View.Events.clickSubscribe, () => {
     if (state.screen == Screen.shutdown)
 	return;
     actionPreamble();
@@ -210,7 +210,7 @@ document.addEventListener("AirSSViewClickSubscribe", () => {
     View.update_layout(state);
 });
 
-document.addEventListener("AirSSViewClickTrash", () => {
+document.addEventListener(View.Events.clickTrash, () => {
     if (state.screen == Screen.shutdown)
 	return;
     actionPreamble();
@@ -219,7 +219,7 @@ document.addEventListener("AirSSViewClickTrash", () => {
     View.update_layout(state);
 });
 
-document.addEventListener("AirSSViewSubmitSubscribe", (e) => {
+document.addEventListener(View.Events.submitSubscribe, (e) => {
     if (state.screen == Screen.shutdown)
 	return;
     actionPreamble();
@@ -230,7 +230,7 @@ document.addEventListener("AirSSViewSubmitSubscribe", (e) => {
     View.update_layout(state);
 });
 
-document.addEventListener("AirSSViewResetDialog", () => {
+document.addEventListener(View.Events.resetDialog, () => {
     if (state.screen == Screen.shutdown)
 	return;
     actionPreamble();
@@ -239,7 +239,7 @@ document.addEventListener("AirSSViewResetDialog", () => {
     View.update_layout(state);
 });
 
-document.addEventListener("AirSSViewSubmitTrash", (e) => {
+document.addEventListener(View.Events.submitTrash, (e) => {
     if (state.screen == Screen.shutdown)
 	return;
     actionPreamble();
@@ -255,7 +255,7 @@ document.addEventListener("AirSSViewSubmitTrash", (e) => {
     View.update_layout(state);
 });
 
-document.addEventListener("AirSSViewSubmitConfig", (e) => {
+document.addEventListener(View.Events.submitConfig, (e) => {
     if (state.screen == Screen.shutdown)
 	return;
     actionPreamble();
@@ -286,7 +286,7 @@ document.addEventListener("AirSSViewSubmitConfig", (e) => {
     View.update_layout(state);
 });
 
-document.addEventListener("AirSSViewClickRefresh", () => {
+document.addEventListener(View.Events.clickRefresh, () => {
     if (state.screen == Screen.shutdown)
 	return;
     actionPreamble();
@@ -294,6 +294,6 @@ document.addEventListener("AirSSViewClickRefresh", () => {
     View.update_layout(state);
 });
 
-document.addEventListener("AirSSViewClickReload", () => {
+document.addEventListener(View.Events.clickReload, () => {
     location.reload();
 });

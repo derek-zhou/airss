@@ -17,6 +17,18 @@ export {currentState, shutdown, clearData, warn, error,
 	addFeed, deleteFeed, fetchFeed, updateFeed,
 	allFeedUrls, postHandle, saveFeeds, restoreFeeds};
 
+// events that I emit
+export const Events = {
+    alert: "AirSSModelAlert",
+    itemsLoaded: "AirSSModelItemsLoaded",
+    initDone: "AirSSModelInitDone",
+    shutDown: "AirSSModelShutDown",
+    startLoading: "AirSSModelStartLoading",
+    stopLoading: "AirSSModelStopLoading",
+    itemUpdated: "AirSSModelItemUpdated",
+    postHandle:	"AirSSModelPostHandle"
+};
+
 // when the cursor is this close to the end I load more
 const WaterMark = parseInt(localStorage.getItem("WATER_MARK")) || 10;
 
@@ -28,10 +40,7 @@ const MaxKeptPeriod = parseInt(localStorage.getItem("MAX_KEPT_PERIOD")) || 180;
 
 // events I post to the document from the callback side
 function emitModelAlert(type, text) {
-    window.document.dispatchEvent(new CustomEvent(
-	"AirSSModelAlert",
-	{detail: {type, text}}
-    ));
+    window.document.dispatchEvent(new CustomEvent(Events.alert, {detail: {type, text}}));
 }
 
 function emitModelWarning(text) {
@@ -50,33 +59,27 @@ function emitModelInfo(text) {
 }
 
 function emitModelItemsLoaded(info) {
-    window.document.dispatchEvent(new CustomEvent(
-	"AirSSModelItemsLoaded",
-	{detail: info}
-    ));
+    window.document.dispatchEvent(new CustomEvent(Events.itemsLoaded, {detail: info}));
 }
 
 function emitModelInitDone() {
-    window.document.dispatchEvent(new Event("AirSSModelInitDone"));
+    window.document.dispatchEvent(new Event(Events.initDone));
 }
 
 function emitModelShutDown(type, text) {
-    window.document.dispatchEvent(new CustomEvent(
-	"AirSSModelShutDown",
-	{detail: {type, text}}
-    ));
+    window.document.dispatchEvent(new CustomEvent(Events.shutDown, {detail: {type, text}}));
 }
 
 function emitModelStartLoading() {
-    window.document.dispatchEvent(new Event("AirSSModelStartLoading"));
+    window.document.dispatchEvent(new Event(Events.startLoading));
 }
 
 function emitModelStopLoading() {
-    window.document.dispatchEvent(new Event("AirSSModelStopLoading"));
+    window.document.dispatchEvent(new Event(Events.stopLoading));
 }
 
 function emitModelItemUpdated(item) {
-    window.document.dispatchEvent(new CustomEvent("AirSSModelItemUpdated", {detail: item}));
+    window.document.dispatchEvent(new CustomEvent(Events.itemUpdated, {detail: item}));
 }
 
 /*
@@ -384,10 +387,7 @@ async function cb_allFeedUrls(prev) {
 
 async function cb_postHandle(prev, handle) {
     await prev;
-    window.document.dispatchEvent(new CustomEvent(
-	"AirSSModelPostHandle",
-	{detail: {text: handle}}
-    ));
+    window.document.dispatchEvent(new CustomEvent(Events.postHandle, {detail: {text: handle}}));
 }
 
 async function cb_saveFeeds(prev) {
