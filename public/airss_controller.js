@@ -30,7 +30,6 @@ var state = {
     currentItem: null,
     postHandle: null,
     loading: false,
-    unsubscribeDefault: false,
     alert: {
 	text: "",
 	type: "info"
@@ -81,13 +80,11 @@ document.addEventListener(Model.Events.shutDown, e => {
 
 document.addEventListener(Model.Events.startLoading, () => {
     state.loading = true;
-    console.log("loading on");
     View.update_layout(state);
 });
 
 document.addEventListener(Model.Events.stopLoading, () => {
     state.loading = false;
-    console.log("loading off");
     View.update_layout(state);
 });
 
@@ -113,7 +110,7 @@ document.addEventListener(Model.Events.initDone, () => {
 });
 
 document.addEventListener("keydown", (e) => {
-    if (state.screen == Screen.shutdown)
+    if (state.screen != Screens.browse)
 	return;
     actionPreamble();
 
@@ -140,7 +137,7 @@ document.addEventListener(View.Events.touchStart, (e) => {
 });
 
 document.addEventListener(View.Events.touchMove, (e) => {
-    if (state.screen == Screen.shutdown)
+    if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
 
@@ -168,7 +165,7 @@ document.addEventListener(View.Events.touchMove, (e) => {
 });
 
 document.addEventListener(View.Events.clickLeft, () => {
-    if (state.screen == Screen.shutdown)
+    if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
     Model.backwardItem();
@@ -176,7 +173,7 @@ document.addEventListener(View.Events.clickLeft, () => {
 });
 
 document.addEventListener(View.Events.clickRight, () => {
-    if (state.screen == Screen.shutdown)
+    if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
     Model.forwardItem();
@@ -184,14 +181,14 @@ document.addEventListener(View.Events.clickRight, () => {
 });
 
 document.addEventListener(View.Events.clickAlert, () => {
-    if (state.screen == Screen.shutdown)
+    if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
     View.update_layout(state);
 });
 
 document.addEventListener(View.Events.clickConfig, () => {
-    if (state.screen == Screen.shutdown)
+    if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
     // piggyback saving here
@@ -202,7 +199,7 @@ document.addEventListener(View.Events.clickConfig, () => {
 });
 
 document.addEventListener(View.Events.clickSubscribe, () => {
-    if (state.screen == Screen.shutdown)
+    if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
     state.screen = Screens.subscribe;
@@ -211,7 +208,7 @@ document.addEventListener(View.Events.clickSubscribe, () => {
 });
 
 document.addEventListener(View.Events.clickTrash, () => {
-    if (state.screen == Screen.shutdown)
+    if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
     state.screen = Screens.trash;
@@ -220,18 +217,18 @@ document.addEventListener(View.Events.clickTrash, () => {
 });
 
 document.addEventListener(View.Events.submitSubscribe, (e) => {
-    if (state.screen == Screen.shutdown)
+    if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
-    let data = new FormData(e.target);
-    Model.subscribe(data.get("feedUtl"));
+    let data = new FormData(e.detail.currentTarget);
+    Model.subscribe(data.get("feedUrl"));
     state.screen = Screens.browse;
     View.render_application(state);
     View.update_layout(state);
 });
 
 document.addEventListener(View.Events.resetDialog, () => {
-    if (state.screen == Screen.shutdown)
+    if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
     state.screen = Screens.browse;
@@ -240,15 +237,15 @@ document.addEventListener(View.Events.resetDialog, () => {
 });
 
 document.addEventListener(View.Events.submitTrash, (e) => {
-    if (state.screen == Screen.shutdown)
+    if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
     if (state.currentItem) {
-	let data = new FormData(e.target);
-	if (data.get("shouldUnsubscribe").checked)
-	    unsubscribe(state.currentItem.feedId);
+	let data = new FormData(e.detail.currentTarget);
+	if (data.get("shouldUnsubscribe"))
+	    Model.unsubscribe(state.currentItem.feedId);
 	else
-	    deleteItem();
+	    Model.deleteItem();
     }
     state.screen = Screens.browse;
     View.render_application(state);
@@ -256,10 +253,10 @@ document.addEventListener(View.Events.submitTrash, (e) => {
 });
 
 document.addEventListener(View.Events.submitConfig, (e) => {
-    if (state.screen == Screen.shutdown)
+    if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
-    let data = new FormData(e.target);
+    let data = new FormData(e.detail.currentTarget);
     // configuration update
     localStorage.setItem("WATER_MARK", data.get("waterMark"));
     localStorage.setItem("MIN_RELOAD_WAIT", data.get("minReloadWait"));
@@ -287,7 +284,7 @@ document.addEventListener(View.Events.submitConfig, (e) => {
 });
 
 document.addEventListener(View.Events.clickRefresh, () => {
-    if (state.screen == Screen.shutdown)
+    if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
     Model.refreshItem();

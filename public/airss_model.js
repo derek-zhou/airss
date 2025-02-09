@@ -233,8 +233,8 @@ async function cb_loadMore(prev) {
 }
 
 async function cb_markRead(prev) {
-    let item = await prev;
-    // we know for sure that item is the current item
+    await prev;
+    let item = await Items.getCurrentItem(db);
     if (item)
 	await Items.markRead(db, item);
 }
@@ -256,6 +256,8 @@ async function cb_unsubscribe(prev, id) {
 	length: Items.length(),
 	cursor: Items.readingCursor()
     });
+    let item = await Items.getCurrentItem(db);
+    emitModelItemUpdated(item);
 }
 
 async function cb_addFeed(prev, feed) {
@@ -367,10 +369,12 @@ async function cb_updateFeed(prev, feed, items) {
     // lastFetchTime is the time we actually loaded something
     feed.lastLoadTime = now;
     if (num > 0) {
+	feed.lastFetchTime = now;
 	if (Items.readingCursor() == -1) {
 	    Items.forwardCursor();
+	    let item = await Items.getCurrentItem(db);
+	    emitModelItemUpdated(item);
 	}
-	feed.lastFetchTime = now;
 	emitModelItemsLoaded({
 	    length: Items.length(),
 	    cursor: Items.readingCursor()

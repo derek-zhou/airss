@@ -296,14 +296,14 @@ form .button {
     font-size: 1.125rem;
     line-height: 1.75rem;
     font-weight: 700;
+    background-color: rgb(147 51 234);
+    color: rgb(255 255 255);
 }
 form .button[type=reset] {
     background-color: rgb(219 39 119);
-    color: rgb(255 255 255);
 }
 form .button[type=submit] {
     background-color: rgb(147 51 234);
-    color: rgb(255 255 255);
 }
 form .toolbar {
     display: flex;
@@ -411,7 +411,6 @@ h5.article-byline span {
 }
 form.comment-form {
     background-color: rgb(255 255 255);
-    row-gap: 0.5rem;
     padding: 0px;
     width: 100%;
 }
@@ -424,6 +423,7 @@ form.comment-form textarea {
       border-color: rgb(75 85 99);
       height: 5rem;
       padding: 0.25rem;
+      width: 100%;
 }
 
 @media (min-width: 512px) {

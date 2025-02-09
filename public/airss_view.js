@@ -53,7 +53,7 @@ function run_custom_actions(e) {
     for (const current of target.children) {
 	if (current instanceof CustomAction && current.getAttribute("type") == e.type) {
 	    let value = current.getAttribute("value");
-	    document.dispatchEvent(new CustomEvent(value, {target: target, detail: e}));
+	    document.dispatchEvent(new CustomEvent(value, {detail: e}));
 	}
     }
 }
@@ -244,7 +244,7 @@ function navbar(state) {
     return [
 	el("div", {class: "navbar"}, [
 	    el("div", {}, [
-		el("a", {href: "/"}, [
+		el("a", {href: "index.html"}, [
 		    el("img", {src: "images/airss_logo.png", class: "logo"}, []),
 		]),
 		el("span", {class: "info"},
@@ -325,14 +325,14 @@ function subscribe_dialog(state) {
 function trash_dialog(state) {
     return [
 	custom_form(Events.submitTrash, Events.resetDialog, [
-	    el("p", {}, ["Are you sure you want to delete this item?"]),
+	    el("p", {class: "line"}, ["Are you sure you want to delete this item?"]),
 	    el("div", {class: "field"}, [
 		el("label", {}, [
 		    "Unsubscribe ",
 		    el("span", {class: "focus"}, [state.currentItem.feedTitle]),
 		    " too",
-		    el("input", {type: "checkbox", name: "shouldUnscribe",
-				 checked: state.unsubscribeDefault}, [])
+		    el("input", {type: "checkbox", name: "shouldUnsubscribe",
+				 checked: !dummy(state.currentItem)}, [])
 		]),
 	    ])
 	])
@@ -496,6 +496,8 @@ function article(state) {
 }
 
 function dummy(item) {
+    if (!item)
+	return true;
     let tags = item.tags;
     return tags.length == 1 && tags[0] == "_error";
 }
@@ -509,7 +511,7 @@ function article_head(item) {
 }
 
 function article_image(item) {
-    if (item.image.Url) {
+    if (item.imageUrl) {
 	return [
 	    el("div", {class: "article-hero"}, [
 		el("a", {href: item.url, target: "_blank", rel: "noopener noreferrer"}, [
@@ -593,7 +595,7 @@ function refresh_button() {
 }
 
 function submit_button() {
-    return el("imput", {class: "button", type: "submit", value: "🔥"}, []);
+    return el("input", {class: "button", type: "submit", value: "🔥"}, []);
 }
 
 function article_content(item) {

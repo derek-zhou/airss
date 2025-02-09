@@ -21,7 +21,7 @@ function sanitizeHtml(input) {
     const doc = parser.parseFromString(input, "text/html");
     const input_body = doc.body;
     var sanitized = doc.createElement('Body');
-    sanitizeChildren(iframe_body, doc, sanitized);
+    sanitizeChildren(input_body, doc, sanitized);
     return sanitized.innerHTML;
 }
 
