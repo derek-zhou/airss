@@ -18,6 +18,25 @@ export const Events = {
     resetDialog: "AirSSViewResetDialog"
 };
 
+export const Subscribe = {
+    feedUrl: "feedUrl"
+};
+
+export const Trash = {
+    shouldUnsubscribe: "shouldUnsubscribe"
+};
+
+export const Config = {
+    waterMark: "waterMark",
+    minReloadWait: "minReloadWait",
+    maxKeptPeriod: "maxKeptPeriod",
+    maxItemsPerFeed: "maxItemsPerFeed",
+    truncateItemsPerFeed: "truncateItemsPerFeed",
+    bounceLoad: "bounceLoad",
+    restoreHandle: "restoreHandle",
+    clearDatabase: "clearDatabase"
+};
+
 // ids used in HTML
 const ProgressBarID = "progress-bar";
 const AlertBoxID = "alert-box";
@@ -314,7 +333,7 @@ function subscribe_dialog(state) {
 	    el("div", {class: "field long"}, [
 		el("label", {}, [
 		    "The URL to the feed or the index page:",
-		    el("input", {type: "text", class: "long", name: "feedUrl",
+		    el("input", {type: "text", class: "long", name: Subscribe.feedUrl,
 				 placeholder: "enter the url to subscribe"}, [])
 		]),
 	    ])
@@ -331,7 +350,7 @@ function trash_dialog(state) {
 		    "Unsubscribe ",
 		    el("span", {class: "focus"}, [state.currentItem.feedTitle]),
 		    " too",
-		    el("input", {type: "checkbox", name: "shouldUnsubscribe",
+		    el("input", {type: "checkbox", name: Trash.shouldUnsubscribe,
 				 checked: !dummy(state.currentItem)}, [])
 		]),
 	    ])
@@ -345,35 +364,35 @@ function config_dialog(state) {
 	    el("div", {class: "field long"}, [
 		el("label", {}, [
 		    "Load more when unread items is below:",
-		    el("select", {name: "waterMark"},
+		    el("select", {name: Config.waterMark},
 		       water_mark_options())
 		])
 	    ]),
 	    el("div", {class: "field long"}, [
 		el("label", {}, [
 		    "Between reloading a feed, wait at least:",
-		    el("select", {name: "minReloadWait"},
+		    el("select", {name: Config.minReloadWait},
 		       min_reload_wait_options())
 		])
 	    ]),
 	    el("div", {class: "field long"}, [
 		el("label", {}, [
 		    "Keep read items in the database for:",
-		    el("select", {name: "maxKeptPeriod"},
+		    el("select", {name: Config.maxKeptPeriod},
 		       max_kept_period_options())
 		])
 	    ]),
 	    el("div", {class: "field long"}, [
 		el("label", {}, [
 		    "Keep in the database at most per feed:",
-		    el("select", {name: "maxItemsPerFeed"},
+		    el("select", {name: Config.maxItemsPerFeed},
 		       max_items_per_feed_options())
 		])
 	    ]),
 	    el("div", {class: "field long"}, [
 		el("label", {}, [
 		    "Truncate each feed while loading to at most:",
-		    el("select", {name: "truncateItemsPerFeed"},
+		    el("select", {name: Config.truncateItemsPerFeed},
 		       truncate_items_per_feed_options())
 		])
 	    ]),
@@ -384,21 +403,22 @@ function config_dialog(state) {
 			el("a", {href: "https://github.com/derek-zhou/airss#Proxy"}, ["Why"]),
 			"):"
 		    ]),
-		    el("input", {type: "checkbox", name: "bounceLoad",
+		    el("input", {type: "checkbox", name: Config.bounceLoad,
 				 checked: bounceLoadDefault()}, [])
 		])
 	    ]),
 	    el("div", {class: "field long"}, [
 		el("label", {}, [
 		    "Restore feeds from:",
-		    el("input", {type: "text", class: "short code", name: "restoreHandle"}, []),
+		    el("input", {type: "text", class: "short code",
+				 name: Config.restoreHandle}, []),
 		    ...savedHandlePrompt(state)
 		])
 	    ]),
 	    el("div", {class: "field long"}, [
 		el("label", {class: "alert alert-danger"}, [
 		    "Danger! Type \"clear database\" to delete all data",
-		    el("input", {type: "text", name: "clearDatabase"}, [])
+		    el("input", {type: "text", name: Config.clearDatabase}, [])
 		])
 	    ])
 	])

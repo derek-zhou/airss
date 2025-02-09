@@ -36,8 +36,23 @@ var state = {
     }
 };
 
-View.render_all(state);
-window.application_state = state;
+function init() {
+    View.render_all(state);
+    window.application_state = state;
+    // do I have a incoming api call to subscribe a feed
+    if (location.search) {
+	let params = new URLSearchParams(location.search.substring(1));
+	let str = params.get("url");
+	// clear location so it is cleaner
+	let url = new URL("/", document.location.href);
+	history.pushState({}, "", url.href);
+	// do I have a refer so I can subscribe?
+	if (params.has("subscribe-referrer") && document.referrer)
+	    Model.subscribe(document.referrer);
+	else if (str)
+	    Model.subscribe(decodeURIComponent(str));
+    }
+}
 
 function actionPreamble() {
     clearTimeout(idleTimeout);
@@ -91,22 +106,6 @@ document.addEventListener(Model.Events.stopLoading, () => {
 document.addEventListener(Model.Events.postHandle, e => {
     state.postHandle = e.detail.text;
     View.render_application(state);
-});
-
-document.addEventListener(Model.Events.initDone, () => {
-    // do I have a incoming api call to subscribe a feed
-    if (location.search) {
-	let params = new URLSearchParams(location.search.substring(1));
-	let str = params.get("url");
-	// clear location so it is cleaner
-	let url = new URL("/", document.location.href);
-	history.pushState({}, "", url.href);
-	// do I have a refer so I can subscribe?
-	if (params.has("subscribe-referrer") && document.referrer)
-	    Model.subscribe(document.referrer);
-	else if (str)
-	    Model.subscribe(decodeURIComponent(str));
-    }
 });
 
 document.addEventListener("keydown", (e) => {
@@ -221,7 +220,7 @@ document.addEventListener(View.Events.submitSubscribe, (e) => {
 	return;
     actionPreamble();
     let data = new FormData(e.detail.currentTarget);
-    Model.subscribe(data.get("feedUrl"));
+    Model.subscribe(data.get(View.Subscribe.feedUrl));
     state.screen = Screens.browse;
     View.render_application(state);
     View.update_layout(state);
@@ -242,7 +241,7 @@ document.addEventListener(View.Events.submitTrash, (e) => {
     actionPreamble();
     if (state.currentItem) {
 	let data = new FormData(e.detail.currentTarget);
-	if (data.get("shouldUnsubscribe"))
+	if (data.get(View.Trash.shouldUnsubscribe))
 	    Model.unsubscribe(state.currentItem.feedId);
 	else
 	    Model.deleteItem();
@@ -258,21 +257,21 @@ document.addEventListener(View.Events.submitConfig, (e) => {
     actionPreamble();
     let data = new FormData(e.detail.currentTarget);
     // configuration update
-    localStorage.setItem("WATER_MARK", data.get("waterMark"));
-    localStorage.setItem("MIN_RELOAD_WAIT", data.get("minReloadWait"));
-    localStorage.setItem("MAX_KEPT_PERIOD", data.get("maxKeptPeriod"));
-    localStorage.setItem("MAX_ITEMS_PER_FEED", data.get("maxItemsPerFeed"));
-    localStorage.setItem("TRUNCATE_ITEMS_PER_FEED", data.get("truncateItemsPerFeed"));
-    localStorage.setItem("BOUNCE_LOAD", data.get("bounceLoad"));
+    localStorage.setItem("WATER_MARK", data.get(View.Config.waterMark));
+    localStorage.setItem("MIN_RELOAD_WAIT", data.get(View.Config.minReloadWait));
+    localStorage.setItem("MAX_KEPT_PERIOD", data.get(View.Config.maxKeptPeriod));
+    localStorage.setItem("MAX_ITEMS_PER_FEED", data.get(View.Config.maxItemsPerFeed));
+    localStorage.setItem("TRUNCATE_ITEMS_PER_FEED", data.get(View.Config.truncateItemsPerFeed));
+    localStorage.setItem("BOUNCE_LOAD", data.get(View.Config.bounceLoad));
 
     // It is very hard to change config at run time, so I just pretend to shutdown
     // cannot really shutdown because model is still working
     state.screen = Screens.shutdown;
 
-    if (data.clearDatabase == "clear database") {
+    if (data.get(View.Config.clearDatabase) == "clear database") {
 	Model.clearData();
-    } else if (data.restoreHandle && data.restoreHandle != "") {
-	Model.restoreFeeds(handle);
+    } else if (data.get(View.Config.restoreHandle)) {
+	Model.restoreFeeds(data.get(View.Config.restoreHandle));
     } else {
 	// It is very hard to change config at run time, so I just pretend to shutdown
 	state.alertType = "info";
@@ -294,3 +293,5 @@ document.addEventListener(View.Events.clickRefresh, () => {
 document.addEventListener(View.Events.clickReload, () => {
     location.reload();
 });
+
+init();
