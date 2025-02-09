@@ -34,12 +34,8 @@ const XMLFeedNameSet = new Set(['rss.xml', 'rss2.xml', 'atom.xml',
  * callback side state and entry points
  */
 
-let enabled = true;
-
 async function cb_subscribe(prev, url) {
     await prev;
-    if (!enabled)
-	return;
     try {
 	Model.loadingStart();
 	let feed = await sanitize(url);
@@ -63,8 +59,6 @@ async function cb_subscribe(prev, url) {
 
 async function cb_load(prev, obj) {
     await prev;
-    if (!enabled)
-	return;
     try {
 	Model.loadingStart();
 	let ret = await loadFeed(obj.feed, obj.items);
@@ -88,8 +82,6 @@ async function cb_load(prev, obj) {
 
 async function cb_reloadUrl(prev, url, id) {
     await prev;
-    if (!enabled)
-	return null;
     try {
 	Model.loadingStart();
 	let response = await bufferReload(url);
@@ -110,8 +102,6 @@ async function cb_reloadUrl(prev, url, id) {
 
 async function cb_saveFeeds(prev) {
     await prev;
-    if (!enabled || !BounceLoad)
-	return;
     let urls = await Model.allFeedUrls();
     if (urls.length == 0)
 	return;
@@ -142,14 +132,12 @@ async function cb_saveFeeds(prev) {
 
 async function cb_restoreFeeds(prev, handle) {
     await prev;
-    if (!enabled || !BounceLoad)
-	return;
     try {
 	Model.loadingStart();
 	let response = await fetch(Stash + "/" + handle, {mode: "cors"});
 	if (response.status != 200) {
-	    Model.warn("Restoring feeds failed with status: " + response.status);
 	    Model.loadingDone();
+	    Model.shutdown("warning", "Restoring feeds failed with status: " + response.status);
 	    return;
 	}
 	let data = await response.json();
@@ -159,11 +147,11 @@ async function cb_restoreFeeds(prev, handle) {
 	    feed.lastLoadTime = 0;
 	    Model.addFeed(feed);
 	}
-	Model.info("Successfully restoring feeds.");
 	Model.loadingDone();
+	Model.shutdown("info", "Successfully restoring feeds.");
     } catch (e) {
-	Model.error("Restoring feeds failed");
 	Model.loadingDone();
+	Model.shutdown("error", "Restoring feeds failed");
     }
 }
 
@@ -206,11 +194,7 @@ function bufferReload(url) {
 async function loadFeed(feed, except) {
     let response = await bufferFetch(feed.feedUrl, except);
     let updated = {...feed};
-    if (BounceLoad && response.status == 401) {
-	enabled = false;
-	return false;
-    }
-    else if (response.status != 200)
+    if (response.status != 200)
 	throw "fetching failed in loadFeed";
 
     if (!BounceLoad && response.redirected) {
@@ -335,10 +319,7 @@ async function sanitize(url) {
 	throw "Only http(s) is supported";
     let feed = new Object();
     let response = await myFetch(url);
-    if (BounceLoad && response.status == 401) {
-	enabled = false;
-	return false;
-    } else if (response.status != 200)
+    if (response.status != 200)
 	throw "fetching failed in sanitize";
 
     if (response.redirected) {
@@ -380,11 +361,7 @@ async function sanitize(url) {
 	    let mergedUrl = new URL(href, url);
 	    feed.feedUrl = mergedUrl.toString();
 	    let response = await myFetch(feed.feedUrl);
-	    if (BounceLoad && response.status == 401) {
-		enabled = false;
-		return false;
-	    }
-	    else if (response.status != 200) {
+	    if (response.status != 200) {
 		throw "fetching failed in sanitize";
 	    }
 	    return await loadInitFeed(response, feed);
@@ -403,11 +380,7 @@ async function sanitize(url) {
 	    let mergedUrl = new URL(href, url);
 	    feed.feedUrl = mergedUrl.toString();
 	    let response = await myFetch(feed.feedUrl);
-	    if (BounceLoad && response.status == 401) {
-		enabled = false;
-		return false;
-	    }
-	    else if (response.status != 200) {
+	    if (response.status != 200) {
 		throw "fetching failed in sanitize";
 	    }
 	    return await loadInitFeed(response, feed);

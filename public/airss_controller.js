@@ -64,7 +64,7 @@ function actionPreamble() {
 // when everything shutdown
 function timeoutShutdown() {
     clearTimeout(idleTimeout);
-    Model.shutdown("Shutdown due to inactivity");
+    Model.shutdown("info", "Shutdown due to inactivity");
 }
 
 document.addEventListener(Model.Events.itemsLoaded, e => {
@@ -262,7 +262,7 @@ document.addEventListener(View.Events.submitConfig, (e) => {
     localStorage.setItem("MAX_KEPT_PERIOD", data.get(View.Config.maxKeptPeriod));
     localStorage.setItem("MAX_ITEMS_PER_FEED", data.get(View.Config.maxItemsPerFeed));
     localStorage.setItem("TRUNCATE_ITEMS_PER_FEED", data.get(View.Config.truncateItemsPerFeed));
-    localStorage.setItem("BOUNCE_LOAD", data.get(View.Config.bounceLoad));
+    localStorage.setItem("BOUNCE_LOAD", data.get(View.Config.bounceLoad) || "false");
 
     // It is very hard to change config at run time, so I just pretend to shutdown
     // cannot really shutdown because model is still working

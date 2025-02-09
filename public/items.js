@@ -12,37 +12,44 @@ const MaxKeptItems = parseInt(localStorage.getItem("MAX_ITEMS_PER_FEED")) || 100
 
 // items is an array of item ids in ascending order
 let items = [];
+// pointer to the current reading position
 let reading = -1;
-let known = -1;
+let readCount = 0;
 
 // public apis
-export {upgrade, load, length,
-	readingCursor, knownCursor, forwardCursor, backwardCursor, unreadCount,
-	markRead, getCurrentItem, getItem, deleteCurrentItem, deleteAllItemsOfFeed,
-	allUrlsOfFeed, pushItem, addItem, updateItem, isDummyItem, isCurrentItem};
+export {upgrade, load, length, readingCursor, forward, backward, unreadCount, getCurrentItem,
+	getItem, deleteCurrentItem, deleteAllItemsOfFeed, allUrlsOfFeed, pushItem, updateItem,
+	isDummyItem, isCurrentItem};
 
 function readingCursor() {
     return reading;
 }
 
-function knownCursor() {
-    return known;
-}
-
 function unreadCount() {
-    return items.length - known - 1;
+    return items.length - readCount;
 }
 
-function forwardCursor() {
+async function updateReadCount(db) {
+    if (reading >= 0) {
+	let item = await db.get(Store, items[reading]);
+	if (!item.read) {
+	    item.read = true;
+	    await db.put(Store, item);
+	    readCount ++;
+	}
+    }
+}
+
+async function forward(db) {
+    await updateReadCount(db);
     if (reading >= items.length - 1)
 	return false;
     reading ++;
-    if (known < reading)
-	known = reading;
     return true;
 }
 
-function backwardCursor() {
+async function backward(db) {
+    await updateReadCount(db);
     if (reading <= 0)
 	return false;
     reading --;
@@ -51,13 +58,6 @@ function backwardCursor() {
 
 function length() {
     return items.length;
-}
-
-function markRead(db, item) {
-    if (item.read)
-	return;
-    item.read = true;
-    return db.put(Store, item);
 }
 
 function getCurrentItem(db) {
@@ -75,40 +75,44 @@ async function deleteCurrentItem(db) {
     if (reading < 0)
 	return false;
     let item = await db.get(Store, items[reading]);
+    if (item.read) {
+	readCount --;
+    }
     Feeds.removeItem(item.feedId, items[reading]);
     await db.delete(Store, items[reading]);
     items = items.slice(0, reading).concat(items.slice(reading + 1));
-    reading--;
-    known--;
+    if (reading == items.length) {
+	reading --;
+    }
     return true;
 }
 
 async function deleteAllItemsOfFeed(db, feedId) {
     let after = [];
     let above_reading = false;
-    let above_known = false;
     let reading_shrink = 0;
-    let known_shrink = 0;
     let itemSet = Feeds.itemsOf(feedId);
     for (let i = 0; i < items.length; i++) {
 	let id = items[i];
 	if (itemSet.has(id)) {
+	    let item = await db.get(Store, id);
 	    await db.delete(Store, id);
+	    if (item.read) {
+		readCount --;
+	    }
 	    if (!above_reading)
-		reading_shrink++;
-	    if (!above_known)
-		known_shrink++;
+		reading_shrink ++;
 	} else {
 	    after.push(id);
 	}
 	if (i == reading)
 	    above_reading = true;
-	if (i == known)
-	    above_known = true;
     }
     items = [...after];
     reading = reading - reading_shrink;
-    known = known - known_shrink;
+    if (reading == items.length) {
+	reading --;
+    }
 }
 
 async function allUrlsOfFeed(db, feedId) {
@@ -127,20 +131,14 @@ async function pushItem(db, item) {
     Feeds.addItem(item.feedId, id);
     items.push(id);
     item.id = id;
+    if (reading < 0) {
+	reading = 0;
+    }
     return id;
 }
 
 async function updateItem(db, item) {
     return db.put(Store, item);
-}
-
-async function addItem(db, item) {
-    // may throw
-    await db.add(Store, item);
-    Feeds.addItem(item.feedId, item.id);
-    items.push(item.id);
-    if (item.read && known == items.length - 2)
-	known ++;
 }
 
 function upgrade(db) {
@@ -181,8 +179,11 @@ async function load(db) {
 	    perFeedCounter.set(feedId, thisCount + 1);
 	    Feeds.addItem(feedId, cursor.value.id);
 	    // items from the beginning up to a point are read
-	    if (!cursor.value.read)
+	    if (cursor.value.read) {
+		readCount ++;
+	    } else {
 		unread = counter;
+	    }
 	} else {
 	    expired.push(cursor.key);
 	}
@@ -194,8 +195,11 @@ async function load(db) {
 	await db.delete(Store, id);
     }
     items = buffer.reverse();
-    // point both cursor at the last read item
-    known = reading = counter - unread - 1;
+    if (unread == 0) {
+	reading = counter - 1;
+    } else {
+	reading = counter - unread;
+    }
     // return a copy so my state is not affected
     return [...items];
 }
