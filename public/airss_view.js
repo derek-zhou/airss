@@ -197,11 +197,13 @@ export function render_application(state) {
 // render only the article container
 export function render_article(state) {
     repaint(document.getElementById(ArticleID), article(state));
+    window.scrollTo({top: 0});
 }
 
 // render only the alert container
 export function render_alert(state) {
     repaint(document.getElementById(AlertBoxID), alert(state));
+    window.scrollTo({top: 0});
 }
 
 // update visibility of various blocks
