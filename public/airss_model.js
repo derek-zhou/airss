@@ -11,7 +11,7 @@ import * as Items from './items.js';
 import * as Loader from './loader.js';
 
 // exported client side functions. all return promises or null
-export {currentState, shutdown, clearData, info, warn, error,
+export {init, currentState, shutdown, clearData, info, warn, error,
 	forwardItem, backwardItem, deleteItem, refreshItem,
 	subscribe, unsubscribe, loadingStart, loadingDone, updateItemText,
 	addFeed, deleteFeed, fetchFeed, updateFeed,
@@ -102,8 +102,30 @@ async function try_load() {
     Loader.load({feed: feed, items: items});
 }
 
-async function cb_getLoadCandidate(prev) {
+// the on demand load callback
+async function cb_maybeLoad(prev) {
     await prev;
+    await try_load();
+}
+
+// the init callback
+async function cb_init(prev) {
+    await prev;
+    db = await openDB("AirSS", 1, {
+	upgrade(db) {
+ 	    Feeds.upgrade(db);
+	    Items.upgrade(db);
+	},
+    });
+    let feedIds = await Feeds.load(db);
+    let itemIds = await Items.load(db);
+    let item = await Items.getCurrentItem(db);
+    emitModelItemsLoaded({
+	length: Items.length(),
+	cursor: Items.readingCursor()
+    });
+    emitModelItemUpdated(item);
+    await try_load();
 }
 
 // the shutdown callback
@@ -158,7 +180,7 @@ async function cb_clearData(prev) {
     await db.close();
     await deleteDB("AirSS");
     db = null;
-    emitModelShutDown("info", "Database deleted");
+    emitModelInfo("Database deleted");
 }
 
 async function cb_subscribe(prev, url) {
@@ -393,31 +415,19 @@ async function cb_restoreFeeds(prev, handle) {
 }
 
 /*
- * internal functions of the callback side
- */
-async function init() {
-    db = await openDB("AirSS", 1, {
-	upgrade(db) {
- 	    Feeds.upgrade(db);
-	    Items.upgrade(db);
-	},
-    });
-    let feedIds = await Feeds.load(db);
-    let itemIds = await Items.load(db);
-    let item = await Items.getCurrentItem(db);
-    emitModelItemsLoaded({
-	length: Items.length(),
-	cursor: Items.readingCursor()
-    });
-    emitModelItemUpdated(item);
-    await try_load();
-}
-
-/*
  * Client side state which is a promise
  * any client side function will await and replace the state
  */
-let state = init();
+let state = null;
+
+function init() {
+    state = cb_init(state);
+}
+
+// load feeds if necessary
+function maybeLoad() {
+    state = cb_maybeLoad(state);
+}
 
 // return the current state so client and await me
 function currentState() {

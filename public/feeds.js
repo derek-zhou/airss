@@ -7,10 +7,10 @@ const UrlIndex = "feedUrl";
 // in memory state
 // feeds is an array of feed ids, in the order of last load time. feeds[0]
 // is the oldest
-let feeds = [];
+var feeds;
 
 // all items of a feed in a Map
-let itemSet = new Map();
+var itemSet;
 
 // public apis
 export {upgrade, load, get, first, rotate, addFeed, updateFeed, allFeedUrls,
@@ -30,6 +30,7 @@ async function load(db) {
     let cursor = await index.openCursor();
 
     feeds = [];
+    itemSet = new Map();
     while (cursor) {
 	feeds.push(cursor.value.id);
 	cursor = await cursor.continue();

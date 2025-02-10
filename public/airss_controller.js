@@ -23,22 +23,24 @@ export const Screens = {
 };
 
 // the application state
-var state = {
-    screen: Screens.browse,
-    length: 0,
-    cursor: -1,
-    currentItem: null,
-    postHandle: null,
-    loading: false,
-    alert: {
-	text: "",
-	type: "info"
-    }
-};
+var state;
 
 function init() {
+    state = {
+	screen: Screens.browse,
+	length: 0,
+	cursor: -1,
+	currentItem: null,
+	postHandle: null,
+	loading: false,
+	alert: {
+	    text: "",
+	    type: "info"
+	}
+    };
     View.render_all(state);
     window.application_state = state;
+    Model.init();
     // do I have a incoming api call to subscribe a feed
     if (location.search) {
 	let params = new URLSearchParams(location.search.substring(1));
@@ -247,7 +249,6 @@ document.addEventListener(View.Events.submitTrash, (e) => {
 	    Model.deleteItem();
     }
     state.screen = Screens.browse;
-    View.render_application(state);
     View.update_layout(state);
 });
 
@@ -264,22 +265,18 @@ document.addEventListener(View.Events.submitConfig, (e) => {
     localStorage.setItem("TRUNCATE_ITEMS_PER_FEED", data.get(View.Config.truncateItemsPerFeed));
     localStorage.setItem("BOUNCE_LOAD", data.get(View.Config.bounceLoad) || "false");
 
-    // It is very hard to change config at run time, so I just pretend to shutdown
-    // cannot really shutdown because model is still working
-    state.screen = Screens.shutdown;
-
+    state.screen = Screens.browse;
+    View.update_layout(state);
+    // It is very hard to change config at run time, so I just take
+    // shortcut to reload
     if (data.get(View.Config.clearDatabase) == "clear database") {
 	Model.clearData();
-    } else if (data.get(View.Config.restoreHandle)) {
-	Model.restoreFeeds(data.get(View.Config.restoreHandle));
-    } else {
-	// It is very hard to change config at run time, so I just pretend to shutdown
-	state.alertType = "info";
-	state.alertText = "Configuration changed, you must reload for it to take effect.";
-	View.render_alert(state);
-	View.render_application(state);
     }
-    View.update_layout(state);
+
+    Model.init();
+    if (data.get(View.Config.restoreHandle)) {
+	Model.restoreFeeds(data.get(View.Config.restoreHandle));
+    }
 });
 
 document.addEventListener(View.Events.clickRefresh, () => {
@@ -291,7 +288,7 @@ document.addEventListener(View.Events.clickRefresh, () => {
 });
 
 document.addEventListener(View.Events.clickReload, () => {
-    location.reload();
+    init();
 });
 
 init();

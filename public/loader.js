@@ -137,7 +137,7 @@ async function cb_restoreFeeds(prev, handle) {
 	let response = await fetch(Stash + "/" + handle, {mode: "cors"});
 	if (response.status != 200) {
 	    Model.loadingDone();
-	    Model.shutdown("warning", "Restoring feeds failed with status: " + response.status);
+	    Model.warn("warning", "Restoring feeds failed with status: " + response.status);
 	    return;
 	}
 	let data = await response.json();
@@ -148,10 +148,10 @@ async function cb_restoreFeeds(prev, handle) {
 	    Model.addFeed(feed);
 	}
 	Model.loadingDone();
-	Model.shutdown("info", "Successfully restoring feeds.");
+	Model.info("Successfully restoring feeds.");
     } catch (e) {
 	Model.loadingDone();
-	Model.shutdown("error", "Restoring feeds failed");
+	Model.error("error", "Restoring feeds failed");
     }
 }
 
