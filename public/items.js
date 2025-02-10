@@ -5,16 +5,12 @@ import * as Feeds from './feeds.js';
 
 const Store = "items";
 
-// kept in days
-const MaxKeptPeriod = parseInt(localStorage.getItem("MAX_KEPT_PERIOD")) || 180;
-// keep at most 100 items from feed
-const MaxKeptItems = parseInt(localStorage.getItem("MAX_ITEMS_PER_FEED")) || 100;
-
+// in memory state
 // items is an array of item ids in ascending order
-let items = [];
+var items;
 // pointer to the current reading position
-let reading = -1;
-let readCount = 0;
+var reading;
+var readCount;
 
 // public apis
 export {upgrade, load, length, readingCursor, forward, backward, unreadCount, getCurrentItem,
@@ -166,14 +162,17 @@ async function load(db) {
     let counter = 0;
     let expired = [];
     let now = new Date();
+    let maxKeptPeriod = parseInt(localStorage.getItem("MAX_KEPT_PERIOD")) || 180;
+    let maxKeptItems = parseInt(localStorage.getItem("MAX_ITEMS_PER_FEED")) || 100;
+    readCount = 0;
 
     while (cursor) {
 	let feedId = cursor.value.feedId;
 	let thisCount = 0;
 	if (perFeedCounter.has(feedId))
 	    thisCount = perFeedCounter.get(feedId);
- 	if (now - cursor.value.datePublished < MaxKeptPeriod*24*3600*1000 &&
-	    thisCount < MaxKeptItems) {
+ 	if (now - cursor.value.datePublished < maxKeptPeriod*24*3600*1000 &&
+	    thisCount < maxKeptItems) {
 	    buffer.push(cursor.key);
 	    counter ++;
 	    perFeedCounter.set(feedId, thisCount + 1);

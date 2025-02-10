@@ -7,12 +7,7 @@ import * as Sanitizer from './sanitizer.js';
 
 export {subscribe, load, reloadUrl, saveFeeds, restoreFeeds};
 
-// truncate to at most 25 items per loading
-const TruncateItems = parseInt(localStorage.getItem("TRUNCATE_ITEMS_PER_FEED")) || 25;
-// kept in days
-const MaxKeptPeriod = parseInt(localStorage.getItem("MAX_KEPT_PERIOD")) || 180;
 // whether to load with bouncer
-const BounceLoad = localStorage.getItem("BOUNCE_LOAD") != "false";
 const BouncerRoot = "https://roastidio.us"
 const Bouncer = BouncerRoot + "/bounce?url=";
 const FullText = BouncerRoot + "/fulltext?url=";
@@ -82,6 +77,7 @@ async function cb_load(prev, obj) {
 
 async function cb_reloadUrl(prev, url, id) {
     await prev;
+    let bounceLoad = localStorage.getItem("BOUNCE_LOAD") != "false";
     try {
 	Model.loadingStart();
 	let response = await bufferReload(url);
@@ -91,7 +87,7 @@ async function cb_reloadUrl(prev, url, id) {
 	    return null;
 	}
 	let data = await response.text();
-	let text = BounceLoad ? data : Sanitizer.sanitizeHtml(data);
+	let text = bounceLoad ? data : Sanitizer.sanitizeHtml(data);
 	Model.updateItemText(text, id);
 	Model.loadingDone();
     } catch (e) {
@@ -156,7 +152,8 @@ async function cb_restoreFeeds(prev, handle) {
 }
 
 function myFetch(url) {
-    if (BounceLoad && !url.startsWith(BouncerRoot)) {
+    let bounceLoad = localStorage.getItem("BOUNCE_LOAD") != "false";
+    if (bounceLoad && !url.startsWith(BouncerRoot)) {
 	return fetch(Bouncer + encodeURIComponent(url), {
 	    mode: "cors"
 	});
@@ -166,7 +163,8 @@ function myFetch(url) {
 }
 
 function bufferFetch(url, except) {
-    if (BounceLoad) {
+    let bounceLoad = localStorage.getItem("BOUNCE_LOAD") != "false";
+    if (bounceLoad) {
 	return fetch(Buffer, {
 	    method: "POST",
 	    headers: {
@@ -182,7 +180,8 @@ function bufferFetch(url, except) {
 }
 
 function bufferReload(url) {
-    if (BounceLoad) {
+    let bounceLoad = localStorage.getItem("BOUNCE_LOAD") != "false";
+    if (bounceLoad) {
 	return fetch(FullText + encodeURIComponent(url), {
 	    mode: "cors"
 	});
@@ -192,17 +191,18 @@ function bufferReload(url) {
 }
 
 async function loadFeed(feed, except) {
+    let bounceLoad = localStorage.getItem("BOUNCE_LOAD") != "false";
     let response = await bufferFetch(feed.feedUrl, except);
     let updated = {...feed};
     if (response.status != 200)
 	throw "fetching failed in loadFeed";
 
-    if (!BounceLoad && response.redirected) {
+    if (!bounceLoad && response.redirected) {
 	// trust redirected url for direct load
 	updated.feedUrl = response.url;
     }
     // buffer load is always in JSON
-    if (BounceLoad) {
+    if (bounceLoad) {
 	let data = await response.json();
 	if (data.error)
 	    throw data.error;
@@ -315,6 +315,7 @@ async function sanitize(url) {
     // first we need to make sure it is a valid url. If not,
     // the next line will throw
     let urlObject = new URL(url);
+    let bounceLoad = localStorage.getItem("BOUNCE_LOAD") != "false";
     if (urlObject.protocol != 'http:' && urlObject.protocol != 'https:')
 	throw "Only http(s) is supported";
     let feed = new Object();
@@ -324,7 +325,7 @@ async function sanitize(url) {
 
     if (response.redirected) {
 	console.info(url + " redirected to: " + response.url);
-	if (BounceLoad && !url.startsWith(BouncerRoot)) {
+	if (bounceLoad && !url.startsWith(BouncerRoot)) {
 	    let urlObject = new URL(response.url);
 	    let search = urlObject.searchParams;
 	    let feedUrl = search.get('url');
@@ -394,11 +395,15 @@ function processItems(rawItems, feed, parseFunc, sanitize) {
     let now = new Date();
     let items = [];
     let counter = 0;
+    // truncate to at most 25 items per loading
+    let truncateItems = parseInt(localStorage.getItem("TRUNCATE_ITEMS_PER_FEED")) || 25;
+    // kept in days
+    let maxKeptPeriod = parseInt(localStorage.getItem("MAX_KEPT_PERIOD")) || 180;
 
     if (rawItems) {
 	for (let item of rawItems.values()) {
-	    // never look pass more than TruncateItems from the top. Some feeds are long
-	    if (counter >= TruncateItems)
+	    // never look pass more than truncateItems from the top. Some feeds are long
+	    if (counter >= truncateItems)
 		break;
 	    else
 		counter ++;
@@ -408,7 +413,7 @@ function processItems(rawItems, feed, parseFunc, sanitize) {
 		continue;
 	    else if (item.datePublished > now)
 		continue;
-	    else if (now - item.datePublished <= MaxKeptPeriod*24*3600*1000) {
+	    else if (now - item.datePublished <= maxKeptPeriod*24*3600*1000) {
 		// duplicate info for simple access
 		item.feedTitle = feed.title;
 		item.feedId = feed.id;

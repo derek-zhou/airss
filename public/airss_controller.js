@@ -266,14 +266,12 @@ document.addEventListener(View.Events.submitConfig, (e) => {
     localStorage.setItem("BOUNCE_LOAD", data.get(View.Config.bounceLoad) || "false");
 
     state.screen = Screens.browse;
+    View.render_application(state);
     View.update_layout(state);
-    // It is very hard to change config at run time, so I just take
-    // shortcut to reload
+
     if (data.get(View.Config.clearDatabase) == "clear database") {
 	Model.clearData();
     }
-
-    Model.init();
     if (data.get(View.Config.restoreHandle)) {
 	Model.restoreFeeds(data.get(View.Config.restoreHandle));
     }

@@ -28,15 +28,6 @@ export const Events = {
     postHandle:	"AirSSModelPostHandle"
 };
 
-// when the cursor is this close to the end I load more
-const WaterMark = parseInt(localStorage.getItem("WATER_MARK")) || 10;
-
-// the minimal elapsed time before a reload, in hour
-const MinReloadWait = parseInt(localStorage.getItem("MIN_RELOAD_WAIT")) || 12;
-
-// kept in days
-const MaxKeptPeriod = parseInt(localStorage.getItem("MAX_KEPT_PERIOD")) || 180;
-
 // events I post to the document from the callback side
 function emitModelAlert(type, text) {
     window.document.dispatchEvent(new CustomEvent(Events.alert, {detail: {type, text}}));
@@ -85,16 +76,21 @@ let db = null;
 let loadingOutstanding = false;
 
 async function try_load() {
+    // when the cursor is this close to the end I load more
+    let waterMark = parseInt(localStorage.getItem("WATER_MARK")) || 10;
+    // the minimal elapsed time before a reload, in hour
+    let minReloadWait = parseInt(localStorage.getItem("MIN_RELOAD_WAIT")) || 12;
+
     if (loadingOutstanding)
 	return;
-    if (Items.unreadCount() > WaterMark)
+    if (Items.unreadCount() > waterMark)
 	return;
     let feedId = Feeds.first();
     if (!feedId)
 	return;
     let now = new Date();
     let feed = await Feeds.get(db, feedId);
-    if (feed.lastLoadTime > now - MinReloadWait * 3600 * 1000)
+    if (feed.lastLoadTime > now - minReloadWait * 3600 * 1000)
 	return;
     Feeds.rotate();
     let items = await Items.allUrlsOfFeed(db, feedId);
@@ -314,8 +310,7 @@ function dummyItem(feed) {
     let item = new Object();
     item.datePublished = new Date();
     item.contentHtml = "If you see this, this feed '" + feed.feedUrl +
-	"' hasn't been updated for " + MaxKeptPeriod +
-	" days. There is nothing wrong, just too quiet.";
+	"' hasn't been updated for a while. There is nothing wrong, just too quiet.";
     // just fake something to satisfy constrains
     item.url = Math.random().toString(36).substring(2, 15);
     item.title = "Errrr...";
@@ -327,6 +322,8 @@ function dummyItem(feed) {
 
 async function cb_updateFeed(prev, feed, items) {
     await prev;
+    // kept in days
+    let maxKeptPeriod = parseInt(localStorage.getItem("MAX_KEPT_PERIOD")) || 180;
     let savedCursor = Items.readingCursor();
     loadingOutstanding = false;
     let oldCount = Items.length();
@@ -372,7 +369,7 @@ async function cb_updateFeed(prev, feed, items) {
 	delete feed.error;
 	num ++;
     } else if (num == 0 &&
-	       feed.lastFetchTime < now - MaxKeptPeriod*24*3600*1000) {
+	       feed.lastFetchTime < now - maxKeptPeriod*24*3600*1000) {
 	await Items.pushItem(db, dummyItem(feed));
 	num ++;
     }
