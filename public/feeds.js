@@ -89,8 +89,7 @@ async function addFeed(db, feed) {
     }
 }
 
-async function updateFeed(db, feed) {
-    let old = await getObject(db, Store, feed.id);
+function updateFeed(db, feed) {
     return putObject(db, Store, feed);
 }
 

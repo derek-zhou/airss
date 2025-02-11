@@ -293,8 +293,7 @@ function oopsItem(feed) {
     let item = new Object();
     item.datePublished = new Date();
     item.contentHtml = "If you see this, this feed '" + feed.feedUrl +
-	"' failed loading:" +
-	"Check the console for the detail error.";
+	"' failed loading: Check the console for the detail error.";
     // just fake something to satisfy constrains
     item.url = Math.random().toString(36).substring(2, 15);
     item.title = "Oops...";
@@ -308,7 +307,8 @@ function dummyItem(feed) {
     let item = new Object();
     item.datePublished = new Date();
     item.contentHtml = "If you see this, this feed '" + feed.feedUrl +
-	"' hasn't been updated for a while. There is nothing wrong, just too quiet.";
+	"' hasn't been updated since " + feed.lastFetchTime.toString() +
+	". There is nothing wrong, just too quiet.";
     // just fake something to satisfy constrains
     item.url = Math.random().toString(36).substring(2, 15);
     item.title = "Errrr...";
@@ -328,6 +328,8 @@ async function cb_updateFeed(prev, feed, items) {
     let now = new Date();
     if (feed.id === undefined) {
 	// must be new feed
+	feed.lastLoadTime = now;
+	feed.lastFetchTime = now;
 	try {
 	    let id = await Feeds.addFeed(db, feed);
 	    console.info("added feed " + feed.feedUrl + " with id: " + id);
@@ -368,6 +370,8 @@ async function cb_updateFeed(prev, feed, items) {
 	num ++;
     } else if (num == 0 &&
 	       feed.lastFetchTime < now - maxKeptPeriod*24*3600*1000) {
+	console.warn("The feed '" + feed.feedUrl +
+		     "' was last fetched at: " + feed.lastFetchTime.toString());
 	await Items.pushItem(db, dummyItem(feed));
 	num ++;
     }

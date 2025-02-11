@@ -136,7 +136,7 @@ async function pushItem(db, item) {
     return id;
 }
 
-async function updateItem(db, item) {
+function updateItem(db, item) {
     return putObject(db, Store, item);
 }
 
