@@ -2,8 +2,11 @@
  * The items schema, based on jsonfeed
  */
 import * as Feeds from './feeds.js';
+import {openCursor, openCursorFromIndex, continueCursor, getObject, getObjectFromIndex,
+	addObject, putObject, deleteObject} from './index_db.js';
 
 const Store = "items";
+const UrlIndex = "url";
 
 // in memory state
 // items is an array of item ids in ascending order
@@ -27,10 +30,10 @@ function unreadCount() {
 
 async function updateReadCount(db) {
     if (reading >= 0) {
-	let item = await db.get(Store, items[reading]);
+	let item = await getObject(db, Store, items[reading]);
 	if (!item.read) {
 	    item.read = true;
-	    await db.put(Store, item);
+	    await putObject(db, Store, item);
 	    readCount ++;
 	}
     }
@@ -58,24 +61,24 @@ function length() {
 
 function getCurrentItem(db) {
     if (reading >= 0)
-	return db.get(Store, items[reading]);
+	return getObject(db, Store, items[reading]);
     else
 	return null;
 }
 
 function getItem(db, id) {
-    return db.get(Store, id);
+    return getObject(db, Store, id);
 }
 
 async function deleteCurrentItem(db) {
     if (reading < 0)
 	return false;
-    let item = await db.get(Store, items[reading]);
+    let item = await getObject(db, Store, items[reading]);
     if (item.read) {
 	readCount --;
     }
     Feeds.removeItem(item.feedId, items[reading]);
-    await db.delete(Store, items[reading]);
+    await deleteObject(db, Store, items[reading]);
     items = items.slice(0, reading).concat(items.slice(reading + 1));
     if (reading == items.length) {
 	reading --;
@@ -91,8 +94,8 @@ async function deleteAllItemsOfFeed(db, feedId) {
     for (let i = 0; i < items.length; i++) {
 	let id = items[i];
 	if (itemSet.has(id)) {
-	    let item = await db.get(Store, id);
-	    await db.delete(Store, id);
+	    let item = await getObject(db, Store, id);
+	    await deleteObject(db, Store, id);
 	    if (item.read) {
 		readCount --;
 	    }
@@ -115,7 +118,7 @@ async function allUrlsOfFeed(db, feedId) {
     let list = [];
     let itemSet = Feeds.itemsOf(feedId);
     for (let id of itemSet.values()) {
-	let item = await db.get(Store, id);
+	let item = await getObject(db, Store, id);
 	if (!isDummyItem(item))
 	    list.push(item.url);
     }
@@ -123,7 +126,7 @@ async function allUrlsOfFeed(db, feedId) {
 }
 
 async function pushItem(db, item) {
-    let id = await db.add(Store, item);
+    let id = await addObject(db, Store, item);
     Feeds.addItem(item.feedId, id);
     items.push(id);
     item.id = id;
@@ -134,14 +137,14 @@ async function pushItem(db, item) {
 }
 
 async function updateItem(db, item) {
-    return db.put(Store, item);
+    return putObject(db, Store, item);
 }
 
 function upgrade(db) {
     // the store holds all the feeds
     let store = db.createObjectStore(
 	Store, {keyPath: "id", autoIncrement: true});
-    store.createIndex("url", "url", {unique: true});
+    store.createIndex(UrlIndex, UrlIndex, {unique: true});
 }
 
 function isDummyItem(item) {
@@ -154,8 +157,7 @@ function isCurrentItem(item) {
 }
 
 async function load(db) {
-    let store = await db.transaction(Store).store;
-    let cursor = await store.openCursor(IDBKeyRange.lowerBound(0), "prev");
+    let cursor = await openCursor(db, Store, IDBKeyRange.lowerBound(0), "prev");
     let perFeedCounter = new Map();
     let buffer = [];
     let unread = 0;
@@ -186,12 +188,12 @@ async function load(db) {
 	} else {
 	    expired.push(cursor.key);
 	}
-	cursor = await cursor.continue();
+	cursor = await continueCursor(cursor);
     }
 
     for (let id of expired.values()) {
 	console.info("deleteing expired item: " + id);
-	await db.delete(Store, id);
+	await deleteObject(db, Store, id);
     }
     items = buffer.reverse();
     if (unread == 0) {

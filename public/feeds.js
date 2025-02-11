@@ -3,6 +3,10 @@
  */
 const Store = "feeds";
 const UrlIndex = "feedUrl";
+const TimeIndex = "lastLoadTime";
+
+import {openCursor, openCursorFromIndex, continueCursor, getObject, getObjectFromIndex,
+	addObject, putObject, deleteObject} from './index_db.js';
 
 // in memory state
 // feeds is an array of feed ids, in the order of last load time. feeds[0]
@@ -20,20 +24,18 @@ function upgrade(db) {
     // the store holds all the feeds
     let store = db.createObjectStore(
 	Store, {keyPath: "id", autoIncrement: true});
-    store.createIndex("feedUrl", "feedUrl", {unique: true});
-    store.createIndex("lastLoadTime", "lastLoadTime", {unique: false});
+    store.createIndex(UrlIndex, UrlIndex, {unique: true});
+    store.createIndex(TimeIndex, TimeIndex, {unique: false});
 }
 
 async function load(db) {
-    let store = await db.transaction(Store).store;
-    let index = store.index("lastLoadTime");
-    let cursor = await index.openCursor();
+    let cursor = await openCursorFromIndex(db, Store, TimeIndex);
 
     feeds = [];
     itemSet = new Map();
     while (cursor) {
 	feeds.push(cursor.value.id);
-	cursor = await cursor.continue();
+	cursor = await continueCursor(cursor);
     }
     // return a copy so my state is not affected
     return [...feeds];
@@ -52,14 +54,14 @@ function rotate() {
 async function allFeedUrls(db) {
     let urls = [];
     for (let id of feeds.values()) {
-	let feed = await db.get(Store, id);
+	let feed = await getObject(db, Store, id);
 	urls.push(feed.feedUrl);
     }
     return urls;
 }
 
 async function get(db, id) {
-    let feed = await db.get(Store, id);
+    let feed = await getObject(db, Store, id);
     // patch the database if this field is missing
     if (!feed.lastFetchTime)
 	feed.lastFetchTime = feed.lastLoadTime;
@@ -67,7 +69,7 @@ async function get(db, id) {
 }
 
 async function getFeed(db, url) {
-    let feed = await db.getFromIndex(Store, UrlIndex, url);
+    let feed = await getObjectFromIndex(db, Store, UrlIndex, url);
     if (feed)
 	return feed.id;
     else
@@ -77,10 +79,10 @@ async function getFeed(db, url) {
 async function addFeed(db, feed) {
     if (feed.id) {
 	feeds.push(feed.id);
-	await db.add(Store, feed);
+	await addObject(db, Store, feed);
 	return feed.id;
     } else {
-	let id = await db.add(Store, feed);
+	let id = await addObject(db, Store, feed);
 	feeds.push(id);
 	feed.id = id;
 	return id;
@@ -88,8 +90,8 @@ async function addFeed(db, feed) {
 }
 
 async function updateFeed(db, feed) {
-    let old = await db.get(Store, feed.id);
-    return db.put(Store, feed);
+    let old = await getObject(db, Store, feed.id);
+    return putObject(db, Store, feed);
 }
 
 function removeFeed(db, id) {
@@ -99,7 +101,7 @@ function removeFeed(db, id) {
 
 function deleteFeed(db, id) {
     feeds = feeds.filter(i => i != id);
-    return db.delete(Store, id);
+    return deleteObject(db, Store, id);
 }
 
 function addItem(id, item_id) {

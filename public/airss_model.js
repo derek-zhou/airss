@@ -5,7 +5,7 @@
  * to the root document
  */
 
-import {openDB, deleteDB} from './vendor/idb/index.js';
+import {openDB, deleteDB} from './index_db.js';
 import * as Feeds from './feeds.js';
 import * as Items from './items.js';
 import * as Loader from './loader.js';
@@ -107,11 +107,9 @@ async function cb_maybeLoad(prev) {
 // the init callback
 async function cb_init(prev) {
     await prev;
-    db = await openDB("AirSS", 1, {
-	upgrade(db) {
- 	    Feeds.upgrade(db);
-	    Items.upgrade(db);
-	},
+    db = await openDB("AirSS", 1, (db) => {
+ 	Feeds.upgrade(db);
+	Items.upgrade(db);
     });
     let feedIds = await Feeds.load(db);
     let itemIds = await Items.load(db);
@@ -128,7 +126,7 @@ async function cb_init(prev) {
 async function cb_shutdown(prev, type, msg) {
     await prev;
     if (db) {
-	await db.close();
+	db.close();
 	// so database is safe. future db operation will crash
 	db = null;
     }
@@ -173,9 +171,9 @@ async function cb_error(prev, msg) {
 
 async function cb_clearData(prev) {
     await prev;
-    await db.close();
-    await deleteDB("AirSS");
+    db.close();
     db = null;
+    await deleteDB("AirSS");
     emitModelInfo("Database deleted");
 }
 
