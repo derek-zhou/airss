@@ -1,4 +1,5 @@
 import {Screens} from './airss_controller.js';
+import {Assets} from "./assets.js";
 
 // events that I emit
 export const Events = {
@@ -108,6 +109,7 @@ function fixup_links(container, url) {
 	try {
 	    let absUrl = new URL(href, url);
 	    link.setAttribute("href", absUrl.toString());
+	    link.setAttribute("target", "_blank");
 	} catch (e) {
 	    console.warn(href + "is not a valid link");
 	}
@@ -223,13 +225,13 @@ function update_hidden(node, should_hide) {
 
 function body(state) {
     return [
-	el("div", {id: ProgressBarID, hidden: true}, []),
+	el("div", {id: ProgressBarID, class: "hidable", hidden: true}, []),
 	el("div", {class: "viewport"}, [
 	    el("custom-action", {type: "touchstart", value: Events.touchStart}, []),
 	    el("custom-action", {type: "touchmove", value: Events.touchMove}, []),
-	    el("div", {id: AlertBoxID, hidden: true}, alert(state)),
+	    el("div", {id: AlertBoxID, class: "hidable", hidden: true}, alert(state)),
 	    el("div", {id: ApplicationID}, application(state)),
-	    el("div", {id: ArticleID, class: "article-viewport"}, article(state)),
+	    el("div", {id: ArticleID, class: "hidable article-viewport"}, article(state)),
 	    el("div", {class: "footer"}, footer(state))
 	])
     ];
@@ -266,7 +268,7 @@ function navbar(state) {
 	el("div", {class: "navbar"}, [
 	    el("div", {}, [
 		el("a", {href: "index.html"}, [
-		    el("img", {src: "images/airss_logo.png", class: "logo"}, []),
+		    el("img", {src: Assets.logoImage, class: "logo"}, []),
 		]),
 		el("span", {class: "info"},
 			[`${state.cursor+1}/${state.length}`])
@@ -512,8 +514,8 @@ function article(state) {
 	el("div", {class: "article-container"}, [
 	    ... item ? article_head(item) : [],
 	    el("div", {class: "content-html"}, article_content(item)),
-	    ... item ? article_tail(item) : []
-	])
+	]),
+	... item ? article_tail(item) : []
     ];
 }
 
@@ -537,7 +539,7 @@ function article_image(item) {
 	return [
 	    el("div", {class: "article-hero"}, [
 		el("a", {href: item.url, target: "_blank", rel: "noopener noreferrer"}, [
-		    el("img", {src: item.imageUrl, alt: "thumbnail", decoding: "sync"}, [])
+		    el("img", {src: item.imageUrl, alt: "thumbnail"}, [])
 		])
 	    ])
 	];
@@ -545,9 +547,7 @@ function article_image(item) {
 	return [
 	    el("div", {class: "article-antihero"}, [
 		el("a", {href: item.url, target: "_blank", rel: "noopener noreferrer"}, [
-		    el("img", {
-			src: "images/unknown_link.png", alt: "thumbnail",
-			decoding: "sync"}, [])
+		    el("img", {src: Assets.unknownLinkImage, alt: "thumbnail"}, [])
 		])
 	    ])
 	];

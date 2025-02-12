@@ -1,5 +1,8 @@
-div {
+div.hidable {
     display: block;
+}
+div.hidable[hidden] {
+    display: none;
 }
 a {
     color: rgb(37 99 235);
@@ -54,7 +57,9 @@ div.viewport {
     flex-direction: column;
 }
 
-div article-viewport {
+div.article-viewport {
+    display: flex;
+    flex-direction: column;
     flex-grow: 1;
 }
 
@@ -120,6 +125,7 @@ div.article-container {
     background-color: rgb(255 255 255);
     padding: 0.5rem;
     width: 100%;
+    flex-grow: 1;
     overflow-x: hidden;
 }
 
@@ -410,6 +416,7 @@ h5.article-byline span {
     white-space: nowrap;
 }
 form.comment-form {
+    place-self: end;
     background-color: rgb(255 255 255);
     padding: 0px;
     width: 100%;
