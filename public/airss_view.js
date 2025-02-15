@@ -47,51 +47,6 @@ const ArticleID = "article";
  * The view layer of AirSS.
  */
 
-class AutoTextArea extends HTMLElement {
-    constructor() {
-	super();
-    }
-
-    connectedCallback() {
-	let textarea = this.firstElementChild;
-	textarea.addEventListener("keydown", (e) => {
-	    e.stopImmediatePropagation();
-	});
-	textarea.addEventListener("input", () => {
-	    let offset = textarea.offsetHeight - textarea.clientHeight;
-	    textarea.style.height = textarea.scrollHeight + offset + 'px';
-	});
-    }
-}
-
-customElements.define("auto-textarea", AutoTextArea);
-
-function run_custom_actions(e) {
-    e.preventDefault();
-    let target = e.currentTarget;
-
-    for (const current of target.children) {
-	if (current instanceof CustomAction && current.getAttribute("type") == e.type) {
-	    let value = current.getAttribute("value");
-	    document.dispatchEvent(new CustomEvent(value, {detail: e}));
-	}
-    }
-}
-
-class CustomAction extends HTMLElement {
-    constructor() {
-	super();
-    }
-
-    connectedCallback() {
-	let type = this.getAttribute("type");
-	let target = this.parentElement;
-	target.addEventListener(type, run_custom_actions);
-    }
-}
-
-customElements.define("custom-action", CustomAction);
-
 function fixup_links(container, url) {
     // fix up all img's src
     for (let img of container.querySelectorAll("img").values()) {
@@ -156,6 +111,19 @@ function build_node(container, tree_node) {
 	}
 	container.append(element);
 	break;
+    }
+}
+
+function action(type, event) {
+    if (!event) {
+	return (node) => {};
+    } else {
+	return (node) => {
+	    node.addEventListener(type, (e) => {
+		e.preventDefault();
+		document.dispatchEvent(new CustomEvent(event, {detail: e}));
+	    });
+	};
     }
 }
 
@@ -227,8 +195,8 @@ function body(state) {
     return [
 	el("div", {id: ProgressBarID, class: "hidable", hidden: true}, []),
 	el("div", {class: "viewport"}, [
-	    el("custom-action", {type: "touchstart", value: Events.touchStart}, []),
-	    el("custom-action", {type: "touchmove", value: Events.touchMove}, []),
+	    action("touchstart", Events.touchStart),
+	    action("touchmove", Events.touchMove),
 	    el("div", {id: AlertBoxID, class: "hidable", hidden: true}, alert(state)),
 	    el("div", {id: ApplicationID}, application(state)),
 	    el("div", {id: ArticleID, class: "hidable article-viewport"}, article(state)),
@@ -275,19 +243,19 @@ function navbar(state) {
 	    ]),
 	    el("div", {class: "toolbar"}, [
 		el("button", {class: "button"}, [
-		    el("custom-action", {type: "click", value: Events.clickConfig}, []),
+		    action("click", Events.clickConfig),
 		    "🔧"
 		]),
 		el("button", {class: "button"}, [
-		    el("custom-action", {type: "click", value: Events.clickSubscribe}, []),
+		    action("click", Events.clickSubscribe),
 		    "🍼"
 		]),
 		el("button", {class: "button"}, [
-		    el("custom-action", {type: "click", value: Events.clickLeft}, []),
+		    action("click", Events.clickLeft),
 		    "◀"
 		]),
 		el("button", {class: "button"}, [
-		    el("custom-action", {type: "click", value: Events.clickRight}, []),
+		    action("click", Events.clickRight),
 		    "▶"
 		])
 	    ])
@@ -301,7 +269,7 @@ function alert(state) {
     } else {
 	return [
 	    el("p", {class: alertClass(state)}, [
-		el("custom-action", {type: "click", value: Events.clickAlert}, []),
+		action("click", Events.clickAlert),
 		state.alert.text
 	    ])
 	];
@@ -497,8 +465,8 @@ function build_options(options, default_value) {
 
 function custom_form(submit_action, reset_action, inner) {
     return el("form", {}, [
-	el("custom-action", {type: "submit", value: submit_action}, []),
-	... reset_action ? [el("custom-action", {type: "reset", value: reset_action}, [])] : [],
+	action("submit", submit_action),
+	action("reset", reset_action),
 	el("section", {}, inner),
 	el("div", {class: "toolbar"}, [
 	    el("input", {class: "button", type: "submit", value: "👌"}, []),
@@ -599,19 +567,31 @@ function article_tail(item) {
 }
 
 function comment_box() {
-    return [el("auto-textarea", {}, [el("textarea", {name: "content"}, [])])];
+    return [
+	el("textarea", {name: "content"}, []),
+	(node) => {
+	    let textarea = node.firstElementChild;
+	    textarea.addEventListener("keydown", (e) => {
+		e.stopImmediatePropagation();
+	    });
+	    textarea.addEventListener("input", () => {
+		let offset = textarea.offsetHeight - textarea.clientHeight;
+		textarea.style.height = textarea.scrollHeight + offset + 'px';
+	    });
+	}
+    ];
 }
 
 function trash_button() {
     return el("button", {class: "button"}, [
-	el("custom-action", {type: "click", value: Events.clickTrash}, []),
+	action("click", Events.clickTrash),
 	"🗑 "
     ]);
 }
 
 function refresh_button() {
     return el("button", {class: "button"}, [
-	el("custom-action", {type: "click", value: Events.clickRefresh}, []),
+	action("click", Events.clickRefresh),
 	"📃"
     ]);
 }
