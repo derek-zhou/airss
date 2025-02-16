@@ -1,23 +1,11 @@
-import {Screens} from './airss_controller.js';
+import {Screens} from "./airss_controller.js";
 import {Assets} from "./assets.js";
 
 // events that I emit
-export const Events = {
-    touchStart: "AirSSViewTouchStart",
-    touchMove: "AirSSViewTouchMove",
-    clickLeft: "AirSSViewClickLeft",
-    clickRight: "AirSSViewClickRight",
-    clickAlert: "AirSSViewClickAlert",
-    clickConfig: "AirSSViewClickConfig",
-    clickSubscribe: "AirSSViewClickSubscribe",
-    clickTrash: "AirSSViewClickTrash",
-    clickRefresh: "AirSSViewClickRefresh",
-    clickReload: "AirSSViewClickReload",
-    submitSubscribe: "AirSSViewSubmitSubscribe",
-    submitTrash: "AirSSViewSubmitTrash",
-    submitConfig: "AirSSViewSubmitConfig",
-    resetDialog: "AirSSViewResetDialog"
-};
+import {touchStartEvent, touchMoveEvent, clickLeftEvent, clickRightEvent, clickAlertEvent,
+	clickConfigEvent, clickSubscribeEvent, clickTrashEvent, clickRefreshEvent,
+	clickReloadEvent, submitSubscribeEvent, submitTrashEvent, submitConfigEvent,
+	resetDialogEvent} from "./airss_controller.js";
 
 export const Subscribe = {
     feedUrl: "feedUrl"
@@ -115,16 +103,13 @@ function build_node(container, tree_node) {
 }
 
 function action(type, event) {
-    if (!event) {
-	return (node) => {};
-    } else {
-	return (node) => {
-	    node.addEventListener(type, (e) => {
-		e.preventDefault();
-		document.dispatchEvent(new CustomEvent(event, {detail: e}));
-	    });
-	};
-    }
+    return (node) => {
+	node.addEventListener(type, (e) => {
+	    e.preventDefault();
+	    if (event)
+		event(e);
+	});
+    };
 }
 
 function el(tag, attributes, children) {
@@ -195,8 +180,8 @@ function body(state) {
     return [
 	el("div", {id: ProgressBarID, class: "hidable", hidden: true}, []),
 	el("div", {class: "viewport"}, [
-	    action("touchstart", Events.touchStart),
-	    action("touchmove", Events.touchMove),
+	    action("touchstart", touchStartEvent),
+	    action("touchmove", touchMoveEvent),
 	    el("div", {id: AlertBoxID, class: "hidable", hidden: true}, alert(state)),
 	    el("div", {id: ApplicationID}, application(state)),
 	    el("div", {id: ArticleID, class: "hidable article-viewport"}, article(state)),
@@ -243,19 +228,19 @@ function navbar(state) {
 	    ]),
 	    el("div", {class: "toolbar"}, [
 		el("button", {class: "button"}, [
-		    action("click", Events.clickConfig),
+		    action("click", clickConfigEvent),
 		    "🔧"
 		]),
 		el("button", {class: "button"}, [
-		    action("click", Events.clickSubscribe),
+		    action("click", clickSubscribeEvent),
 		    "🍼"
 		]),
 		el("button", {class: "button"}, [
-		    action("click", Events.clickLeft),
+		    action("click", clickLeftEvent),
 		    "◀"
 		]),
 		el("button", {class: "button"}, [
-		    action("click", Events.clickRight),
+		    action("click", clickRightEvent),
 		    "▶"
 		])
 	    ])
@@ -269,7 +254,7 @@ function alert(state) {
     } else {
 	return [
 	    el("p", {class: alertClass(state)}, [
-		action("click", Events.clickAlert),
+		action("click", clickAlertEvent),
 		state.alert.text
 	    ])
 	];
@@ -293,7 +278,7 @@ function dialog(state) {
 
 function reload_dialog(state) {
     return [
-	custom_form(Events.clickReload, null, [
+	custom_form(clickReloadEvent, null, [
 	    el("p", {}, ["AirSS is shut down. Reload?"])
 	])
     ];
@@ -301,7 +286,7 @@ function reload_dialog(state) {
 
 function subscribe_dialog(state) {
     return [
-	custom_form(Events.submitSubscribe, Events.resetDialog, [
+	custom_form(submitSubscribeEvent, resetDialogEvent, [
 	    el("div", {class: "field long"}, [
 		el("label", {}, [
 		    "The URL to the feed or the index page:",
@@ -315,7 +300,7 @@ function subscribe_dialog(state) {
 
 function trash_dialog(state) {
     return [
-	custom_form(Events.submitTrash, Events.resetDialog, [
+	custom_form(submitTrashEvent, resetDialogEvent, [
 	    el("p", {class: "line"}, ["Are you sure you want to delete this item?"]),
 	    el("div", {class: "field"}, [
 		el("label", {}, [
@@ -332,7 +317,7 @@ function trash_dialog(state) {
 
 function config_dialog(state) {
     return [
-	custom_form(Events.submitConfig, Events.resetDialog, [
+	custom_form(submitConfigEvent, resetDialogEvent, [
 	    el("div", {class: "field long"}, [
 		el("label", {}, [
 		    "Load more when unread items is below:",
@@ -584,14 +569,14 @@ function comment_box() {
 
 function trash_button() {
     return el("button", {class: "button"}, [
-	action("click", Events.clickTrash),
+	action("click", clickTrashEvent),
 	"🗑 "
     ]);
 }
 
 function refresh_button() {
     return el("button", {class: "button"}, [
-	action("click", Events.clickRefresh),
+	action("click", clickRefreshEvent),
 	"📃"
     ]);
 }

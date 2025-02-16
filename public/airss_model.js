@@ -10,63 +10,16 @@ import * as Feeds from './feeds.js';
 import * as Items from './items.js';
 import * as Loader from './loader.js';
 
+// events I post to the controller
+import {alertEvent, itemsLoadedEvent, shutDownEvent, startLoadingEvent, stopLoadingEvent,
+	itemUpdatedEvent, postHandleEvent} from "./airss_controller.js";
+
 // exported client side functions. all return promises or null
 export {init, currentState, shutdown, clearData, info, warn, error,
 	forwardItem, backwardItem, deleteItem, refreshItem,
 	subscribe, unsubscribe, loadingStart, loadingDone, updateItemText,
 	addFeed, deleteFeed, fetchFeed, updateFeed,
 	allFeedUrls, postHandle, saveFeeds, restoreFeeds};
-
-// events that I emit
-export const Events = {
-    alert: "AirSSModelAlert",
-    itemsLoaded: "AirSSModelItemsLoaded",
-    shutDown: "AirSSModelShutDown",
-    startLoading: "AirSSModelStartLoading",
-    stopLoading: "AirSSModelStopLoading",
-    itemUpdated: "AirSSModelItemUpdated",
-    postHandle:	"AirSSModelPostHandle"
-};
-
-// events I post to the document from the callback side
-function emitModelAlert(type, text) {
-    window.document.dispatchEvent(new CustomEvent(Events.alert, {detail: {type, text}}));
-}
-
-function emitModelWarning(text) {
-    console.warn(text);
-    emitModelAlert("warning", text);
-}
-
-function emitModelError(text) {
-    console.error(text);
-    emitModelAlert("error", text);
-}
-
-function emitModelInfo(text) {
-    console.info(text);
-    emitModelAlert("info", text);
-}
-
-function emitModelItemsLoaded(info) {
-    window.document.dispatchEvent(new CustomEvent(Events.itemsLoaded, {detail: info}));
-}
-
-function emitModelShutDown(type, text) {
-    window.document.dispatchEvent(new CustomEvent(Events.shutDown, {detail: {type, text}}));
-}
-
-function emitModelStartLoading() {
-    window.document.dispatchEvent(new Event(Events.startLoading));
-}
-
-function emitModelStopLoading() {
-    window.document.dispatchEvent(new Event(Events.stopLoading));
-}
-
-function emitModelItemUpdated(item) {
-    window.document.dispatchEvent(new CustomEvent(Events.itemUpdated, {detail: item}));
-}
 
 /*
  * callback side state and entry points
@@ -114,11 +67,8 @@ async function cb_init(prev) {
     let feedIds = await Feeds.load(db);
     let itemIds = await Items.load(db);
     let item = await Items.getCurrentItem(db);
-    emitModelItemsLoaded({
-	length: Items.length(),
-	cursor: Items.readingCursor()
-    });
-    emitModelItemUpdated(item);
+    itemsLoadedEvent(Items.length(), Items.readingCursor());
+    itemUpdatedEvent(item);
     await try_load();
 }
 
@@ -130,27 +80,27 @@ async function cb_shutdown(prev, type, msg) {
 	// so database is safe. future db operation will crash
 	db = null;
     }
-    emitModelShutDown(type, msg);
+    shutDownEvent(type, msg);
 }
 
 async function cb_info(prev, msg) {
     await prev;
-    emitModelInfo(msg);
+    alertEvent("info", msg);
 }
 
 async function cb_warn(prev, msg) {
     await prev;
-    emitModelWarning(msg);
+    alertEvent("warning", msg);
 }
 
 async function cb_loadingStart(prev) {
     await prev;
-    emitModelStartLoading();
+    startLoadingEvent();
 }
 
 async function cb_loadingDone(prev) {
     await prev;
-    emitModelStopLoading();
+    stopLoadingEvent();
 }
 
 async function cb_updateItemText(prev, text, id) {
@@ -160,13 +110,13 @@ async function cb_updateItemText(prev, text, id) {
 	item.contentHtml = text;
 	await Items.updateItem(db, item);
 	if (Items.isCurrentItem(item))
-	    emitModelItemUpdated(item);
+	    itemUpdatedEvent(item);
     }
 }
 
 async function cb_error(prev, msg) {
     await prev;
-    emitModelError(msg);
+    alertEvent("error", msg);
 }
 
 async function cb_clearData(prev) {
@@ -174,7 +124,7 @@ async function cb_clearData(prev) {
     db.close();
     db = null;
     await deleteDB("AirSS");
-    emitModelInfo("Database deleted");
+    alertEvent("info", "Database deleted");
 }
 
 async function cb_subscribe(prev, url) {
@@ -189,7 +139,7 @@ async function cb_refreshItem(prev) {
     if (item && !Items.isDummyItem(item)) {
 	Loader.reloadUrl(item.url, item.id);
     } else {
-	emitModelWarning("Item not refreshable");
+	alertEvent("warning", "Item not refreshable");
     }
 }
 
@@ -197,15 +147,12 @@ async function cb_forwardItem(prev) {
     await prev;
     let ret = await Items.forward(db);
     if (!ret) {
-	emitModelWarning("Already at the end");
+	alertEvent("warning", "Already at the end");
 	await try_load();
     } else {
-	emitModelItemsLoaded({
-	    length: Items.length(),
-	    cursor: Items.readingCursor()
-	});
+	itemsLoadedEvent(Items.length(), Items.readingCursor());
 	let item = await Items.getCurrentItem(db);
-	emitModelItemUpdated(item);
+	itemUpdatedEvent(item);
 	await try_load();
     }
 }
@@ -214,26 +161,20 @@ async function cb_backwardItem(prev) {
     await prev;
     let ret = await Items.backward(db);
     if (!ret) {
-	emitModelWarning("Already at the beginning");
+	alertEvent("warning", "Already at the beginning");
     } else {
-	emitModelItemsLoaded({
-	    length: Items.length(),
-	    cursor: Items.readingCursor()
-	});
+	itemsLoadedEvent(Items.length(), Items.readingCursor());
 	let item = await Items.getCurrentItem(db);
-	emitModelItemUpdated(item);
+	itemUpdatedEvent(item);
     }
 }
 
 async function cb_deleteItem(prev) {
     await prev;
     await Items.deleteCurrentItem(db);
-    emitModelItemsLoaded({
-	length: Items.length(),
-	cursor: Items.readingCursor()
-    });
+    itemsLoadedEvent(Items.length(), Items.readingCursor());
     let item = await Items.getCurrentItem(db);
-    emitModelItemUpdated(item);
+    itemUpdatedEvent(item);
 }
 
 async function cb_loadMore(prev) {
@@ -248,20 +189,17 @@ async function cb_unsubscribe(prev, id) {
     await Items.deleteAllItemsOfFeed(db, id);
     try {
 	await Feeds.removeFeed(db, id);
-	emitModelInfo("Feed unsubscribed");
+	alertEvent("info", "Feed unsubscribed");
     } catch (e) {
 	if (e instanceof DOMException) {
-	    emitModelError("Feed not found");
+	    alertEvent("error", "Feed not found");
 	} else {
 	    throw e;
 	}
     }
-    emitModelItemsLoaded({
-	length: Items.length(),
-	cursor: Items.readingCursor()
-    });
+    itemsLoadedEvent(Items.length(), Items.readingCursor());
     let item = await Items.getCurrentItem(db);
-    emitModelItemUpdated(item);
+    itemUpdatedEvent(item);
 }
 
 async function cb_addFeed(prev, feed) {
@@ -271,7 +209,7 @@ async function cb_addFeed(prev, feed) {
 	console.info("added feed " + feed.feedUrl + " with id: " + id);
     } catch (e) {
 	if (e instanceof DOMException) {
-	    emitModelError("The feed '" + feed.feedUrl +
+	    alertEvent("error", "The feed '" + feed.feedUrl +
 			   "' is already subscribed");
 	} else {
 	    throw e;
@@ -333,10 +271,10 @@ async function cb_updateFeed(prev, feed, items) {
 	try {
 	    let id = await Feeds.addFeed(db, feed);
 	    console.info("added feed " + feed.feedUrl + " with id: " + id);
-	    emitModelInfo("The feed '" + feed.feedUrl + "' is now subscribed");
+	    alertEvent("info", "The feed '" + feed.feedUrl + "' is now subscribed");
 	} catch (e) {
 	    if (e instanceof DOMException) {
-		emitModelError("The feed '" + feed.feedUrl + "' is already subscribed");
+		alertEvent("error", "The feed '" + feed.feedUrl + "' is already subscribed");
 		feed.id = await Feeds.getFeed(db, feed.feedUrl);
 	    } else {
 		throw e;
@@ -361,7 +299,7 @@ async function cb_updateFeed(prev, feed, items) {
     console.info("loaded feed '" + feed.feedUrl + "' with " + num + " of " + items.length + " items");
 
     if (feed.error) {
-	emitModelError("The feed '" + feed.feedUrl +
+	alertEvent("error", "The feed '" + feed.feedUrl +
 		       "' faild to load");
 	console.error("The feed '" + feed.feedUrl +
 		       "' faild to load: " + feed.error);
@@ -380,14 +318,11 @@ async function cb_updateFeed(prev, feed, items) {
     feed.lastLoadTime = now;
     if (num > 0) {
 	feed.lastFetchTime = now;
-	emitModelItemsLoaded({
-	    length: Items.length(),
-	    cursor: Items.readingCursor()
-	});
+	itemsLoadedEvent(Items.length(), Items.readingCursor());
     }
     if (Items.readingCursor() != savedCursor) {
 	let item = await Items.getCurrentItem(db);
-	emitModelItemUpdated(item);
+	itemUpdatedEvent(item);
     }
     await Feeds.updateFeed(db, feed);
     await try_load();
@@ -400,7 +335,7 @@ async function cb_allFeedUrls(prev) {
 
 async function cb_postHandle(prev, handle) {
     await prev;
-    window.document.dispatchEvent(new CustomEvent(Events.postHandle, {detail: {text: handle}}));
+    postHandleEvent(handle);
 }
 
 async function cb_saveFeeds(prev) {

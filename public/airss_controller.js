@@ -69,46 +69,46 @@ function timeoutShutdown() {
     Model.shutdown("info", "Shutdown due to inactivity");
 }
 
-document.addEventListener(Model.Events.itemsLoaded, e => {
-    state.length = e.detail.length;
-    state.cursor = e.detail.cursor;
+export function itemsLoadedEvent(length, cursor) {
+    state.length = length;
+    state.cursor = cursor;
     View.render_application(state);
-});
+}
 
-document.addEventListener(Model.Events.itemUpdated, e => {
-    state.currentItem = e.detail;
+export function itemUpdatedEvent(item) {
+    state.currentItem = item;
     View.render_article(state);
-});
+}
 
-document.addEventListener(Model.Events.alert, e => {
-    state.alert.type = e.detail.type;
-    state.alert.text = e.detail.text;
+export function alertEvent(type, text) {
+    state.alert.type = type;
+    state.alert.text = text;
     View.render_alert(state);
     View.update_layout(state);
-});
+}
 
-document.addEventListener(Model.Events.shutDown, e => {
-    state.alert.type = e.detail.type;
-    state.alert.text = e.detail.text;
+export function shutDownEvent(type, text) {
+    state.alert.type = type;
+    state.alert.text = text;
     state.screen = Screens.shutdown;
     View.render_application(state);
     View.update_layout(state);
-});
+}
 
-document.addEventListener(Model.Events.startLoading, () => {
+export function startLoadingEvent() {
     state.loading = true;
     View.update_layout(state);
-});
+}
 
-document.addEventListener(Model.Events.stopLoading, () => {
+export function stopLoadingEvent() {
     state.loading = false;
     View.update_layout(state);
-});
+}
 
-document.addEventListener(Model.Events.postHandle, e => {
-    state.postHandle = e.detail.text;
+export function postHandleEvent(text) {
+    state.postHandle = text;
     View.render_application(state);
-});
+}
 
 document.addEventListener("keydown", (e) => {
     if (state.screen != Screens.browse)
@@ -132,19 +132,19 @@ document.addEventListener("keydown", (e) => {
 let xDown = null;
 let yDown = null;
 
-document.addEventListener(View.Events.touchStart, (e) => {
-    xDown = e.detail.touches[0].clientX;
-    yDown = e.detail.touches[0].clientY;
-});
+export function touchStartEvent(e) {
+    xDown = e.touches[0].clientX;
+    yDown = e.touches[0].clientY;
+}
 
-document.addEventListener(View.Events.touchMove, (e) => {
+export function touchMoveEvent(e) {
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
 
     if ( xDown && yDown && state.screen != Screens.browse ) {
-	let xUp = e.detail.touches[0].clientX;
-	let yUp = e.detail.touches[0].clientY;
+	let xUp = e.touches[0].clientX;
+	let yUp = e.touches[0].clientY;
 	let xDiff = xDown - xUp;
 	let yDiff = yDown - yUp;
 
@@ -163,32 +163,32 @@ document.addEventListener(View.Events.touchMove, (e) => {
     /* reset values */
     xDown = null;
     yDown = null;
-});
+}
 
-document.addEventListener(View.Events.clickLeft, () => {
+export function clickLeftEvent() {
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
     Model.backwardItem();
     View.update_layout(state);
-});
+}
 
-document.addEventListener(View.Events.clickRight, () => {
+export function clickRightEvent() {
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
     Model.forwardItem();
     View.update_layout(state);
-});
+}
 
-document.addEventListener(View.Events.clickAlert, () => {
+export function clickAlertEvent() {
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
     View.update_layout(state);
-});
+}
 
-document.addEventListener(View.Events.clickConfig, () => {
+export function clickConfigEvent() {
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
@@ -197,52 +197,52 @@ document.addEventListener(View.Events.clickConfig, () => {
     state.screen = Screens.config;
     View.render_application(state);
     View.update_layout(state);
-});
+}
 
-document.addEventListener(View.Events.clickSubscribe, () => {
+export function clickSubscribeEvent() {
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
     state.screen = Screens.subscribe;
     View.render_application(state);
     View.update_layout(state);
-});
+}
 
-document.addEventListener(View.Events.clickTrash, () => {
+export function clickTrashEvent() {
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
     state.screen = Screens.trash;
     View.render_application(state);
     View.update_layout(state);
-});
+}
 
-document.addEventListener(View.Events.submitSubscribe, (e) => {
+export function submitSubscribeEvent(e) {
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
-    let data = new FormData(e.detail.currentTarget);
+    let data = new FormData(e.currentTarget);
     Model.subscribe(data.get(View.Subscribe.feedUrl));
     state.screen = Screens.browse;
     View.render_application(state);
     View.update_layout(state);
-});
+}
 
-document.addEventListener(View.Events.resetDialog, () => {
+export function resetDialogEvent() {
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
     state.screen = Screens.browse;
     View.render_application(state);
     View.update_layout(state);
-});
+}
 
-document.addEventListener(View.Events.submitTrash, (e) => {
+export function submitTrashEvent(e) {
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
     if (state.currentItem) {
-	let data = new FormData(e.detail.currentTarget);
+	let data = new FormData(e.currentTarget);
 	if (data.get(View.Trash.shouldUnsubscribe))
 	    Model.unsubscribe(state.currentItem.feedId);
 	else
@@ -250,13 +250,13 @@ document.addEventListener(View.Events.submitTrash, (e) => {
     }
     state.screen = Screens.browse;
     View.update_layout(state);
-});
+}
 
-document.addEventListener(View.Events.submitConfig, (e) => {
+export function submitConfigEvent(e) {
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
-    let data = new FormData(e.detail.currentTarget);
+    let data = new FormData(e.currentTarget);
     // configuration update
     localStorage.setItem("WATER_MARK", data.get(View.Config.waterMark));
     localStorage.setItem("MIN_RELOAD_WAIT", data.get(View.Config.minReloadWait));
@@ -275,18 +275,18 @@ document.addEventListener(View.Events.submitConfig, (e) => {
     if (data.get(View.Config.restoreHandle)) {
 	Model.restoreFeeds(data.get(View.Config.restoreHandle));
     }
-});
+}
 
-document.addEventListener(View.Events.clickRefresh, () => {
+export function clickRefreshEvent() {
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
     Model.refreshItem();
     View.update_layout(state);
-});
+}
 
-document.addEventListener(View.Events.clickReload, () => {
+export function clickReloadEvent() {
     init();
-});
+}
 
 init();
