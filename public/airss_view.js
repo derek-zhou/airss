@@ -86,17 +86,27 @@ function text(t) {
     return (node) => node.append(document.createTextNode(t));
 }
 
-function elem(tag, attributes, transformations) {
-    return (node) => node.append(build_elem(tag, attributes, transformations));
+function elem(tag, transformations) {
+    return (node) => node.append(build_elem(tag, transformations));
 }
 
-function build_elem(tag, attributes, transformations) {
-    const element = document.createElement(tag);
+function attr(attributes) {
+    return (node) => set_attrs(node, attributes);
+}
+
+function set_attrs(node, attributes) {
     for (const key in attributes) {
-	const value = buildValue(attributes[key]);
-	if (value)
-	    element.setAttribute(key, value);
+	const value = attributes[key];
+	if (Array.isArray(value) && value.length > 0) {
+	    node.setAttribute(key, value.join(" "));
+	} else if (value){
+	    node.setAttribute(key, value);
+	}
     }
+}
+
+function build_elem(tag, transformations) {
+    const element = document.createElement(tag);
     for (const transform of transformations)
 	transform(element);
     return element;
@@ -168,33 +178,52 @@ function update_hidden(node, should_hide) {
 
 function body(state) {
     return [
-	elem("div", {id: ProgressBarID, class: "hidable", hidden: true}, []),
-	elem("div", {class: "viewport"}, [
+	elem("div", [
+	    attr({id: ProgressBarID, class: "hidable", hidden: true})
+	]),
+	elem("div", [
+	    attr({class: "viewport"}),
 	    hook("touchstart", touchStartEvent),
 	    hook("touchmove", touchMoveEvent),
-	    elem("div", {id: AlertBoxID, class: "hidable", hidden: true}, alert(state)),
-	    elem("div", {id: ApplicationID}, application(state)),
-	    elem("div", {id: ArticleID, class: "hidable article-viewport"}, article(state)),
-	    elem("div", {class: "footer"}, footer(state))
+	    elem("div", [
+		attr({id: AlertBoxID, class: "hidable", hidden: true}),
+		...alert(state)
+	    ]),
+	    elem("div", [
+		attr({id: ApplicationID}),
+		...application(state)
+	    ]),
+	    elem("div", [
+		attr({id: ArticleID, class: "hidable article-viewport"}),
+		...article(state)
+	    ]),
+	    elem("div", [
+		attr({class: "footer"}),
+		...footer(state)
+	    ])
 	])
     ];
 }
 
 function footer(state) {
     return [
-	elem("div", {class: "left-half"}, [
-	    elem("a", {
-		href: "https://roastidio.us/roast",
-		referrerpolicy: "no-referrer-when-downgrade"
-	    }, [
+	elem("div", [
+	    attr({class: "left-half"}),
+	    elem("a", [
+		attr({
+		    href: "https://roastidio.us/roast",
+		    referrerpolicy: "no-referrer-when-downgrade"
+		}),
 		text("Roast me at Roastidious")
 	    ]),
 	]),
-	elem("div", {class: "right-half"}, [
-	    elem("a", {
-		href: "https://github.com/derek-zhou/airss",
-		referrerpolicy: "no-referrer-when-downgrade"
-	    }, [
+	elem("div", [
+	    attr({class: "right-half"}),
+	    elem("a", [
+		attr({
+		    href: "https://github.com/derek-zhou/airss",
+		    referrerpolicy: "no-referrer-when-downgrade"
+		}),
 		text("Fork me on GitHub")
 	    ]),
 	])
@@ -210,29 +239,39 @@ function application(state) {
 
 function navbar(state) {
     return [
-	elem("div", {class: "navbar"}, [
-	    elem("div", {}, [
-		elem("a", {href: "index.html"}, [
-		    elem("img", {src: Assets.logoImage, class: "logo"}, []),
+	elem("div", [
+	    attr({class: "navbar"}),
+	    elem("div", [
+		elem("a", [
+		    attr({href: "index.html"}),
+		    elem("img", [
+			attr({src: Assets.logoImage, class: "logo"})
+		    ]),
 		]),
-		elem("span", {class: "info"}, [
+		elem("span", [
+		    attr({class: "info"}),
 		    text(`${state.cursor+1}/${state.length}`)
 		])
 	    ]),
-	    elem("div", {class: "toolbar"}, [
-		elem("button", {class: "button"}, [
+	    elem("div", [
+		attr({class: "toolbar"}),
+		elem("button", [
+		    attr({class: "button"}),
 		    hook("click", clickConfigEvent),
 		    text("🔧")
 		]),
-		elem("button", {class: "button"}, [
+		elem("button", [
+		    attr({class: "button"}),
 		    hook("click", clickSubscribeEvent),
 		    text("🍼")
 		]),
-		elem("button", {class: "button"}, [
+		elem("button", [
+		    attr({class: "button"}),
 		    hook("click", clickLeftEvent),
 		    text("◀")
 		]),
-		elem("button", {class: "button"}, [
+		elem("button", [
+		    attr({class: "button"}),
 		    hook("click", clickRightEvent),
 		    text("▶")
 		])
@@ -246,7 +285,8 @@ function alert(state) {
 	return [];
     } else {
 	return [
-	    elem("p", {class: alertClass(state)}, [
+	    elem("p", [
+		attr({class: alertClass(state)}),
 		hook("click", clickAlertEvent),
 		text(state.alert.text)
 	    ])
@@ -272,7 +312,7 @@ function dialog(state) {
 function reload_dialog(state) {
     return [
 	custom_form(clickReloadEvent, null, [
-	    elem("p", {}, [
+	    elem("p", [
 		text("AirSS is shut down. Reload?")
 	    ])
 	])
@@ -282,12 +322,19 @@ function reload_dialog(state) {
 function subscribe_dialog(state) {
     return [
 	custom_form(submitSubscribeEvent, resetDialogEvent, [
-	    elem("div", {class: "field long"}, [
-		elem("label", {}, [
+	    elem("div", [
+		attr({class: "field long"}),
+		elem("label", [
 		    text("The URL to the feed or the index page:"),
-		    elem("input", {type: "text", class: "long", name: Subscribe.feedUrl,
-				 placeholder: "enter the url to subscribe"}, [])
-		]),
+		    elem("input", [
+			attr({
+			    type: "text",
+			    class: "long",
+			    name: Subscribe.feedUrl,
+			    placeholder: "enter the url to subscribe"
+			})
+		    ])
+		])
 	    ])
 	])
     ];
@@ -296,17 +343,27 @@ function subscribe_dialog(state) {
 function trash_dialog(state) {
     return [
 	custom_form(submitTrashEvent, resetDialogEvent, [
-	    elem("p", {class: "line"}, [
+	    elem("p", [
+		attr({class: "line"}),
 		text("Are you sure you want to delete this item?")
 	    ]),
-	    elem("div", {class: "field"}, [
-		elem("label", {}, [
+	    elem("div", [
+		attr({class: "field"}),
+		elem("label", [
 		    text("Unsubscribe "),
-		    elem("span", {class: "focus"}, [state.currentItem.feedTitle]),
+		    elem("span", [
+			attr({class: "focus"}),
+			text(state.currentItem.feedTitle)
+		    ]),
 		    text(" too"),
-		    elem("input", {type: "checkbox", name: Trash.shouldUnsubscribe,
-				 checked: !dummy(state.currentItem)}, [])
-		]),
+		    elem("input", [
+			attr({
+			    type: "checkbox",
+			    name: Trash.shouldUnsubscribe,
+			    checked: !dummy(state.currentItem)
+			})
+		    ])
+		])
 	    ])
 	])
     ];
@@ -315,66 +372,98 @@ function trash_dialog(state) {
 function config_dialog(state) {
     return [
 	custom_form(submitConfigEvent, resetDialogEvent, [
-	    elem("div", {class: "field long"}, [
-		elem("label", {}, [
+	    elem("div", [
+		attr({class: "field long"}),
+		elem("label", [
 		    text("Load more when unread items is below:"),
-		    elem("select", {name: Config.waterMark},
-		       water_mark_options())
+		    elem("select", [
+			attr({name: Config.waterMark}),
+			...water_mark_options()
+		    ])
 		])
 	    ]),
-	    elem("div", {class: "field long"}, [
-		elem("label", {}, [
+	    elem("div", [
+		attr({class: "field long"}),
+		elem("label", [
 		    text("Between reloading a feed, wait at least:"),
-		    elem("select", {name: Config.minReloadWait},
-		       min_reload_wait_options())
+		    elem("select", [
+			attr({name: Config.minReloadWait}),
+			...min_reload_wait_options()
+		    ])
 		])
 	    ]),
-	    elem("div", {class: "field long"}, [
-		elem("label", {}, [
+	    elem("div", [
+		attr({class: "field long"}),
+		elem("label", [
 		    text("Keep read items in the database for:"),
-		    elem("select", {name: Config.maxKeptPeriod},
-		       max_kept_period_options())
+		    elem("select", [
+			attr({name: Config.maxKeptPeriod}),
+			...max_kept_period_options()
+		    ])
 		])
 	    ]),
-	    elem("div", {class: "field long"}, [
-		elem("label", {}, [
+	    elem("div", [
+		attr({class: "field long"}),
+		elem("label", [
 		    text("Keep in the database at most per feed:"),
-		    elem("select", {name: Config.maxItemsPerFeed},
-		       max_items_per_feed_options())
+		    elem("select", [
+			attr({name: Config.maxItemsPerFeed}),
+			...max_items_per_feed_options()
+		    ])
 		])
 	    ]),
-	    elem("div", {class: "field long"}, [
-		elem("label", {}, [
+	    elem("div", [
+		attr({class: "field long"}),
+		elem("label", [
 		    text("Truncate each feed while loading to at most:"),
-		    elem("select", {name: Config.truncateItemsPerFeed},
-		       truncate_items_per_feed_options())
+		    elem("select", [
+			attr({name: Config.truncateItemsPerFeed}),
+			...truncate_items_per_feed_options()
+		    ])
 		])
 	    ]),
-	    elem("div", {class: "field long"}, [
-		elem("label", {}, [
-		    elem("span", {}, [
+	    elem("div", [
+		attr({class: "field long"}),
+		elem("label", [
+		    elem("span", [
 			text("Load feeds with roastidio.us ("),
-			elem("a", {href: "https://github.com/derek-zhou/airss#Proxy"}, [
+			elem("a", [
+			    attr({href: "https://github.com/derek-zhou/airss#Proxy"}),
 			    text("Why")
 			]),
 			text("):")
 		    ]),
-		    elem("input", {type: "checkbox", name: Config.bounceLoad,
-				 checked: bounceLoadDefault()}, [])
+		    elem("input", [
+			attr({
+			    type: "checkbox",
+			    name: Config.bounceLoad,
+			    checked: bounceLoadDefault()
+			})
+		    ])
 		])
 	    ]),
-	    elem("div", {class: "field long"}, [
-		elem("label", {}, [
+	    elem("div", [
+		attr({class: "field long"}),
+		elem("label", [
 		    text("Restore feeds from:"),
-		    elem("input", {type: "text", class: "short code",
-				 name: Config.restoreHandle}, []),
+		    elem("input", [
+			attr({
+			    type: "text",
+			    class: "short code",
+			    name: Config.restoreHandle
+			})
+		    ]),
 		    ...savedHandlePrompt(state)
 		])
 	    ]),
-	    elem("div", {class: "field long"}, [
-		elem("label", {class: "alert alert-danger"}, [
+	    elem("div", [
+		attr({class: "field long"}),
+		elem("label", [
+		    attr({class: "alert alert-danger"}),
 		    text("Danger! Type \"clear database\" to delete all data"),
-		    elem("input", {type: "text", name: Config.clearDatabase}, [])
+		    elem("input", [
+			attr({type: "text", name: Config.clearDatabase})
+		    ])
 		])
 	    ])
 	])
@@ -385,9 +474,7 @@ function savedHandlePrompt(state) {
     if (state.postHandle) {
 	return [
 	    text("Your feeds were saved to: "),
-	    elem("span", {class: "code"}, [
-		text(state.postHandle)
-	    ])
+	    elem("span", [attr({class: "code"}), text(state.postHandle)])
 	];
     } else {
 	return [];
@@ -445,31 +532,45 @@ function truncate_items_per_feed_options() {
 
 function build_options(options, default_value) {
     return options.map((each) =>
-	elem("option", {selected: each.value == default_value, value: each.value}, [
+	elem("option", [
+	    attr({selected: each.value == default_value, value: each.value}),
 	    text(each.text)
 	])
     );
 }
 
 function custom_form(submit_action, reset_action, inner) {
-    return elem("form", {}, [
+    return elem("form", [
 	hook("submit", submit_action),
 	... reset_action ? [hook("reset", reset_action)] : [],
-	elem("section", {}, inner),
-	elem("div", {class: "toolbar"}, [
-	    elem("input", {class: "button", type: "submit", value: "👌"}, []),
-	    ... reset_action ? [elem("input", {class: "button", type: "reset", value: "👎"}, [])] : []
+	elem("section", inner),
+	elem("div", [
+	    attr({class: "toolbar"}),
+	    submit_button(),
+	    ... reset_action ? [reset_button()] : []
 	])
     ]);
+}
+
+function submit_button() {
+    return elem("input", [attr({class: "button", type: "submit", value: "👌"})]);
+}
+
+function reset_button() {
+    return elem("input", [attr({class: "button", type: "reset", value: "👎"})]);
 }
 
 function article(state) {
     const item = state.currentItem;
 
     return [
-	elem("div", {class: "article-container"}, [
+	elem("div", [
+	    attr({class: "article-container"}),
 	    ... item ? article_head(item) : [],
-	    elem("div", {class: "content-html"}, article_content(item)),
+	    elem("div", [
+		attr({class: "content-html"}),
+		...article_content(item)
+	    ])
 	]),
 	... item ? article_tail(item) : []
     ];
@@ -493,17 +594,21 @@ function article_head(item) {
 function article_image(item) {
     if (item.imageUrl) {
 	return [
-	    elem("div", {class: "article-hero"}, [
-		elem("a", {href: item.url, target: "_blank", rel: "noopener noreferrer"}, [
-		    elem("img", {src: item.imageUrl, alt: "thumbnail"}, [])
+	    elem("div", [
+		attr({class: "article-hero"}),
+		elem("a", [
+		    attr({href: item.url, target: "_blank", rel: "noopener noreferrer"}),
+		    elem("img", [attr({src: item.imageUrl, alt: "thumbnail"})])
 		])
 	    ])
 	];
     } else {
 	return [
-	    elem("div", {class: "article-antihero"}, [
-		elem("a", {href: item.url, target: "_blank", rel: "noopener noreferrer"}, [
-		    elem("img", {src: Assets.unknownLinkImage, alt: "thumbnail"}, [])
+	    elem("div", [
+		attr({class: "article-antihero"}),
+		elem("a", [
+		    attr({href: item.url, target: "_blank", rel: "noopener noreferrer"}),
+		    elem("img", [attr({src: Assets.unknownLinkImage, alt: "thumbnail"})])
 		])
 	    ])
 	];
@@ -512,15 +617,13 @@ function article_image(item) {
 
 function article_title(item) {
     if (dummy(item)) {
-	return [
-	    elem("h4", {class: "article-title"}, [
-		text(item.title)
-	    ])
-	];
+	return [elem("h4", [attr({class: "article-title"}), text(item.title)])];
     } else {
 	return [
-	    elem("h4", {class: "article-title"}, [
-		elem("a", {href: item.url, target: "_blank", rel: "noopener noreferrer"}, [
+	    elem("h4", [
+		attr({class: "article-title"}),
+		elem("a", [
+		    attr({href: item.url, target: "_blank", rel: "noopener noreferrer"}),
 		    text(item.title)
 		])
 	    ])
@@ -530,34 +633,31 @@ function article_title(item) {
 
 function article_byline(item) {
     return [
-	elem("h5", {class: "article-byline"}, [
-	    elem("span", {}, [
-		text(item.feedTitle)
-	    ]),
-	    elem("span", {}, [
-		text(" | ")
-	    ]),
-	    elem("span", {}, [
-		text(item.datePublished.toLocaleString())
-	    ])
+	elem("h5", [
+	    attr({class: "article-byline"}),
+	    elem("span", [text(item.feedTitle)]),
+	    elem("span", [text(" | ")]),
+	    elem("span", [text(item.datePublished.toLocaleString())])
 	])
     ];
 }
 
 function article_tail(item) {
     return [
-	elem("form", {
-	    class: "comment-form",
-	    method: "post",
-	    action: "https://roastidio.us/post",
-	    target: "_blank"
-	}, [
-	    elem("input", {type: "hidden", name: "url", value: item.url}, []),
+	elem("form", [
+	    attr({
+		class: "comment-form",
+		method: "post",
+		action: "https://roastidio.us/post",
+		target: "_blank"
+	    }),
+	    elem("input", [attr({type: "hidden", name: "url", value: item.url})]),
 	    ... dummy(item) ? [] : comment_box(),
-	    elem("div", {class: "toolbar"}, [
+	    elem("div", [
+		attr({class: "toolbar"}),
 		trash_button(),
 		... dummy(item) ? [] : [refresh_button()],
-		... dummy(item) ? [] : [submit_button()]
+		... dummy(item) ? [] : [roast_button()]
 	    ])
 	])
     ];
@@ -565,9 +665,9 @@ function article_tail(item) {
 
 function comment_box() {
     return [
-	elem("textarea", {name: "content"}, []),
+	elem("textarea", [attr({name: "content"})]),
 	(node) => {
-	    const textarea = node.firstElementChild;
+	    const textarea = node.querySelector("textarea");
 	    textarea.addEventListener("keydown", (e) => {
 		e.stopImmediatePropagation();
 	    });
@@ -580,21 +680,23 @@ function comment_box() {
 }
 
 function trash_button() {
-    return elem("button", {class: "button"}, [
+    return elem("button", [
+	attr({class: "button"}),
 	hook("click", clickTrashEvent),
 	text("🗑 ")
     ]);
 }
 
 function refresh_button() {
-    return elem("button", {class: "button"}, [
+    return elem("button", [
+	attr({class: "button"}),
 	hook("click", clickRefreshEvent),
 	text("📃")
     ]);
 }
 
-function submit_button() {
-    return elem("input", {class: "button", type: "submit", value: "🔥"}, []);
+function roast_button() {
+    return elem("input", [attr({class: "button", type: "submit", value: "🔥"})]);
 }
 
 function article_content(item) {
@@ -610,63 +712,57 @@ function article_content(item) {
 
 function dummy_article() {
     return [
-	elem("h2", {}, [
-	    text("No news is bad news")
-	]),
-	elem("p", {}, [
+	elem("h2", [text("No news is bad news")]),
+	elem("p", [
 	    text("Airss is a web feed reader that runs entirely in your browser. You can subscribe any feeds by clicking the 🍼 button from above and paste the URL, or you can use of one of the following tricks: ")
 	]),
-	elem("h3", {}, [
-	    text("Desktop browser users")
-	]),
-	elem("p", {}, [
+	elem("h3", [text("Desktop browser users")]),
+	elem("p", [
 	    text("Install this bookmarklet "),
-	    elem("a", {class: "button", href: "javascript:location.href='{airssPrefix}?url='+encodeURIComponent(window.location.href)"}, [
+	    elem("a", [
+		attr({
+		    class: "button",
+		    href: "javascript:location.href='{airssPrefix}?url='+encodeURIComponent(window.location.href)"
+		}),
 		text(" Subscribe it in Airss")
 	    ]),
 	    text(" "),
-	    elem("b", {}, [
-		text("by dragging it to your bookmarks")
-	    ]),
+	    elem("b", [text("by dragging it to your bookmarks")]),
 	    text(". Whenever you encounter something interesting on the web, be it a blog, a news website or whatever, you can click this bookmarklet to subscribe. Chances are they support RSS feeds so you will always stay updated.")
 	]),
-	elem("h3", {}, [
-	    text("Mobile browser users")
-	]),
-	elem("p", {}, [
+	elem("h3", [text("Mobile browser users")]),
+	elem("p", [
 	    text("Android users can install this APP: "),
-	    elem("a", {href: "https://f-droid.org/en/packages/net.daverix.urlforward/"}, [
+	    elem("a", [
+		attr({href: "https://f-droid.org/en/packages/net.daverix.urlforward/"}),
 		text("URL Forwarder")
 	    ]),
 	    text(" (Thank you, David Laurell!) then add a filter as:")
 	]),
-	elem("pre", {}, [
-	    text("https://airss.roastidio.us/?url=@url")
-	]),
-	elem("p", {}, [
+	elem("pre", [text("https://airss.roastidio.us/?url=@url")]),
+	elem("p", [
 	    text("Then you can share links to the APP and select the menu to subscribe, if it support RSS feeds.")
 	]),
-	elem("p", {}, [
+	elem("p", [
 	    text("iOS Safari users can use the bookmarklet method as mentioned earlier by syncing the bookmarklet from your Mac.")
 	]),
-	elem("h2", {}, [
-	    text("To my fellow bloggers")
-	]),
-	elem("p", {}, [
+	elem("h2", [text("To my fellow bloggers")]),
+	elem("p", [
 	    text("Please make sure you have your feed "),
-	    elem("a", {href: "https://www.rssboard.org/rss-autodiscovery"}, [
+	    elem("a", [
+		attr({href: "https://www.rssboard.org/rss-autodiscovery"}),
 		text("auto-discoverable")
 	    ]),
 	    text(" from your homepage. And if you can, please enable "),
-	    elem("a", {href: "https://enable-cors.org/"}, [
-		text("permissive CORS")]),
+	    elem("a", [
+		attr({href: "https://enable-cors.org/"}),
+		text("permissive CORS")
+	    ]),
 	    text(" on your blog to reach out to a broader audience. Lastly, if you really like Airss, you can put a link on your homepage:")
 	]),
-	elem("pre", {}, [
+	elem("pre", [
 	    text("<a href=\"https://airss.roastidio.us/?subscribe-referrer\" referrerpolicy=\"no-referrer-when-downgrade\">Follow me with Airss!</a>")
 	]),
-	elem("p", {}, [
-	    text("So your readers can have an even easier time to follow you.")
-	])
+	elem("p", [text("So your readers can have an even easier time to follow you.")])
     ];
 }
