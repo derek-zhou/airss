@@ -37,20 +37,20 @@ const ArticleID = "article";
 
 function fixup_links(container, url) {
     // fix up all img's src
-    for (let img of container.querySelectorAll("img").values()) {
-	let href = img.getAttribute("src");
+    for (const img of container.querySelectorAll("img").values()) {
+	const href = img.getAttribute("src");
 	try {
-	    let absUrl = new URL(href, url);
+	    const absUrl = new URL(href, url);
 	    img.setAttribute("src", absUrl.toString());
 	} catch (e) {
 	    console.warn(href + "is not a valid link");
 	}
     }
     // fixup all a's href
-    for (let link of container.querySelectorAll("a").values()) {
-	let href = link.getAttribute("href");
+    for (const link of container.querySelectorAll("a").values()) {
+	const href = link.getAttribute("href");
 	try {
-	    let absUrl = new URL(href, url);
+	    const absUrl = new URL(href, url);
 	    link.setAttribute("href", absUrl.toString());
 	    link.setAttribute("target", "_blank");
 	} catch (e) {
@@ -60,7 +60,7 @@ function fixup_links(container, url) {
 }
 
 function clear_content(container) {
-    let junk = [];
+    const junk = [];
     for (const child of container.childNodes) {
 	junk.push(child);
     }
@@ -69,54 +69,44 @@ function clear_content(container) {
     }
 }
 
-function repaint(container, tree) {
+function repaint(container, transformations) {
     clear_content(container);
-    tree.forEach((each) => build_node(container, each));
+    for (const transform of transformations)
+	transform(container);
 }
 
-function build_node(container, tree_node) {
-    switch(typeof(tree_node)) {
-    case "string":
-	container.append(document.createTextNode(tree_node));
-	break;
-    case "function":
-	tree_node(container);
-	break;
-    case "object":
-	let element = document.createElement(tree_node.tag);
-	if (tree_node.attributes) {
-	    Object.keys(tree_node.attributes).forEach((key) => {
-		let value = tree_node.attributes[key];
-		if (Array.isArray(value) && value.length > 0) {
-		    element.setAttribute(key, value.join(" "));
-		} else if (value) {
-		    element.setAttribute(key, value);
-		}
-	    });
-	}
-	if (tree_node.children) {
-	    tree_node.children.forEach((each) => build_node(element, each));
-	}
-	container.append(element);
-	break;
+function hook(type, event) {
+    return (node) => node.addEventListener(type, (e) => {
+	e.preventDefault();
+	event(e);
+    });
+}
+
+function text(t) {
+    return (node) => node.append(document.createTextNode(t));
+}
+
+function elem(tag, attributes, transformations) {
+    return (node) => node.append(build_elem(tag, attributes, transformations));
+}
+
+function build_elem(tag, attributes, transformations) {
+    const element = document.createElement(tag);
+    for (const key in attributes) {
+	const value = buildValue(attributes[key]);
+	if (value)
+	    element.setAttribute(key, value);
     }
+    for (const transform of transformations)
+	transform(element);
+    return element;
 }
 
-function action(type, event) {
-    return (node) => {
-	node.addEventListener(type, (e) => {
-	    e.preventDefault();
-	    if (event)
-		event(e);
-	});
-    };
-}
-
-function el(tag, attributes, children) {
-    return {
-	tag,
-	... attributes == {} ? {} : {attributes},
-	... children == [] ? {} : {children}
+function buildValue(value) {
+    if (Array.isArray(value)) {
+	return value.join(" ");
+    } else {
+	return value;
     }
 }
 
@@ -131,11 +121,11 @@ function rightDisabled(state) {
 function alertClass(state) {
     switch (state.alert.type) {
     case "error":
-	return "alert alert-danger";
+	return ["alert", "alert-danger"];
     case "warning":
-	return "alert alert-warning";
+	return ["alert", "alert-warning"];
     default:
-	return "alert alert-info";
+	return ["alert", "alert-info"];
     }
 }
 
@@ -178,33 +168,35 @@ function update_hidden(node, should_hide) {
 
 function body(state) {
     return [
-	el("div", {id: ProgressBarID, class: "hidable", hidden: true}, []),
-	el("div", {class: "viewport"}, [
-	    action("touchstart", touchStartEvent),
-	    action("touchmove", touchMoveEvent),
-	    el("div", {id: AlertBoxID, class: "hidable", hidden: true}, alert(state)),
-	    el("div", {id: ApplicationID}, application(state)),
-	    el("div", {id: ArticleID, class: "hidable article-viewport"}, article(state)),
-	    el("div", {class: "footer"}, footer(state))
+	elem("div", {id: ProgressBarID, class: "hidable", hidden: true}, []),
+	elem("div", {class: "viewport"}, [
+	    hook("touchstart", touchStartEvent),
+	    hook("touchmove", touchMoveEvent),
+	    elem("div", {id: AlertBoxID, class: "hidable", hidden: true}, alert(state)),
+	    elem("div", {id: ApplicationID}, application(state)),
+	    elem("div", {id: ArticleID, class: "hidable article-viewport"}, article(state)),
+	    elem("div", {class: "footer"}, footer(state))
 	])
     ];
 }
 
 function footer(state) {
     return [
-	el("div", {class: "left-half"}, [
-	    el("a", {
+	elem("div", {class: "left-half"}, [
+	    elem("a", {
 		href: "https://roastidio.us/roast",
-		referrerpolicy: "no-referrer-when-downgrade"}, [
-		    "Roast me at Roastidious"
-		]),
+		referrerpolicy: "no-referrer-when-downgrade"
+	    }, [
+		text("Roast me at Roastidious")
+	    ]),
 	]),
-	el("div", {class: "right-half"}, [
-	    el("a", {
+	elem("div", {class: "right-half"}, [
+	    elem("a", {
 		href: "https://github.com/derek-zhou/airss",
-		referrerpolicy: "no-referrer-when-downgrade"}, [
-		    "Fork me on GitHub"
-		]),
+		referrerpolicy: "no-referrer-when-downgrade"
+	    }, [
+		text("Fork me on GitHub")
+	    ]),
 	])
     ];
 }
@@ -218,30 +210,31 @@ function application(state) {
 
 function navbar(state) {
     return [
-	el("div", {class: "navbar"}, [
-	    el("div", {}, [
-		el("a", {href: "index.html"}, [
-		    el("img", {src: Assets.logoImage, class: "logo"}, []),
+	elem("div", {class: "navbar"}, [
+	    elem("div", {}, [
+		elem("a", {href: "index.html"}, [
+		    elem("img", {src: Assets.logoImage, class: "logo"}, []),
 		]),
-		el("span", {class: "info"},
-			[`${state.cursor+1}/${state.length}`])
+		elem("span", {class: "info"}, [
+		    text(`${state.cursor+1}/${state.length}`)
+		])
 	    ]),
-	    el("div", {class: "toolbar"}, [
-		el("button", {class: "button"}, [
-		    action("click", clickConfigEvent),
-		    "🔧"
+	    elem("div", {class: "toolbar"}, [
+		elem("button", {class: "button"}, [
+		    hook("click", clickConfigEvent),
+		    text("🔧")
 		]),
-		el("button", {class: "button"}, [
-		    action("click", clickSubscribeEvent),
-		    "🍼"
+		elem("button", {class: "button"}, [
+		    hook("click", clickSubscribeEvent),
+		    text("🍼")
 		]),
-		el("button", {class: "button"}, [
-		    action("click", clickLeftEvent),
-		    "◀"
+		elem("button", {class: "button"}, [
+		    hook("click", clickLeftEvent),
+		    text("◀")
 		]),
-		el("button", {class: "button"}, [
-		    action("click", clickRightEvent),
-		    "▶"
+		elem("button", {class: "button"}, [
+		    hook("click", clickRightEvent),
+		    text("▶")
 		])
 	    ])
 	])
@@ -253,9 +246,9 @@ function alert(state) {
 	return [];
     } else {
 	return [
-	    el("p", {class: alertClass(state)}, [
-		action("click", clickAlertEvent),
-		state.alert.text
+	    elem("p", {class: alertClass(state)}, [
+		hook("click", clickAlertEvent),
+		text(state.alert.text)
 	    ])
 	];
     }
@@ -279,7 +272,9 @@ function dialog(state) {
 function reload_dialog(state) {
     return [
 	custom_form(clickReloadEvent, null, [
-	    el("p", {}, ["AirSS is shut down. Reload?"])
+	    elem("p", {}, [
+		text("AirSS is shut down. Reload?")
+	    ])
 	])
     ];
 }
@@ -287,10 +282,10 @@ function reload_dialog(state) {
 function subscribe_dialog(state) {
     return [
 	custom_form(submitSubscribeEvent, resetDialogEvent, [
-	    el("div", {class: "field long"}, [
-		el("label", {}, [
-		    "The URL to the feed or the index page:",
-		    el("input", {type: "text", class: "long", name: Subscribe.feedUrl,
+	    elem("div", {class: "field long"}, [
+		elem("label", {}, [
+		    text("The URL to the feed or the index page:"),
+		    elem("input", {type: "text", class: "long", name: Subscribe.feedUrl,
 				 placeholder: "enter the url to subscribe"}, [])
 		]),
 	    ])
@@ -301,13 +296,15 @@ function subscribe_dialog(state) {
 function trash_dialog(state) {
     return [
 	custom_form(submitTrashEvent, resetDialogEvent, [
-	    el("p", {class: "line"}, ["Are you sure you want to delete this item?"]),
-	    el("div", {class: "field"}, [
-		el("label", {}, [
-		    "Unsubscribe ",
-		    el("span", {class: "focus"}, [state.currentItem.feedTitle]),
-		    " too",
-		    el("input", {type: "checkbox", name: Trash.shouldUnsubscribe,
+	    elem("p", {class: "line"}, [
+		text("Are you sure you want to delete this item?")
+	    ]),
+	    elem("div", {class: "field"}, [
+		elem("label", {}, [
+		    text("Unsubscribe "),
+		    elem("span", {class: "focus"}, [state.currentItem.feedTitle]),
+		    text(" too"),
+		    elem("input", {type: "checkbox", name: Trash.shouldUnsubscribe,
 				 checked: !dummy(state.currentItem)}, [])
 		]),
 	    ])
@@ -318,64 +315,66 @@ function trash_dialog(state) {
 function config_dialog(state) {
     return [
 	custom_form(submitConfigEvent, resetDialogEvent, [
-	    el("div", {class: "field long"}, [
-		el("label", {}, [
-		    "Load more when unread items is below:",
-		    el("select", {name: Config.waterMark},
+	    elem("div", {class: "field long"}, [
+		elem("label", {}, [
+		    text("Load more when unread items is below:"),
+		    elem("select", {name: Config.waterMark},
 		       water_mark_options())
 		])
 	    ]),
-	    el("div", {class: "field long"}, [
-		el("label", {}, [
-		    "Between reloading a feed, wait at least:",
-		    el("select", {name: Config.minReloadWait},
+	    elem("div", {class: "field long"}, [
+		elem("label", {}, [
+		    text("Between reloading a feed, wait at least:"),
+		    elem("select", {name: Config.minReloadWait},
 		       min_reload_wait_options())
 		])
 	    ]),
-	    el("div", {class: "field long"}, [
-		el("label", {}, [
-		    "Keep read items in the database for:",
-		    el("select", {name: Config.maxKeptPeriod},
+	    elem("div", {class: "field long"}, [
+		elem("label", {}, [
+		    text("Keep read items in the database for:"),
+		    elem("select", {name: Config.maxKeptPeriod},
 		       max_kept_period_options())
 		])
 	    ]),
-	    el("div", {class: "field long"}, [
-		el("label", {}, [
-		    "Keep in the database at most per feed:",
-		    el("select", {name: Config.maxItemsPerFeed},
+	    elem("div", {class: "field long"}, [
+		elem("label", {}, [
+		    text("Keep in the database at most per feed:"),
+		    elem("select", {name: Config.maxItemsPerFeed},
 		       max_items_per_feed_options())
 		])
 	    ]),
-	    el("div", {class: "field long"}, [
-		el("label", {}, [
-		    "Truncate each feed while loading to at most:",
-		    el("select", {name: Config.truncateItemsPerFeed},
+	    elem("div", {class: "field long"}, [
+		elem("label", {}, [
+		    text("Truncate each feed while loading to at most:"),
+		    elem("select", {name: Config.truncateItemsPerFeed},
 		       truncate_items_per_feed_options())
 		])
 	    ]),
-	    el("div", {class: "field long"}, [
-		el("label", {}, [
-		    el("span", {}, [
-			"Load feeds with roastidio.us (",
-			el("a", {href: "https://github.com/derek-zhou/airss#Proxy"}, ["Why"]),
-			"):"
+	    elem("div", {class: "field long"}, [
+		elem("label", {}, [
+		    elem("span", {}, [
+			text("Load feeds with roastidio.us ("),
+			elem("a", {href: "https://github.com/derek-zhou/airss#Proxy"}, [
+			    text("Why")
+			]),
+			text("):")
 		    ]),
-		    el("input", {type: "checkbox", name: Config.bounceLoad,
+		    elem("input", {type: "checkbox", name: Config.bounceLoad,
 				 checked: bounceLoadDefault()}, [])
 		])
 	    ]),
-	    el("div", {class: "field long"}, [
-		el("label", {}, [
-		    "Restore feeds from:",
-		    el("input", {type: "text", class: "short code",
+	    elem("div", {class: "field long"}, [
+		elem("label", {}, [
+		    text("Restore feeds from:"),
+		    elem("input", {type: "text", class: "short code",
 				 name: Config.restoreHandle}, []),
 		    ...savedHandlePrompt(state)
 		])
 	    ]),
-	    el("div", {class: "field long"}, [
-		el("label", {class: "alert alert-danger"}, [
-		    "Danger! Type \"clear database\" to delete all data",
-		    el("input", {type: "text", name: Config.clearDatabase}, [])
+	    elem("div", {class: "field long"}, [
+		elem("label", {class: "alert alert-danger"}, [
+		    text("Danger! Type \"clear database\" to delete all data"),
+		    elem("input", {type: "text", name: Config.clearDatabase}, [])
 		])
 	    ])
 	])
@@ -385,8 +384,10 @@ function config_dialog(state) {
 function savedHandlePrompt(state) {
     if (state.postHandle) {
 	return [
-	    "Your feeds were saved to: ",
-	    el("span", {class: "code"}, [state.postHandle])
+	    text("Your feeds were saved to: "),
+	    elem("span", {class: "code"}, [
+		text(state.postHandle)
+	    ])
 	];
     } else {
 	return [];
@@ -444,29 +445,31 @@ function truncate_items_per_feed_options() {
 
 function build_options(options, default_value) {
     return options.map((each) =>
-	el("option", {selected: each.value == default_value, value: each.value}, [each.text])
+	elem("option", {selected: each.value == default_value, value: each.value}, [
+	    text(each.text)
+	])
     );
 }
 
 function custom_form(submit_action, reset_action, inner) {
-    return el("form", {}, [
-	action("submit", submit_action),
-	action("reset", reset_action),
-	el("section", {}, inner),
-	el("div", {class: "toolbar"}, [
-	    el("input", {class: "button", type: "submit", value: "👌"}, []),
-	    ... reset_action ? [el("input", {class: "button", type: "reset", value: "👎"}, [])] : []
+    return elem("form", {}, [
+	hook("submit", submit_action),
+	... reset_action ? [hook("reset", reset_action)] : [],
+	elem("section", {}, inner),
+	elem("div", {class: "toolbar"}, [
+	    elem("input", {class: "button", type: "submit", value: "👌"}, []),
+	    ... reset_action ? [elem("input", {class: "button", type: "reset", value: "👎"}, [])] : []
 	])
     ]);
 }
 
 function article(state) {
-    let item = state.currentItem;
+    const item = state.currentItem;
 
     return [
-	el("div", {class: "article-container"}, [
+	elem("div", {class: "article-container"}, [
 	    ... item ? article_head(item) : [],
-	    el("div", {class: "content-html"}, article_content(item)),
+	    elem("div", {class: "content-html"}, article_content(item)),
 	]),
 	... item ? article_tail(item) : []
     ];
@@ -475,7 +478,7 @@ function article(state) {
 function dummy(item) {
     if (!item)
 	return true;
-    let tags = item.tags;
+    const tags = item.tags;
     return tags.length == 1 && tags[0] == "_error";
 }
 
@@ -490,17 +493,17 @@ function article_head(item) {
 function article_image(item) {
     if (item.imageUrl) {
 	return [
-	    el("div", {class: "article-hero"}, [
-		el("a", {href: item.url, target: "_blank", rel: "noopener noreferrer"}, [
-		    el("img", {src: item.imageUrl, alt: "thumbnail"}, [])
+	    elem("div", {class: "article-hero"}, [
+		elem("a", {href: item.url, target: "_blank", rel: "noopener noreferrer"}, [
+		    elem("img", {src: item.imageUrl, alt: "thumbnail"}, [])
 		])
 	    ])
 	];
     } else {
 	return [
-	    el("div", {class: "article-antihero"}, [
-		el("a", {href: item.url, target: "_blank", rel: "noopener noreferrer"}, [
-		    el("img", {src: Assets.unknownLinkImage, alt: "thumbnail"}, [])
+	    elem("div", {class: "article-antihero"}, [
+		elem("a", {href: item.url, target: "_blank", rel: "noopener noreferrer"}, [
+		    elem("img", {src: Assets.unknownLinkImage, alt: "thumbnail"}, [])
 		])
 	    ])
 	];
@@ -510,13 +513,16 @@ function article_image(item) {
 function article_title(item) {
     if (dummy(item)) {
 	return [
-	    el("h4", {class: "article-title"}, [item.title])
+	    elem("h4", {class: "article-title"}, [
+		text(item.title)
+	    ])
 	];
     } else {
 	return [
-	    el("h4", {class: "article-title"}, [
-		el("a", {href: item.url, target: "_blank", rel: "noopener noreferrer"},
-		   [item.title])
+	    elem("h4", {class: "article-title"}, [
+		elem("a", {href: item.url, target: "_blank", rel: "noopener noreferrer"}, [
+		    text(item.title)
+		])
 	    ])
 	];
     }
@@ -524,25 +530,31 @@ function article_title(item) {
 
 function article_byline(item) {
     return [
-	el("h5", {class: "article-byline"}, [
-	    el("span", {}, [item.feedTitle]),
-	    el("span", {}, [" | "]),
-	    el("span", {}, [item.datePublished.toLocaleString()])
+	elem("h5", {class: "article-byline"}, [
+	    elem("span", {}, [
+		text(item.feedTitle)
+	    ]),
+	    elem("span", {}, [
+		text(" | ")
+	    ]),
+	    elem("span", {}, [
+		text(item.datePublished.toLocaleString())
+	    ])
 	])
     ];
 }
 
 function article_tail(item) {
     return [
-	el("form", {
+	elem("form", {
 	    class: "comment-form",
 	    method: "post",
 	    action: "https://roastidio.us/post",
 	    target: "_blank"
 	}, [
-	    el("input", {type: "hidden", name: "url", value: item.url}, []),
+	    elem("input", {type: "hidden", name: "url", value: item.url}, []),
 	    ... dummy(item) ? [] : comment_box(),
-	    el("div", {class: "toolbar"}, [
+	    elem("div", {class: "toolbar"}, [
 		trash_button(),
 		... dummy(item) ? [] : [refresh_button()],
 		... dummy(item) ? [] : [submit_button()]
@@ -553,14 +565,14 @@ function article_tail(item) {
 
 function comment_box() {
     return [
-	el("textarea", {name: "content"}, []),
+	elem("textarea", {name: "content"}, []),
 	(node) => {
-	    let textarea = node.firstElementChild;
+	    const textarea = node.firstElementChild;
 	    textarea.addEventListener("keydown", (e) => {
 		e.stopImmediatePropagation();
 	    });
 	    textarea.addEventListener("input", () => {
-		let offset = textarea.offsetHeight - textarea.clientHeight;
+		const offset = textarea.offsetHeight - textarea.clientHeight;
 		textarea.style.height = textarea.scrollHeight + offset + 'px';
 	    });
 	}
@@ -568,21 +580,21 @@ function comment_box() {
 }
 
 function trash_button() {
-    return el("button", {class: "button"}, [
-	action("click", clickTrashEvent),
-	"🗑 "
+    return elem("button", {class: "button"}, [
+	hook("click", clickTrashEvent),
+	text("🗑 ")
     ]);
 }
 
 function refresh_button() {
-    return el("button", {class: "button"}, [
-	action("click", clickRefreshEvent),
-	"📃"
+    return elem("button", {class: "button"}, [
+	hook("click", clickRefreshEvent),
+	text("📃")
     ]);
 }
 
 function submit_button() {
-    return el("input", {class: "button", type: "submit", value: "🔥"}, []);
+    return elem("input", {class: "button", type: "submit", value: "🔥"}, []);
 }
 
 function article_content(item) {
@@ -598,46 +610,63 @@ function article_content(item) {
 
 function dummy_article() {
     return [
-	el("h2", {}, ["No news is bad news"]),
-	el("p", {}, [
-	    "Airss is a web feed reader that runs entirely in your browser. You can subscribe any feeds by clicking the 🍼 button from above and paste the URL, or you can use of one of the following tricks: "
+	elem("h2", {}, [
+	    text("No news is bad news")
 	]),
-	el("h3", {}, ["Desktop browser users"]),
-	el("p", {}, [
-	    "Install this bookmarklet ",
-	    el("a", {class: "button", href: "javascript:location.href='{airssPrefix}?url='+encodeURIComponent(window.location.href)"}, [
-		" Subscribe it in Airss"
+	elem("p", {}, [
+	    text("Airss is a web feed reader that runs entirely in your browser. You can subscribe any feeds by clicking the 🍼 button from above and paste the URL, or you can use of one of the following tricks: ")
+	]),
+	elem("h3", {}, [
+	    text("Desktop browser users")
+	]),
+	elem("p", {}, [
+	    text("Install this bookmarklet "),
+	    elem("a", {class: "button", href: "javascript:location.href='{airssPrefix}?url='+encodeURIComponent(window.location.href)"}, [
+		text(" Subscribe it in Airss")
 	    ]),
-	    " ",
-	    el("b", {}, ["by dragging it to your bookmarks"]),
-	    ". Whenever you encounter something interesting on the web, be it a blog, a news website or whatever, you can click this bookmarklet to subscribe. Chances are they support RSS feeds so you will always stay updated."
-	]),
-	el("h3", {}, ["Mobile browser users"]),
-	el("p", {}, [
-	    "Android users can install this APP: ",
-	    el("a", {href: "https://f-droid.org/en/packages/net.daverix.urlforward/"}, [
-		"URL Forwarder"
+	    text(" "),
+	    elem("b", {}, [
+		text("by dragging it to your bookmarks")
 	    ]),
-	    " (Thank you, David Laurell!) then add a filter as:"
+	    text(". Whenever you encounter something interesting on the web, be it a blog, a news website or whatever, you can click this bookmarklet to subscribe. Chances are they support RSS feeds so you will always stay updated.")
 	]),
-	el("pre", {}, ["https://airss.roastidio.us/?url=@url"]),
-	el("p", {}, [
-	    "Then you can share links to the APP and select the menu to subscribe, if it support RSS feeds."
+	elem("h3", {}, [
+	    text("Mobile browser users")
 	]),
-	el("p", {}, [
-	    "iOS Safari users can use the bookmarklet method as mentioned earlier by syncing the bookmarklet from your Mac."
+	elem("p", {}, [
+	    text("Android users can install this APP: "),
+	    elem("a", {href: "https://f-droid.org/en/packages/net.daverix.urlforward/"}, [
+		text("URL Forwarder")
+	    ]),
+	    text(" (Thank you, David Laurell!) then add a filter as:")
 	]),
-	el("h2", {}, ["To my fellow bloggers"]),
-	el("p", {}, [
-	    "Please make sure you have your feed ",
-	    el("a", {href: "https://www.rssboard.org/rss-autodiscovery"}, ["auto-discoverable"]),
-	    " from your homepage. And if you can, please enable ",
-	    el("a", {href: "https://enable-cors.org/"}, ["permissive CORS"]),
-	    " on your blog to reach out to a broader audience. Lastly, if you really like Airss, you can put a link on your homepage:"
+	elem("pre", {}, [
+	    text("https://airss.roastidio.us/?url=@url")
 	]),
-	el("pre", {}, [
-	    "<a href=\"https://airss.roastidio.us/?subscribe-referrer\" referrerpolicy=\"no-referrer-when-downgrade\">Follow me with Airss!</a>"
+	elem("p", {}, [
+	    text("Then you can share links to the APP and select the menu to subscribe, if it support RSS feeds.")
 	]),
-	el("p", {}, ["So your readers can have an even easier time to follow you."])
+	elem("p", {}, [
+	    text("iOS Safari users can use the bookmarklet method as mentioned earlier by syncing the bookmarklet from your Mac.")
+	]),
+	elem("h2", {}, [
+	    text("To my fellow bloggers")
+	]),
+	elem("p", {}, [
+	    text("Please make sure you have your feed "),
+	    elem("a", {href: "https://www.rssboard.org/rss-autodiscovery"}, [
+		text("auto-discoverable")
+	    ]),
+	    text(" from your homepage. And if you can, please enable "),
+	    elem("a", {href: "https://enable-cors.org/"}, [
+		text("permissive CORS")]),
+	    text(" on your blog to reach out to a broader audience. Lastly, if you really like Airss, you can put a link on your homepage:")
+	]),
+	elem("pre", {}, [
+	    text("<a href=\"https://airss.roastidio.us/?subscribe-referrer\" referrerpolicy=\"no-referrer-when-downgrade\">Follow me with Airss!</a>")
+	]),
+	elem("p", {}, [
+	    text("So your readers can have an even easier time to follow you.")
+	])
     ];
 }
