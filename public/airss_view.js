@@ -26,11 +26,13 @@ export const Config = {
     clearDatabase: "clearDatabase"
 };
 
-// ids used in HTML
-const ProgressBarID = "progress-bar";
-const AlertBoxID = "alert-box";
-const ApplicationID = "application";
-const ArticleID = "article";
+// pointers into the DOM
+var DOMShortcut = {
+    progressBar: null,
+    alertBox: null,
+    application: null,
+    article: null
+};
 /*
  * The view layer of AirSS.
  */
@@ -173,26 +175,26 @@ export function render_all(state) {
 
 // render only the application container
 export function render_application(state) {
-    repaint(document.getElementById(ApplicationID), application(state));
+    repaint(DOMShortcut.application, application(state));
 }
 
 // render only the article container
 export function render_article(state) {
-    repaint(document.getElementById(ArticleID), article(state));
+    repaint(DOMShortcut.article, article(state));
     window.scrollTo({top: 0});
 }
 
 // render only the alert container
 export function render_alert(state) {
-    repaint(document.getElementById(AlertBoxID), alert(state));
+    repaint(DOMShortcut.alertBox, alert(state));
     window.scrollTo({top: 0});
 }
 
 // update visibility of various blocks
 export function update_layout(state) {
-    update_hidden(document.getElementById(ArticleID), state.screen != Screens.browse);
-    update_hidden(document.getElementById(ProgressBarID), !state.loading);
-    update_hidden(document.getElementById(AlertBoxID), state.alert.text == "");
+    update_hidden(DOMShortcut.article, state.screen != Screens.browse);
+    update_hidden(DOMShortcut.progressBar, !state.loading);
+    update_hidden(DOMShortcut.alertBox, state.alert.text == "");
 }
 
 function update_hidden(node, should_hide) {
@@ -205,14 +207,27 @@ function update_hidden(node, should_hide) {
 
 function body(state) {
     return [
-	elem("div", [attr({id: ProgressBarID, hidden: true}), clss("hidable")]),
+	elem("div", [
+	    (node) => {DOMShortcut.progressBar = node},
+	    attr({hidden: true}),
+	    clss("hidable")
+	]),
 	elem("div", [
 	    clss("viewport"),
 	    hook("touchstart", touchStartEvent),
 	    hook("touchmove", touchMoveEvent),
-	    elem("div", alert(state)),
-	    elem("div", application(state)),
-	    elem("div", article(state)),
+	    elem("div", [
+		(node) => {DOMShortcut.alertBox = node},
+		...alert(state)
+	    ]),
+	    elem("div", [
+		(node) => {DOMShortcut.application = node},
+		...application(state)
+	    ]),
+	    elem("div", [
+		(node) => {DOMShortcut.article = node},
+		...article(state)
+	    ]),
 	    elem("div", footer(state))
 	])
     ];
@@ -246,7 +261,6 @@ function footer(state) {
 
 function application(state) {
     return [
-	attr({id: ApplicationID}),
 	...navbar(state),
 	...dialog(state)
     ];
@@ -299,12 +313,11 @@ function navbar(state) {
 function alert(state) {
     if (state.alert.text == "") {
 	return [
-	    attr({id: AlertBoxID, hidden: true}),
+	    attr({hidden: true}),
 	    clss("hidable"),
 	];
     } else {
 	return [
-	    attr({id: AlertBoxID}),
 	    clss("hidable"),
 	    elem("p", [
 		clss(alertClass(state.alert.type)),
@@ -581,7 +594,6 @@ function article(state) {
 
     if (item) {
 	return [
-	    attr({id: ArticleID}),
 	    clss(["hidable", "article-viewport"]),
 	    elem("div", [
 		clss("article-container"),
@@ -592,7 +604,6 @@ function article(state) {
 	];
     } else {
 	return [
-	    attr({id: ArticleID}),
 	    clss(["hidable", "article-viewport"]),
 	    elem("div", [
 		clss("article-container"),
