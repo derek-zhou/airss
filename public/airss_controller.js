@@ -30,8 +30,6 @@ function init() {
 	screen: Screens.browse,
 	length: 0,
 	cursor: -1,
-	currentItem: null,
-	postHandle: null,
 	loading: false,
 	alert: {
 	    text: "",

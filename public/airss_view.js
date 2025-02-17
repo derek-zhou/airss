@@ -28,10 +28,6 @@ export const Config = {
 
 // pointers into the DOM
 var DOMShortcut = {
-    progressBar: null,
-    alertBox: null,
-    application: null,
-    article: null
 };
 /*
  * The view layer of AirSS.
@@ -602,7 +598,7 @@ function article(state) {
 	    ]),
 	    ...article_tail(item)
 	];
-    } else {
+    } else if (item === null) {
 	return [
 	    clss(["hidable", "article-viewport"]),
 	    elem("div", [
@@ -610,6 +606,9 @@ function article(state) {
 		elem("div", dummy_article())
 	    ])
 	];
+    } else {
+	// undefined, initial paint
+	return [];
     }
 }
 
