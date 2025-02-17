@@ -59,13 +59,20 @@ function fixup_links(container, url) {
     }
 }
 
-function clear_content(container) {
+function clear_all(node) {
     const junk = [];
-    for (const child of container.childNodes) {
+    for (const child of node.childNodes) {
 	junk.push(child);
     }
     for (const elem of junk) {
 	elem.remove();
+    }
+    const junk2 = [];
+    for (const attr of node.attributes) {
+	junk.push(attr.name);
+    }
+    for (const name of junk2) {
+	node.removeAttribute(name);
     }
 }
 
@@ -79,10 +86,10 @@ function autoAdjustHeight(e) {
     textarea.style.height = textarea.scrollHeight + offset + 'px';
 }
 
-function repaint(container, transformations) {
-    clear_content(container);
+function repaint(node, transformations) {
+    clear_all(node);
     for (const transform of transformations)
-	transform(container);
+	transform(node);
 }
 
 function hook(type, handler) {
@@ -101,6 +108,10 @@ function attr(attributes) {
     return (node) => set_attrs(node, attributes);
 }
 
+function clss(classes) {
+    return (node) => add_all(node.classList, classes);
+}
+
 function set_attrs(node, attributes) {
     for (const key in attributes) {
 	const value = attributes[key];
@@ -109,6 +120,15 @@ function set_attrs(node, attributes) {
 	} else if (value){
 	    node.setAttribute(key, value);
 	}
+    }
+}
+
+function add_all(list, from) {
+    if (Array.isArray(from)) {
+	for (const c of from)
+	    list.add(c);
+    } else {
+	list.add(from);
     }
 }
 
@@ -135,8 +155,8 @@ function rightDisabled(state) {
     return state.cursor >= state.length - 1 || state.screen != Screens.browse;
 }
 
-function alertClass(state) {
-    switch (state.alert.type) {
+function alertClass(type) {
+    switch (type) {
     case "error":
 	return ["alert", "alert-danger"];
     case "warning":
@@ -185,37 +205,24 @@ function update_hidden(node, should_hide) {
 
 function body(state) {
     return [
+	elem("div", [attr({id: ProgressBarID, hidden: true}), clss("hidable")]),
 	elem("div", [
-	    attr({id: ProgressBarID, class: "hidable", hidden: true})
-	]),
-	elem("div", [
-	    attr({class: "viewport"}),
+	    clss("viewport"),
 	    hook("touchstart", touchStartEvent),
 	    hook("touchmove", touchMoveEvent),
-	    elem("div", [
-		attr({id: AlertBoxID, class: "hidable", hidden: true}),
-		...alert(state)
-	    ]),
-	    elem("div", [
-		attr({id: ApplicationID}),
-		...application(state)
-	    ]),
-	    elem("div", [
-		attr({id: ArticleID, class: "hidable article-viewport"}),
-		...article(state)
-	    ]),
-	    elem("div", [
-		attr({class: "footer"}),
-		...footer(state)
-	    ])
+	    elem("div", alert(state)),
+	    elem("div", application(state)),
+	    elem("div", article(state)),
+	    elem("div", footer(state))
 	])
     ];
 }
 
 function footer(state) {
     return [
+	clss("footer"),
 	elem("div", [
-	    attr({class: "left-half"}),
+	    clss("left-half"),
 	    elem("a", [
 		attr({
 		    href: "https://roastidio.us/roast",
@@ -225,7 +232,7 @@ function footer(state) {
 	    ]),
 	]),
 	elem("div", [
-	    attr({class: "right-half"}),
+	    clss("right-half"),
 	    elem("a", [
 		attr({
 		    href: "https://github.com/derek-zhou/airss",
@@ -239,6 +246,7 @@ function footer(state) {
 
 function application(state) {
     return [
+	attr({id: ApplicationID}),
 	...navbar(state),
 	...dialog(state)
     ];
@@ -247,38 +255,39 @@ function application(state) {
 function navbar(state) {
     return [
 	elem("div", [
-	    attr({class: "navbar"}),
+	    clss("navbar"),
 	    elem("div", [
 		elem("a", [
 		    attr({href: "index.html"}),
 		    elem("img", [
-			attr({src: Assets.logoImage, class: "logo"})
+			attr({src: Assets.logoImage}),
+			clss("logo")
 		    ]),
 		]),
 		elem("span", [
-		    attr({class: "info"}),
+		    clss("info"),
 		    text(`${state.cursor+1}/${state.length}`)
 		])
 	    ]),
 	    elem("div", [
-		attr({class: "toolbar"}),
+		clss("toolbar"),
 		elem("button", [
-		    attr({class: "button"}),
+		    clss("button"),
 		    hook("click", clickConfigEvent),
 		    text("🔧")
 		]),
 		elem("button", [
-		    attr({class: "button"}),
+		    clss("button"),
 		    hook("click", clickSubscribeEvent),
 		    text("🍼")
 		]),
 		elem("button", [
-		    attr({class: "button"}),
+		    clss("button"),
 		    hook("click", clickLeftEvent),
 		    text("◀")
 		]),
 		elem("button", [
-		    attr({class: "button"}),
+		    clss("button"),
 		    hook("click", clickRightEvent),
 		    text("▶")
 		])
@@ -289,11 +298,16 @@ function navbar(state) {
 
 function alert(state) {
     if (state.alert.text == "") {
-	return [];
+	return [
+	    attr({id: AlertBoxID, hidden: true}),
+	    clss("hidable"),
+	];
     } else {
 	return [
+	    attr({id: AlertBoxID}),
+	    clss("hidable"),
 	    elem("p", [
-		attr({class: alertClass(state)}),
+		clss(alertClass(state.alert.type)),
 		hook("click", clickAlertEvent),
 		text(state.alert.text)
 	    ])
@@ -328,16 +342,16 @@ function subscribe_dialog(state) {
     return [
 	custom_form(submitSubscribeEvent, resetDialogEvent, [
 	    elem("div", [
-		attr({class: "field long"}),
+		clss(["field", "long"]),
 		elem("label", [
 		    text("The URL to the feed or the index page:"),
 		    elem("input", [
 			attr({
 			    type: "text",
-			    class: "long",
 			    name: Subscribe.feedUrl,
 			    placeholder: "enter the url to subscribe"
-			})
+			}),
+			clss("long")
 		    ])
 		])
 	    ])
@@ -349,15 +363,15 @@ function trash_dialog(state) {
     return [
 	custom_form(submitTrashEvent, resetDialogEvent, [
 	    elem("p", [
-		attr({class: "line"}),
+		clss("line"),
 		text("Are you sure you want to delete this item?")
 	    ]),
 	    elem("div", [
-		attr({class: "field"}),
+		clss("field"),
 		elem("label", [
 		    text("Unsubscribe "),
 		    elem("span", [
-			attr({class: "focus"}),
+			clss("focus"),
 			text(state.currentItem.feedTitle)
 		    ]),
 		    text(" too"),
@@ -378,7 +392,7 @@ function config_dialog(state) {
     return [
 	custom_form(submitConfigEvent, resetDialogEvent, [
 	    elem("div", [
-		attr({class: "field long"}),
+		clss(["field", "long"]),
 		elem("label", [
 		    text("Load more when unread items is below:"),
 		    elem("select", [
@@ -388,7 +402,7 @@ function config_dialog(state) {
 		])
 	    ]),
 	    elem("div", [
-		attr({class: "field long"}),
+		clss(["field", "long"]),
 		elem("label", [
 		    text("Between reloading a feed, wait at least:"),
 		    elem("select", [
@@ -398,7 +412,7 @@ function config_dialog(state) {
 		])
 	    ]),
 	    elem("div", [
-		attr({class: "field long"}),
+		clss(["field", "long"]),
 		elem("label", [
 		    text("Keep read items in the database for:"),
 		    elem("select", [
@@ -408,7 +422,7 @@ function config_dialog(state) {
 		])
 	    ]),
 	    elem("div", [
-		attr({class: "field long"}),
+		clss(["field", "long"]),
 		elem("label", [
 		    text("Keep in the database at most per feed:"),
 		    elem("select", [
@@ -418,7 +432,7 @@ function config_dialog(state) {
 		])
 	    ]),
 	    elem("div", [
-		attr({class: "field long"}),
+		clss(["field", "long"]),
 		elem("label", [
 		    text("Truncate each feed while loading to at most:"),
 		    elem("select", [
@@ -428,7 +442,7 @@ function config_dialog(state) {
 		])
 	    ]),
 	    elem("div", [
-		attr({class: "field long"}),
+		clss(["field", "long"]),
 		elem("label", [
 		    elem("span", [
 			text("Load feeds with roastidio.us ("),
@@ -448,23 +462,20 @@ function config_dialog(state) {
 		])
 	    ]),
 	    elem("div", [
-		attr({class: "field long"}),
+		clss(["field", "long"]),
 		elem("label", [
 		    text("Restore feeds from:"),
 		    elem("input", [
-			attr({
-			    type: "text",
-			    class: "short code",
-			    name: Config.restoreHandle
-			})
+			attr({type: "text", name: Config.restoreHandle}),
+			clss(["short", "code"])
 		    ]),
 		    ...savedHandlePrompt(state)
 		])
 	    ]),
 	    elem("div", [
-		attr({class: "field long"}),
+		clss(["field", "long"]),
 		elem("label", [
-		    attr({class: "alert alert-danger"}),
+		    clss(["alert", "alert-danger"]),
 		    text("Danger! Type \"clear database\" to delete all data"),
 		    elem("input", [
 			attr({type: "text", name: Config.clearDatabase})
@@ -479,7 +490,7 @@ function savedHandlePrompt(state) {
     if (state.postHandle) {
 	return [
 	    text("Your feeds were saved to: "),
-	    elem("span", [attr({class: "code"}), text(state.postHandle)])
+	    elem("span", [clss("code"), text(state.postHandle)])
 	];
     } else {
 	return [];
@@ -550,7 +561,7 @@ function custom_form(submit_action, reset_action, inner) {
 	... reset_action ? [hook("reset", reset_action)] : [],
 	elem("section", inner),
 	elem("div", [
-	    attr({class: "toolbar"}),
+	    clss("toolbar"),
 	    submit_button(),
 	    ... reset_action ? [reset_button()] : []
 	])
@@ -558,27 +569,37 @@ function custom_form(submit_action, reset_action, inner) {
 }
 
 function submit_button() {
-    return elem("input", [attr({class: "button", type: "submit", value: "👌"})]);
+    return elem("input", [attr({type: "submit", value: "👌"}), clss("button")]);
 }
 
 function reset_button() {
-    return elem("input", [attr({class: "button", type: "reset", value: "👎"})]);
+    return elem("input", [attr({type: "reset", value: "👎"}), clss("button")]);
 }
 
 function article(state) {
     const item = state.currentItem;
 
-    return [
-	elem("div", [
-	    attr({class: "article-container"}),
-	    ... item ? article_head(item) : [],
+    if (item) {
+	return [
+	    attr({id: ArticleID}),
+	    clss(["hidable", "article-viewport"]),
 	    elem("div", [
-		attr({class: "content-html"}),
-		...article_content(item)
+		clss("article-container"),
+		...article_head(item),
+		elem("div", article_content(item))
+	    ]),
+	    ...article_tail(item)
+	];
+    } else {
+	return [
+	    attr({id: ArticleID}),
+	    clss(["hidable", "article-viewport"]),
+	    elem("div", [
+		clss("article-container"),
+		elem("div", dummy_article())
 	    ])
-	]),
-	... item ? article_tail(item) : []
-    ];
+	];
+    }
 }
 
 function dummy(item) {
@@ -600,7 +621,7 @@ function article_image(item) {
     if (item.imageUrl) {
 	return [
 	    elem("div", [
-		attr({class: "article-hero"}),
+		clss("article-hero"),
 		elem("a", [
 		    attr({href: item.url, target: "_blank", rel: "noopener noreferrer"}),
 		    elem("img", [attr({src: item.imageUrl, alt: "thumbnail"})])
@@ -610,7 +631,7 @@ function article_image(item) {
     } else {
 	return [
 	    elem("div", [
-		attr({class: "article-antihero"}),
+		clss("article-antihero"),
 		elem("a", [
 		    attr({href: item.url, target: "_blank", rel: "noopener noreferrer"}),
 		    elem("img", [attr({src: Assets.unknownLinkImage, alt: "thumbnail"})])
@@ -622,11 +643,11 @@ function article_image(item) {
 
 function article_title(item) {
     if (dummy(item)) {
-	return [elem("h4", [attr({class: "article-title"}), text(item.title)])];
+	return [elem("h4", [clss("article-title"), text(item.title)])];
     } else {
 	return [
 	    elem("h4", [
-		attr({class: "article-title"}),
+		clss("article-title"),
 		elem("a", [
 		    attr({href: item.url, target: "_blank", rel: "noopener noreferrer"}),
 		    text(item.title)
@@ -639,7 +660,7 @@ function article_title(item) {
 function article_byline(item) {
     return [
 	elem("h5", [
-	    attr({class: "article-byline"}),
+	    clss("article-byline"),
 	    elem("span", [text(item.feedTitle)]),
 	    elem("span", [text(" | ")]),
 	    elem("span", [text(item.datePublished.toLocaleString())])
@@ -648,39 +669,41 @@ function article_byline(item) {
 }
 
 function article_tail(item) {
+    if (dummy(item)) {
+	return [
+	    elem("form", [
+		clss("comment-form"),
+		elem("div", [clss("toolbar"), trash_button()])
+	    ])
+	];
+    }
     return [
 	elem("form", [
 	    attr({
-		class: "comment-form",
 		method: "post",
 		action: "https://roastidio.us/post",
 		target: "_blank"
 	    }),
+	    clss("comment-form"),
 	    elem("input", [attr({type: "hidden", name: "url", value: item.url})]),
-	    ... dummy(item) ? [] : comment_box(),
+	    elem("textarea", [
+		attr({name: "content"}),
+		hook("keydown", stopPropagation),
+		    hook("input", autoAdjustHeight)
+	    ]),
 	    elem("div", [
-		attr({class: "toolbar"}),
+		clss("toolbar"),
 		trash_button(),
-		... dummy(item) ? [] : [refresh_button()],
-		... dummy(item) ? [] : [roast_button()]
+		refresh_button(),
+		roast_button()
 	    ])
-	])
-    ];
-}
-
-function comment_box() {
-    return [
-	elem("textarea", [
-	    attr({name: "content"}),
-	    hook("keydown", stopPropagation),
-	    hook("input", autoAdjustHeight)
 	])
     ];
 }
 
 function trash_button() {
     return elem("button", [
-	attr({class: "button"}),
+	clss("button"),
 	hook("click", clickTrashEvent),
 	text("🗑 ")
     ]);
@@ -688,29 +711,27 @@ function trash_button() {
 
 function refresh_button() {
     return elem("button", [
-	attr({class: "button"}),
+	clss("button"),
 	hook("click", clickRefreshEvent),
 	text("📃")
     ]);
 }
 
 function roast_button() {
-    return elem("input", [attr({class: "button", type: "submit", value: "🔥"})]);
+    return elem("input", [attr({type: "submit", value: "🔥"}), clss("button")]);
 }
 
 function article_content(item) {
-    if (item) {
-	return [
-	    (node) => {node.innerHTML = item.contentHtml},
-	    ... dummy(item) ? [] : [(node) => fixup_links(node, item.url)]
-	];
-    } else {
-	return dummy_article();
-    }
+    return [
+	clss("content-html"),
+	(node) => {node.innerHTML = item.contentHtml},
+	... dummy(item) ? [] : [(node) => fixup_links(node, item.url)]
+    ];
 }
 
 function dummy_article() {
     return [
+	clss("content-html"),
 	elem("h2", [text("No news is bad news")]),
 	elem("p", [
 	    text("Airss is a web feed reader that runs entirely in your browser. You can subscribe any feeds by clicking the 🍼 button from above and paste the URL, or you can use of one of the following tricks: ")
@@ -720,9 +741,9 @@ function dummy_article() {
 	    text("Install this bookmarklet "),
 	    elem("a", [
 		attr({
-		    class: "button",
 		    href: "javascript:location.href='{airssPrefix}?url='+encodeURIComponent(window.location.href)"
 		}),
+		clss("button"),
 		text(" Subscribe it in Airss")
 	    ]),
 	    text(" "),
