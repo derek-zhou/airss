@@ -165,7 +165,8 @@ export function touchMoveEvent(e) {
     yDown = null;
 }
 
-export function clickLeftEvent() {
+export function clickLeftEvent(e) {
+    e.preventDefault();
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
@@ -173,7 +174,8 @@ export function clickLeftEvent() {
     View.update_layout(state);
 }
 
-export function clickRightEvent() {
+export function clickRightEvent(e) {
+    e.preventDefault();
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
@@ -181,14 +183,16 @@ export function clickRightEvent() {
     View.update_layout(state);
 }
 
-export function clickAlertEvent() {
+export function clickAlertEvent(e) {
+    e.preventDefault();
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
     View.update_layout(state);
 }
 
-export function clickConfigEvent() {
+export function clickConfigEvent(e) {
+    e.preventDefault();
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
@@ -199,7 +203,8 @@ export function clickConfigEvent() {
     View.update_layout(state);
 }
 
-export function clickSubscribeEvent() {
+export function clickSubscribeEvent(e) {
+    e.preventDefault();
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
@@ -208,7 +213,8 @@ export function clickSubscribeEvent() {
     View.update_layout(state);
 }
 
-export function clickTrashEvent() {
+export function clickTrashEvent(e) {
+    e.preventDefault();
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
@@ -218,6 +224,7 @@ export function clickTrashEvent() {
 }
 
 export function submitSubscribeEvent(e) {
+    e.preventDefault();
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
@@ -228,7 +235,8 @@ export function submitSubscribeEvent(e) {
     View.update_layout(state);
 }
 
-export function resetDialogEvent() {
+export function resetDialogEvent(e) {
+    e.preventDefault();
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
@@ -238,6 +246,7 @@ export function resetDialogEvent() {
 }
 
 export function submitTrashEvent(e) {
+    e.preventDefault();
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
@@ -253,6 +262,7 @@ export function submitTrashEvent(e) {
 }
 
 export function submitConfigEvent(e) {
+    e.preventDefault();
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
@@ -277,7 +287,8 @@ export function submitConfigEvent(e) {
     }
 }
 
-export function clickRefreshEvent() {
+export function clickRefreshEvent(e) {
+    e.preventDefault();
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
@@ -285,7 +296,8 @@ export function clickRefreshEvent() {
     View.update_layout(state);
 }
 
-export function clickReloadEvent() {
+export function clickReloadEvent(e) {
+    e.preventDefault();
     init();
 }
 

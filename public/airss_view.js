@@ -69,17 +69,24 @@ function clear_content(container) {
     }
 }
 
+function stopPropagation(e) {
+    e.stopImmediatePropagation();
+}
+
+function autoAdjustHeight(e) {
+    const textarea = e.currentTarget;
+    const offset = textarea.offsetHeight - textarea.clientHeight;
+    textarea.style.height = textarea.scrollHeight + offset + 'px';
+}
+
 function repaint(container, transformations) {
     clear_content(container);
     for (const transform of transformations)
 	transform(container);
 }
 
-function hook(type, event) {
-    return (node) => node.addEventListener(type, (e) => {
-	e.preventDefault();
-	event(e);
-    });
+function hook(type, handler) {
+    return (node) => node.addEventListener(type, handler);
 }
 
 function text(t) {
@@ -312,9 +319,7 @@ function dialog(state) {
 function reload_dialog(state) {
     return [
 	custom_form(clickReloadEvent, null, [
-	    elem("p", [
-		text("AirSS is shut down. Reload?")
-	    ])
+	    elem("p", [text("AirSS is shut down. Reload?")])
 	])
     ];
 }
@@ -665,17 +670,11 @@ function article_tail(item) {
 
 function comment_box() {
     return [
-	elem("textarea", [attr({name: "content"})]),
-	(node) => {
-	    const textarea = node.querySelector("textarea");
-	    textarea.addEventListener("keydown", (e) => {
-		e.stopImmediatePropagation();
-	    });
-	    textarea.addEventListener("input", () => {
-		const offset = textarea.offsetHeight - textarea.clientHeight;
-		textarea.style.height = textarea.scrollHeight + offset + 'px';
-	    });
-	}
+	elem("textarea", [
+	    attr({name: "content"}),
+	    hook("keydown", stopPropagation),
+	    hook("input", autoAdjustHeight)
+	])
     ];
 }
 
