@@ -26,8 +26,12 @@ export const Config = {
     clearDatabase: "clearDatabase"
 };
 
-// pointers into the DOM
-var DOMShortcut = {
+// permanent pointers into the DOM for partial repaint
+const DOM = {
+    progressBar: document.createElement("div"),
+    alertBox: document.createElement("div"),
+    application: document.createElement("div"),
+    article: document.createElement("div")
 };
 /*
  * The view layer of AirSS.
@@ -57,7 +61,17 @@ function fixup_links(container, url) {
     }
 }
 
-function clear_all(node) {
+function stopPropagation(e) {
+    e.stopImmediatePropagation();
+}
+
+function autoAdjustHeight(e) {
+    const textarea = e.currentTarget;
+    const offset = textarea.offsetHeight - textarea.clientHeight;
+    textarea.style.height = textarea.scrollHeight + offset + 'px';
+}
+
+function clear(node) {
     const junk = [];
     for (const child of node.childNodes) {
 	junk.push(child);
@@ -72,22 +86,17 @@ function clear_all(node) {
     for (const name of junk2) {
 	node.removeAttribute(name);
     }
-}
-
-function stopPropagation(e) {
-    e.stopImmediatePropagation();
-}
-
-function autoAdjustHeight(e) {
-    const textarea = e.currentTarget;
-    const offset = textarea.offsetHeight - textarea.clientHeight;
-    textarea.style.height = textarea.scrollHeight + offset + 'px';
+    return node;
 }
 
 function repaint(node, transformations) {
-    clear_all(node);
-    for (const transform of transformations)
-	transform(node);
+    return transform(clear(node), transformations);
+}
+
+function transform(node, functions) {
+    for (const f of functions)
+	f(node);
+    return node;
 }
 
 function hook(type, handler) {
@@ -98,8 +107,12 @@ function text(t) {
     return (node) => node.append(document.createTextNode(t));
 }
 
+function graft(element, transformations) {
+    return (node) => node.append(repaint(element, transformations));
+}
+
 function elem(tag, transformations) {
-    return (node) => node.append(build_elem(tag, transformations));
+    return (node) => node.append(transform(document.createElement(tag), transformations));
 }
 
 function attr(attributes) {
@@ -128,13 +141,6 @@ function add_all(list, from) {
     } else {
 	list.add(from);
     }
-}
-
-function build_elem(tag, transformations) {
-    const element = document.createElement(tag);
-    for (const transform of transformations)
-	transform(element);
-    return element;
 }
 
 function buildValue(value) {
@@ -171,48 +177,36 @@ export function render_all(state) {
 
 // render only the progress bar
 export function render_progress_bar(state) {
-    repaint(DOMShortcut.progressBar, progressBar(state));
+    repaint(DOM.progressBar, progressBar(state));
 }
 
 // render only the application container
 export function render_application(state) {
-    repaint(DOMShortcut.application, application(state));
+    repaint(DOM.application, application(state));
 }
 
 // render only the article container
 export function render_article(state) {
-    repaint(DOMShortcut.article, article(state));
+    repaint(DOM.article, article(state));
     window.scrollTo({top: 0});
 }
 
 // render only the alert container
 export function render_alert(state) {
-    repaint(DOMShortcut.alertBox, alert(state));
+    repaint(DOM.alertBox, alert(state));
     window.scrollTo({top: 0});
 }
 
 function body(state) {
     return [
-	elem("div", [
-	    (node) => {DOMShortcut.progressBar = node},
-	    ...progressBar(state)
-	]),
+	graft(DOM.progressBar, progressBar(state)),
 	elem("div", [
 	    clss("viewport"),
 	    hook("touchstart", touchStartEvent),
 	    hook("touchmove", touchMoveEvent),
-	    elem("div", [
-		(node) => {DOMShortcut.alertBox = node},
-		...alert(state)
-	    ]),
-	    elem("div", [
-		(node) => {DOMShortcut.application = node},
-		...application(state)
-	    ]),
-	    elem("div", [
-		(node) => {DOMShortcut.article = node},
-		...article(state)
-	    ]),
+	    graft(DOM.alertBox, alert(state)),
+	    graft(DOM.application, application(state)),
+	    graft(DOM.article, article(state)),
 	    elem("div", footer(state))
 	])
     ];
