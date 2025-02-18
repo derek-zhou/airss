@@ -188,13 +188,13 @@ export function render_application(state) {
 // render only the article container
 export function render_article(state) {
     repaint(DOM.article, article(state));
-    window.scrollTo({top: 0});
+    DOM.article.scrollIntoView();
 }
 
 // render only the alert container
 export function render_alert(state) {
     repaint(DOM.alertBox, alert(state));
-    window.scrollTo({top: 0});
+    DOM.alertBox.scrollIntoView();
 }
 
 function body(state) {
