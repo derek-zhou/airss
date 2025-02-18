@@ -69,6 +69,7 @@ async function cb_init(prev) {
     let item = await Items.getCurrentItem(db);
     itemsLoadedEvent(Items.length(), Items.readingCursor());
     itemUpdatedEvent(item);
+    stopLoadingEvent();
     await try_load();
 }
 

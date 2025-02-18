@@ -302,7 +302,6 @@ function navbar(state) {
 }
 
 function alert(state) {
-    console.log("got alert type: " + state.alert.type + " text: " + state.alert.text);
     if (state.alert.text == "")
 	return [];
     return [

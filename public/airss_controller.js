@@ -30,7 +30,7 @@ function init() {
 	screen: Screens.browse,
 	length: 0,
 	cursor: -1,
-	loading: false,
+	loading: true,
 	alert: {
 	    text: "",
 	    type: "info"
