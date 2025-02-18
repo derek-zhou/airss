@@ -110,15 +110,18 @@ export function postHandleEvent(text) {
 document.addEventListener("keydown", (e) => {
     if (state.screen != Screens.browse)
 	return;
-    actionPreamble();
 
     switch (e.key) {
     case 'n':
     case 'N':
+	e.preventDefault();
+	actionPreamble();
 	Model.forwardItem();
 	break;
     case 'p':
     case 'P':
+	e.preventDefault();
+	actionPreamble();
 	Model.backwardItem();
 	break;
     }
@@ -134,11 +137,7 @@ export function touchStartEvent(e) {
 }
 
 export function touchMoveEvent(e) {
-    if (state.screen == Screens.shutdown)
-	return;
-    actionPreamble();
-
-    if ( xDown && yDown && state.screen != Screens.browse ) {
+    if ( xDown && yDown && state.screen == Screens.browse ) {
 	let xUp = e.touches[0].clientX;
 	let yUp = e.touches[0].clientY;
 	let xDiff = xDown - xUp;
@@ -148,9 +147,13 @@ export function touchMoveEvent(e) {
 	if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {
 	    if ( xDiff > 0 ) {
 		/* left swipe */
+		e.preventDefault();
+		actionPreamble();
 		Model.backwardItem();
 	    } else {
 		/* right swipe */
+		e.preventDefault();
+		actionPreamble();
 		Model.forwardItem();
 	    }
 	}
