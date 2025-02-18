@@ -67,7 +67,7 @@ function clear_all(node) {
     }
     const junk2 = [];
     for (const attr of node.attributes) {
-	junk.push(attr.name);
+	junk2.push(attr.name);
     }
     for (const name of junk2) {
 	node.removeAttribute(name);
@@ -169,6 +169,11 @@ export function render_all(state) {
     repaint(document.body, body(state));
 }
 
+// render only the progress bar
+export function render_progress_bar(state) {
+    repaint(DOMShortcut.progressBar, progressBar(state));
+}
+
 // render only the application container
 export function render_application(state) {
     repaint(DOMShortcut.application, application(state));
@@ -186,27 +191,11 @@ export function render_alert(state) {
     window.scrollTo({top: 0});
 }
 
-// update visibility of various blocks
-export function update_layout(state) {
-    update_hidden(DOMShortcut.article, state.screen != Screens.browse);
-    update_hidden(DOMShortcut.progressBar, !state.loading);
-    update_hidden(DOMShortcut.alertBox, state.alert.text == "");
-}
-
-function update_hidden(node, should_hide) {
-    if (should_hide) {
-	node.setAttribute("hidden", true);
-    } else {
-	node.removeAttribute("hidden");
-    }
-}
-
 function body(state) {
     return [
 	elem("div", [
 	    (node) => {DOMShortcut.progressBar = node},
-	    attr({hidden: true}),
-	    clss("hidable")
+	    ...progressBar(state)
 	]),
 	elem("div", [
 	    clss("viewport"),
@@ -227,6 +216,12 @@ function body(state) {
 	    elem("div", footer(state))
 	])
     ];
+}
+
+function progressBar(state) {
+    if (!state.loading)
+	return [];
+    return [clss("progress-bar")];
 }
 
 function footer(state) {
@@ -307,21 +302,16 @@ function navbar(state) {
 }
 
 function alert(state) {
-    if (state.alert.text == "") {
-	return [
-	    attr({hidden: true}),
-	    clss("hidable"),
-	];
-    } else {
-	return [
-	    clss("hidable"),
-	    elem("p", [
-		clss(alertClass(state.alert.type)),
-		hook("click", clickAlertEvent),
-		text(state.alert.text)
-	    ])
-	];
-    }
+    console.log("got alert type: " + state.alert.type + " text: " + state.alert.text);
+    if (state.alert.text == "")
+	return [];
+    return [
+	elem("p", [
+	    clss(alertClass(state.alert.type)),
+	    hook("click", clickAlertEvent),
+	    text(state.alert.text)
+	])
+    ];
 }
 
 function dialog(state) {
@@ -587,10 +577,14 @@ function reset_button() {
 
 function article(state) {
     const item = state.currentItem;
+    const hidden = state.screen != Screens.browse;
+
+    if (item === undefined || hidden)
+	return [];
 
     if (item) {
 	return [
-	    clss(["hidable", "article-viewport"]),
+	    clss("article-viewport"),
 	    elem("div", [
 		clss("article-container"),
 		...article_head(item),
@@ -598,17 +592,14 @@ function article(state) {
 	    ]),
 	    ...article_tail(item)
 	];
-    } else if (item === null) {
+    } else {
 	return [
-	    clss(["hidable", "article-viewport"]),
+	    clss("article-viewport"),
 	    elem("div", [
 		clss("article-container"),
 		elem("div", dummy_article())
 	    ])
 	];
-    } else {
-	// undefined, initial paint
-	return [];
     }
 }
 

@@ -1,9 +1,3 @@
-div.hidable {
-    display: block;
-}
-div.hidable[hidden] {
-    display: none;
-}
 a {
     color: rgb(37 99 235);
 }
@@ -36,7 +30,7 @@ a:hover {
     color: rgb(185 28 28);
 }
 
-div#progress-bar {
+div.progress-bar {
     position: fixed;
     width: 100%;
     left: 0px;

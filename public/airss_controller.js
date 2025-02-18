@@ -58,6 +58,7 @@ function actionPreamble() {
     clearTimeout(idleTimeout);
     idleTimeout = setTimeout(timeoutShutdown, TimeoutPeriod);
     state.alert.text = "";
+    View.render_alert(state);
 }
 
 // shutdown the model layer. return a promise that reject
@@ -82,25 +83,23 @@ export function alertEvent(type, text) {
     state.alert.type = type;
     state.alert.text = text;
     View.render_alert(state);
-    View.update_layout(state);
 }
 
 export function shutDownEvent(type, text) {
     state.alert.type = type;
     state.alert.text = text;
     state.screen = Screens.shutdown;
-    View.render_application(state);
-    View.update_layout(state);
+    View.render_all(state);
 }
 
 export function startLoadingEvent() {
     state.loading = true;
-    View.update_layout(state);
+    View.render_progress_bar(state);
 }
 
 export function stopLoadingEvent() {
     state.loading = false;
-    View.update_layout(state);
+    View.render_progress_bar(state);
 }
 
 export function postHandleEvent(text) {
@@ -123,7 +122,6 @@ document.addEventListener("keydown", (e) => {
 	Model.backwardItem();
 	break;
     }
-    View.update_layout(state);
 });
 
 // for swipes
@@ -157,7 +155,6 @@ export function touchMoveEvent(e) {
 	    }
 	}
     }
-    View.update_layout(state);
     /* reset values */
     xDown = null;
     yDown = null;
@@ -169,7 +166,6 @@ export function clickLeftEvent(e) {
 	return;
     actionPreamble();
     Model.backwardItem();
-    View.update_layout(state);
 }
 
 export function clickRightEvent(e) {
@@ -178,7 +174,6 @@ export function clickRightEvent(e) {
 	return;
     actionPreamble();
     Model.forwardItem();
-    View.update_layout(state);
 }
 
 export function clickAlertEvent(e) {
@@ -186,7 +181,6 @@ export function clickAlertEvent(e) {
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
-    View.update_layout(state);
 }
 
 export function clickConfigEvent(e) {
@@ -197,8 +191,7 @@ export function clickConfigEvent(e) {
     // piggyback saving here
     Model.saveFeeds();
     state.screen = Screens.config;
-    View.render_application(state);
-    View.update_layout(state);
+    View.render_all(state);
 }
 
 export function clickSubscribeEvent(e) {
@@ -207,8 +200,7 @@ export function clickSubscribeEvent(e) {
 	return;
     actionPreamble();
     state.screen = Screens.subscribe;
-    View.render_application(state);
-    View.update_layout(state);
+    View.render_all(state);
 }
 
 export function clickTrashEvent(e) {
@@ -217,8 +209,7 @@ export function clickTrashEvent(e) {
 	return;
     actionPreamble();
     state.screen = Screens.trash;
-    View.render_application(state);
-    View.update_layout(state);
+    View.render_all(state);
 }
 
 export function submitSubscribeEvent(e) {
@@ -229,8 +220,7 @@ export function submitSubscribeEvent(e) {
     let data = new FormData(e.currentTarget);
     Model.subscribe(data.get(View.Subscribe.feedUrl));
     state.screen = Screens.browse;
-    View.render_application(state);
-    View.update_layout(state);
+    View.render_all(state);
 }
 
 export function resetDialogEvent(e) {
@@ -239,8 +229,7 @@ export function resetDialogEvent(e) {
 	return;
     actionPreamble();
     state.screen = Screens.browse;
-    View.render_application(state);
-    View.update_layout(state);
+    View.render_all(state);
 }
 
 export function submitTrashEvent(e) {
@@ -256,7 +245,7 @@ export function submitTrashEvent(e) {
 	    Model.deleteItem();
     }
     state.screen = Screens.browse;
-    View.update_layout(state);
+    View.render_all(state);
 }
 
 export function submitConfigEvent(e) {
@@ -274,8 +263,7 @@ export function submitConfigEvent(e) {
     localStorage.setItem("BOUNCE_LOAD", data.get(View.Config.bounceLoad) || "false");
 
     state.screen = Screens.browse;
-    View.render_application(state);
-    View.update_layout(state);
+    View.render_all(state);
 
     if (data.get(View.Config.clearDatabase) == "clear database") {
 	Model.clearData();
@@ -291,7 +279,6 @@ export function clickRefreshEvent(e) {
 	return;
     actionPreamble();
     Model.refreshItem();
-    View.update_layout(state);
 }
 
 export function clickReloadEvent(e) {
