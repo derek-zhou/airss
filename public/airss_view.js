@@ -55,13 +55,15 @@ function removeAllAttributes(node) {
 }
 
 function repaint(node, functions) {
-    return transform(clear(node), functions);
+    clear(node);
+    perform(node, functions);
+    return node;
 }
 
-function transform(node, functions) {
+function perform(node, functions) {
     if (Array.isArray(functions)) {
 	for (const f of functions) {
-	    transform(node, f);
+	    perform(node, f);
 	}
     } else {
 	functions(node);
@@ -78,7 +80,7 @@ function text(t) {
 }
 
 function fill(html) {
-    return (node) => node.append(node.innerHTML = html);
+    return (node) => {node.innerHTML = html};
 }
 
 function graft(element, functions) {
@@ -86,7 +88,7 @@ function graft(element, functions) {
 }
 
 function elem(tag, functions) {
-    return (node) => node.append(transform(document.createElement(tag), functions));
+    return (node) => node.append(perform(document.createElement(tag), functions));
 }
 
 function attr(attributes) {
