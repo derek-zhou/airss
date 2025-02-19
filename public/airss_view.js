@@ -1,11 +1,5 @@
-import {Screens} from "./airss_controller.js";
+import * as Controller from './airss_controller.js';
 import {Assets} from "./assets.js";
-
-// events that I emit
-import {touchStartEvent, touchMoveEvent, clickLeftEvent, clickRightEvent, clickAlertEvent,
-	clickConfigEvent, clickSubscribeEvent, clickTrashEvent, clickRefreshEvent,
-	clickReloadEvent, submitSubscribeEvent, submitTrashEvent, submitConfigEvent,
-	resetDialogEvent} from "./airss_controller.js";
 
 export const Subscribe = {
     feedUrl: "feedUrl"
@@ -33,45 +27,14 @@ const DOM = {
     application: document.createElement("div"),
     article: document.createElement("div")
 };
-/*
- * The view layer of AirSS.
- */
-
-function fixup_links(container, url) {
-    // fix up all img's src
-    for (const img of container.querySelectorAll("img").values()) {
-	const href = img.getAttribute("src");
-	try {
-	    const absUrl = new URL(href, url);
-	    img.setAttribute("src", absUrl.toString());
-	} catch (e) {
-	    console.warn(href + "is not a valid link");
-	}
-    }
-    // fixup all a's href
-    for (const link of container.querySelectorAll("a").values()) {
-	const href = link.getAttribute("href");
-	try {
-	    const absUrl = new URL(href, url);
-	    link.setAttribute("href", absUrl.toString());
-	    link.setAttribute("target", "_blank");
-	} catch (e) {
-	    console.warn(href + "is not a valid link");
-	}
-    }
-}
-
-function stopPropagation(e) {
-    e.stopImmediatePropagation();
-}
-
-function autoAdjustHeight(e) {
-    const textarea = e.currentTarget;
-    const offset = textarea.offsetHeight - textarea.clientHeight;
-    textarea.style.height = textarea.scrollHeight + offset + 'px';
-}
 
 function clear(node) {
+    removeAllChildren(node);
+    removeAllAttributes(node);
+    return node;
+}
+
+function removeAllChildren(node) {
     const junk = [];
     for (const child of node.childNodes) {
 	junk.push(child);
@@ -79,14 +42,16 @@ function clear(node) {
     for (const elem of junk) {
 	elem.remove();
     }
-    const junk2 = [];
+}
+
+function removeAllAttributes(node) {
+    const junk = [];
     for (const attr of node.attributes) {
-	junk2.push(attr.name);
+	junk.push(attr.name);
     }
-    for (const name of junk2) {
+    for (const name of junk) {
 	node.removeAttribute(name);
     }
-    return node;
 }
 
 function repaint(node, transformations) {
@@ -143,20 +108,50 @@ function add_all(list, from) {
     }
 }
 
-function buildValue(value) {
-    if (Array.isArray(value)) {
-	return value.join(" ");
-    } else {
-	return value;
+/*
+ * The view layer of AirSS.
+ */
+
+function fixup_links(container, url) {
+    // fix up all img's src
+    for (const img of container.querySelectorAll("img").values()) {
+	const href = img.getAttribute("src");
+	try {
+	    const absUrl = new URL(href, url);
+	    img.setAttribute("src", absUrl.toString());
+	} catch (e) {
+	    console.warn(href + "is not a valid link");
+	}
+    }
+    // fixup all a's href
+    for (const link of container.querySelectorAll("a").values()) {
+	const href = link.getAttribute("href");
+	try {
+	    const absUrl = new URL(href, url);
+	    link.setAttribute("href", absUrl.toString());
+	    link.setAttribute("target", "_blank");
+	} catch (e) {
+	    console.warn(href + "is not a valid link");
+	}
     }
 }
 
+function stopPropagation(e) {
+    e.stopImmediatePropagation();
+}
+
+function autoAdjustHeight(e) {
+    const textarea = e.currentTarget;
+    const offset = textarea.offsetHeight - textarea.clientHeight;
+    textarea.style.height = textarea.scrollHeight + offset + 'px';
+}
+
 function leftDisabled(state) {
-    return state.cursor <= 0 || state.screen != Screens.browse;
+    return state.cursor <= 0 || state.screen != Controller.Screens.browse;
 }
 
 function rightDisabled(state) {
-    return state.cursor >= state.length - 1 || state.screen != Screens.browse;
+    return state.cursor >= state.length - 1 || state.screen != Controller.Screens.browse;
 }
 
 function alertClass(type) {
@@ -202,8 +197,8 @@ function body(state) {
 	graft(DOM.progressBar, progressBar(state)),
 	elem("div", [
 	    clss("viewport"),
-	    hook("touchstart", touchStartEvent),
-	    hook("touchmove", touchMoveEvent),
+	    hook("touchstart", Controller.touchStartEvent),
+	    hook("touchmove", Controller.touchMoveEvent),
 	    graft(DOM.alertBox, alert(state)),
 	    graft(DOM.application, application(state)),
 	    graft(DOM.article, article(state)),
@@ -213,9 +208,7 @@ function body(state) {
 }
 
 function progressBar(state) {
-    if (!state.loading)
-	return [];
-    return [clss("progress-bar")];
+    return state.loading ? [clss("progress-bar")] : [];
 }
 
 function footer(state) {
@@ -272,22 +265,22 @@ function navbar(state) {
 		clss("toolbar"),
 		elem("button", [
 		    clss("button"),
-		    hook("click", clickConfigEvent),
+		    hook("click", Controller.clickConfigEvent),
 		    text("🔧")
 		]),
 		elem("button", [
 		    clss("button"),
-		    hook("click", clickSubscribeEvent),
+		    hook("click", Controller.clickSubscribeEvent),
 		    text("🍼")
 		]),
 		elem("button", [
 		    clss("button"),
-		    hook("click", clickLeftEvent),
+		    hook("click", Controller.clickLeftEvent),
 		    text("◀")
 		]),
 		elem("button", [
 		    clss("button"),
-		    hook("click", clickRightEvent),
+		    hook("click", Controller.clickRightEvent),
 		    text("▶")
 		])
 	    ])
@@ -301,7 +294,7 @@ function alert(state) {
     return [
 	elem("p", [
 	    clss(alertClass(state.alert.type)),
-	    hook("click", clickAlertEvent),
+	    hook("click", Controller.clickAlertEvent),
 	    text(state.alert.text)
 	])
     ];
@@ -309,13 +302,13 @@ function alert(state) {
 
 function dialog(state) {
     switch (state.screen) {
-    case Screens.browse:
+    case Controller.Screens.browse:
 	return [];
-    case Screens.trash:
+    case Controller.Screens.trash:
 	return trash_dialog(state);
-    case Screens.config:
+    case Controller.Screens.config:
 	return config_dialog(state);
-    case Screens.subscribe:
+    case Controller.Screens.subscribe:
 	return subscribe_dialog(state);
     default:
 	return reload_dialog(state);
@@ -324,7 +317,7 @@ function dialog(state) {
 
 function reload_dialog(state) {
     return [
-	custom_form(clickReloadEvent, null, [
+	custom_form(Controller.clickReloadEvent, null, [
 	    elem("p", [text("AirSS is shut down. Reload?")])
 	])
     ];
@@ -332,7 +325,7 @@ function reload_dialog(state) {
 
 function subscribe_dialog(state) {
     return [
-	custom_form(submitSubscribeEvent, resetDialogEvent, [
+	custom_form(Controller.submitSubscribeEvent, Controller.resetDialogEvent, [
 	    elem("div", [
 		clss(["field", "long"]),
 		elem("label", [
@@ -353,7 +346,7 @@ function subscribe_dialog(state) {
 
 function trash_dialog(state) {
     return [
-	custom_form(submitTrashEvent, resetDialogEvent, [
+	custom_form(Controller.submitTrashEvent, Controller.resetDialogEvent, [
 	    elem("p", [
 		clss("line"),
 		text("Are you sure you want to delete this item?")
@@ -382,7 +375,7 @@ function trash_dialog(state) {
 
 function config_dialog(state) {
     return [
-	custom_form(submitConfigEvent, resetDialogEvent, [
+	custom_form(Controller.submitConfigEvent, Controller.resetDialogEvent, [
 	    elem("div", [
 		clss(["field", "long"]),
 		elem("label", [
@@ -570,7 +563,7 @@ function reset_button() {
 
 function article(state) {
     const item = state.currentItem;
-    const hidden = state.screen != Screens.browse;
+    const hidden = state.screen != Controller.Screens.browse;
 
     if (item === undefined || hidden)
 	return [];
@@ -698,7 +691,7 @@ function article_tail(item) {
 function trash_button() {
     return elem("button", [
 	clss("button"),
-	hook("click", clickTrashEvent),
+	hook("click", Controller.clickTrashEvent),
 	text("🗑 ")
     ]);
 }
@@ -706,7 +699,7 @@ function trash_button() {
 function refresh_button() {
     return elem("button", [
 	clss("button"),
-	hook("click", clickRefreshEvent),
+	hook("click", Controller.clickRefreshEvent),
 	text("📃")
     ]);
 }

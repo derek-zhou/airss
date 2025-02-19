@@ -8,7 +8,7 @@ import * as Model from './airss_model.js';
 import * as View from './airss_view.js';
 
 // timeout for the model to shutdown itself for inactivity
-const TimeoutPeriod = 3600 * 1000;
+const TimeoutPeriod = 600 * 1000;
 
 // watchdog to shutdown the backend when idel long enough
 let idleTimeout = setTimeout(timeoutShutdown, TimeoutPeriod);
@@ -74,7 +74,7 @@ export function itemsLoadedEvent(length, cursor) {
     View.render_application(state);
 }
 
-export function itemUpdatedEvent(item) {
+  export function itemUpdatedEvent(item) {
     state.currentItem = item;
     View.render_article(state);
 }
