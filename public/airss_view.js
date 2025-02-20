@@ -31,7 +31,6 @@ const DOM = {
 function clear(node) {
     removeAllChildren(node);
     removeAllAttributes(node);
-    return node;
 }
 
 function removeAllChildren(node) {
@@ -57,7 +56,6 @@ function removeAllAttributes(node) {
 function repaint(node, functions) {
     clear(node);
     perform(node, functions);
-    return node;
 }
 
 function perform(node, functions) {
@@ -68,35 +66,52 @@ function perform(node, functions) {
     } else {
 	functions(node);
     }
-    return node;
 }
 
 function hook(type, handler) {
-    return (node) => node.addEventListener(type, handler);
+    return (node) => {
+	node.addEventListener(type, handler);
+    };
 }
 
-function text(t) {
-    return (node) => node.append(document.createTextNode(t));
+function append(element) {
+    return (node) => {
+	node.append(element);
+    };
 }
 
 function fill(html) {
-    return (node) => {node.innerHTML = html};
-}
-
-function graft(element, functions) {
-    return (node) => node.append(repaint(element, functions));
-}
-
-function elem(tag, functions) {
-    return (node) => node.append(perform(document.createElement(tag), functions));
+    return (node) => {
+	node.innerHTML = html;
+    };
 }
 
 function attr(attributes) {
-    return (node) => set_attrs(node, attributes);
+    return (node) => {
+	set_attrs(node, attributes);
+    };
 }
 
 function clss(classes) {
-    return (node) => add_all(node.classList, classes);
+    return (node) => {
+	add_all(node.classList, classes);
+    };
+}
+
+function text(t) {
+    const element = document.createTextNode(t);
+    return append(element);
+}
+
+function graft(element, functions) {
+    repaint(element, functions);
+    return append(element);
+}
+
+function elem(tag, functions) {
+    const element = document.createElement(tag);
+    perform(element, functions);
+    return append(element);
 }
 
 function if_only(test, func) {
