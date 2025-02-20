@@ -20,7 +20,7 @@ export const Config = {
     clearDatabase: "clearDatabase"
 };
 
-// permanent pointers into the DOM for partial repaint
+// permanent pointers into the DOM for partial replay
 const DOM = {
     progressBar: document.createElement("div"),
     alertBox: document.createElement("div"),
@@ -53,18 +53,18 @@ function removeAllAttributes(node) {
     }
 }
 
-function repaint(node, functions) {
-    clear(node);
-    perform(node, functions);
+function replay(subject, script) {
+    clear(subject);
+    play(subject, script);
 }
 
-function perform(node, functions) {
-    if (Array.isArray(functions)) {
-	for (const f of functions) {
-	    perform(node, f);
+function play(subject, script) {
+    if (Array.isArray(script)) {
+	for (const f of script) {
+	    play(subject, f);
 	}
     } else {
-	functions(node);
+	script(subject);
     }
 }
 
@@ -103,14 +103,14 @@ function text(t) {
     return append(element);
 }
 
-function graft(element, functions) {
-    repaint(element, functions);
+function graft(element, script) {
+    replay(element, script);
     return append(element);
 }
 
-function elem(tag, functions) {
+function elem(tag, script) {
     const element = document.createElement(tag);
-    perform(element, functions);
+    play(element, script);
     return append(element);
 }
 
@@ -206,29 +206,27 @@ function alertClass(type) {
 
 // render everything from scratch
 export function render_all(state) {
-    repaint(document.body, body(state));
+    replay(document.body, body(state));
 }
 
 // render only the progress bar
 export function render_progress_bar(state) {
-    repaint(DOM.progressBar, progressBar(state));
+    replay(DOM.progressBar, progressBar(state));
 }
 
 // render only the application container
 export function render_application(state) {
-    repaint(DOM.application, application(state));
+    replay(DOM.application, application(state));
 }
 
 // render only the article container
 export function render_article(state) {
-    repaint(DOM.article, article(state));
-    DOM.article.scrollIntoView();
+    replay(DOM.article, article(state));
 }
 
 // render only the alert container
 export function render_alert(state) {
-    repaint(DOM.alertBox, alert(state));
-    DOM.alertBox.scrollIntoView();
+    replay(DOM.alertBox, alert(state));
 }
 
 function body(state) {

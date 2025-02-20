@@ -74,15 +74,19 @@ export function itemsLoadedEvent(length, cursor) {
     View.render_application(state);
 }
 
-  export function itemUpdatedEvent(item) {
+export function itemUpdatedEvent(item) {
     state.currentItem = item;
     View.render_article(state);
+    if (item)
+	window.scrollTo({top: 0});
 }
 
 export function alertEvent(type, text) {
     state.alert.type = type;
     state.alert.text = text;
     View.render_alert(state);
+    if (text)
+	window.scrollTo({top: 0});
 }
 
 export function shutDownEvent(type, text) {
