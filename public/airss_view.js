@@ -1,5 +1,6 @@
-import * as Controller from './airss_controller.js';
+import * as Controller from "./airss_controller.js";
 import {Assets} from "./assets.js";
+import {replay, hook, elem, text, fill, attr, class_list, graft, if_only} from "./domfun.js";
 
 export const Subscribe = {
     feedUrl: "feedUrl"
@@ -27,118 +28,6 @@ const DOM = {
     application: document.createElement("div"),
     article: document.createElement("div")
 };
-
-function clear(node) {
-    removeAllChildren(node);
-    removeAllAttributes(node);
-}
-
-function removeAllChildren(node) {
-    const junk = [];
-    for (const child of node.childNodes) {
-	junk.push(child);
-    }
-    for (const elem of junk) {
-	elem.remove();
-    }
-}
-
-function removeAllAttributes(node) {
-    const junk = [];
-    for (const attr of node.attributes) {
-	junk.push(attr.name);
-    }
-    for (const name of junk) {
-	node.removeAttribute(name);
-    }
-}
-
-function replay(subject, script) {
-    clear(subject);
-    play(subject, script);
-}
-
-function play(subject, script) {
-    if (Array.isArray(script)) {
-	for (const f of script) {
-	    play(subject, f);
-	}
-    } else {
-	script(subject);
-    }
-}
-
-function hook(type, handler) {
-    return (node) => {
-	node.addEventListener(type, handler);
-    };
-}
-
-function append(element) {
-    return (node) => {
-	node.append(element);
-    };
-}
-
-function fill(html) {
-    return (node) => {
-	node.innerHTML = html;
-    };
-}
-
-function attr(attributes) {
-    return (node) => {
-	set_attrs(node, attributes);
-    };
-}
-
-function clss(classes) {
-    return (node) => {
-	add_all(node.classList, classes);
-    };
-}
-
-function text(t) {
-    const element = document.createTextNode(t);
-    return append(element);
-}
-
-function graft(element, script) {
-    replay(element, script);
-    return append(element);
-}
-
-function elem(tag, script) {
-    const element = document.createElement(tag);
-    play(element, script);
-    return append(element);
-}
-
-function if_only(test, func) {
-    if (test)
-	return func;
-    return [];
-}
-
-function set_attrs(node, attributes) {
-    for (const key in attributes) {
-	const value = attributes[key];
-	if (Array.isArray(value) && value.length > 0) {
-	    node.setAttribute(key, value.join(" "));
-	} else if (value){
-	    node.setAttribute(key, value);
-	}
-    }
-}
-
-function add_all(list, from) {
-    if (Array.isArray(from)) {
-	for (const c of from)
-	    list.add(c);
-    } else {
-	list.add(from);
-    }
-}
 
 /*
  * The view layer of AirSS.
@@ -196,11 +85,11 @@ function rightDisabled(state) {
 function alertClass(type) {
     switch (type) {
     case "error":
-	return ["alert", "alert-danger"];
+	return "alert-danger";
     case "warning":
-	return ["alert", "alert-warning"];
+	return "alert-warning";
     default:
-	return ["alert", "alert-info"];
+	return "alert-info";
     }
 }
 
@@ -233,7 +122,7 @@ function body(state) {
     return [
 	graft(DOM.progressBar, progressBar(state)),
 	elem("div", [
-	    clss("viewport"),
+	    class_list("viewport"),
 	    hook("touchstart", Controller.touchStartEvent),
 	    hook("touchmove", Controller.touchMoveEvent),
 	    graft(DOM.alertBox, alert(state)),
@@ -245,14 +134,14 @@ function body(state) {
 }
 
 function progressBar(state) {
-    return state.loading ? clss("progress-bar") : [];
+    return state.loading ? class_list("progress-bar") : [];
 }
 
 function footer(state) {
     return [
-	clss("footer"),
+	class_list("footer"),
 	elem("div", [
-	    clss("left-half"),
+	    class_list("left-half"),
 	    elem("a", [
 		attr({
 		    href: "https://roastidio.us/roast",
@@ -262,7 +151,7 @@ function footer(state) {
 	    ]),
 	]),
 	elem("div", [
-	    clss("right-half"),
+	    class_list("right-half"),
 	    elem("a", [
 		attr({
 		    href: "https://github.com/derek-zhou/airss",
@@ -284,39 +173,39 @@ function application(state) {
 function navbar(state) {
     return [
 	elem("div", [
-	    clss("navbar"),
+	    class_list("navbar"),
 	    elem("div", [
 		elem("a", [
 		    attr({href: "index.html"}),
 		    elem("img", [
 			attr({src: Assets.logoImage}),
-			clss("logo")
+			class_list("logo")
 		    ]),
 		]),
 		elem("span", [
-		    clss("info"),
+		    class_list("info"),
 		    text(`${state.cursor+1}/${state.length}`)
 		])
 	    ]),
 	    elem("div", [
-		clss("toolbar"),
+		class_list("toolbar"),
 		elem("button", [
-		    clss("button"),
+		    class_list("button"),
 		    hook("click", Controller.clickConfigEvent),
 		    text("🔧")
 		]),
 		elem("button", [
-		    clss("button"),
+		    class_list("button"),
 		    hook("click", Controller.clickSubscribeEvent),
 		    text("🍼")
 		]),
 		elem("button", [
-		    clss("button"),
+		    class_list("button"),
 		    hook("click", Controller.clickLeftEvent),
 		    text("◀")
 		]),
 		elem("button", [
-		    clss("button"),
+		    class_list("button"),
 		    hook("click", Controller.clickRightEvent),
 		    text("▶")
 		])
@@ -329,7 +218,7 @@ function alert(state) {
     if (state.alert.text == "")
 	return [];
     return elem("p", [
-	clss(alertClass(state.alert.type)),
+	class_list("alert", alertClass(state.alert.type)),
 	hook("click", Controller.clickAlertEvent),
 	text(state.alert.text)
     ]);
@@ -359,17 +248,16 @@ function reload_dialog(state) {
 function subscribe_dialog(state) {
     return custom_form(Controller.submitSubscribeEvent, Controller.resetDialogEvent, [
 	elem("div", [
-	    clss(["field", "long"]),
+	    class_list("field", "long"),
 	    elem("label", [
 		text("The URL to the feed or the index page:"),
 		elem("input", [
 		    attr({
-			class: "long",
 			type: "text",
 			name: Subscribe.feedUrl,
 			placeholder: "enter the url to subscribe"
 		    }),
-		    clss("long")
+		    class_list("long")
 		])
 	    ])
 	])
@@ -379,15 +267,15 @@ function subscribe_dialog(state) {
 function trash_dialog(state) {
     return custom_form(Controller.submitTrashEvent, Controller.resetDialogEvent, [
 	elem("p", [
-	    clss("line"),
+	    class_list("line"),
 	    text("Are you sure you want to delete this item?")
 	]),
 	elem("div", [
-	    clss("field"),
+	    class_list("field"),
 	    elem("label", [
 		text("Unsubscribe "),
 		elem("span", [
-		    clss("focus"),
+		    class_list("focus"),
 		    text(state.currentItem.feedTitle)
 		]),
 		text(" too"),
@@ -406,7 +294,7 @@ function trash_dialog(state) {
 function config_dialog(state) {
     return custom_form(Controller.submitConfigEvent, Controller.resetDialogEvent, [
 	elem("div", [
-	    clss(["field", "long"]),
+	    class_list("field", "long"),
 	    elem("label", [
 		text("Load more when unread items is below:"),
 		elem("select", [
@@ -416,7 +304,7 @@ function config_dialog(state) {
 	    ])
 	]),
 	elem("div", [
-	    clss(["field", "long"]),
+	    class_list("field", "long"),
 	    elem("label", [
 		text("Between reloading a feed, wait at least:"),
 		elem("select", [
@@ -426,7 +314,7 @@ function config_dialog(state) {
 	    ])
 	]),
 	elem("div", [
-	    clss(["field", "long"]),
+	    class_list("field", "long"),
 	    elem("label", [
 		text("Keep read items in the database for:"),
 		elem("select", [
@@ -436,7 +324,7 @@ function config_dialog(state) {
 	    ])
 	]),
 	elem("div", [
-	    clss(["field", "long"]),
+	    class_list("field", "long"),
 	    elem("label", [
 		text("Keep in the database at most per feed:"),
 		elem("select", [
@@ -446,8 +334,8 @@ function config_dialog(state) {
 	    ])
 	]),
 	elem("div", [
-	    clss(["field", "long"]),
-	    elem("label", [
+	    class_list("field", "long"),
+ 	    elem("label", [
 		text("Truncate each feed while loading to at most:"),
 		elem("select", [
 		    attr({name: Config.truncateItemsPerFeed}),
@@ -456,7 +344,7 @@ function config_dialog(state) {
 	    ])
 	]),
 	elem("div", [
-	    clss(["field", "long"]),
+	    class_list("field", "long"),
 	    elem("label", [
 		elem("span", [
 		    text("Load feeds with roastidio.us ("),
@@ -476,20 +364,20 @@ function config_dialog(state) {
 	    ])
 	]),
 	elem("div", [
-	    clss(["field", "long"]),
+	    class_list("field", "long"),
 	    elem("label", [
 		text("Restore feeds from:"),
 		elem("input", [
 		    attr({type: "text", name: Config.restoreHandle}),
-		    clss(["short", "code"])
+		    class_list("short", "code")
 		]),
 		savedHandlePrompt(state)
 	    ])
 	]),
 	elem("div", [
-	    clss(["field", "long"]),
+	    class_list("field", "long"),
 	    elem("label", [
-		clss(["alert", "alert-danger"]),
+		class_list("alert", "alert-danger"),
 		text("Danger! Type \"clear database\" to delete all data"),
 		elem("input", attr({type: "text", name: Config.clearDatabase}))
 	    ])
@@ -503,7 +391,7 @@ function savedHandlePrompt(state) {
     return [
 	text("Your feeds were saved to: "),
 	elem("span", [
-	    clss("code"),
+	    class_list("code"),
 	    text(state.postHandle)
 	])
     ];
@@ -573,7 +461,7 @@ function custom_form(submit_action, reset_action, inner) {
 	if_only(reset_action, hook("reset", reset_action)),
 	elem("section", inner),
 	elem("div", [
-	    clss("toolbar"),
+	    class_list("toolbar"),
 	    submit_button(),
 	    if_only(reset_action, reset_button())
 	])
@@ -581,11 +469,11 @@ function custom_form(submit_action, reset_action, inner) {
 }
 
 function submit_button() {
-    return elem("input", [attr({type: "submit", value: "👌"}), clss("button")]);
+    return elem("input", [attr({type: "submit", value: "👌"}), class_list("button")]);
 }
 
 function reset_button() {
-    return elem("input", [attr({type: "reset", value: "👎"}), clss("button")]);
+    return elem("input", [attr({type: "reset", value: "👎"}), class_list("button")]);
 }
 
 function article(state) {
@@ -597,9 +485,9 @@ function article(state) {
 
     if (item) {
 	return [
-	    clss("article-viewport"),
+	    class_list("article-viewport"),
 	    elem("div", [
-		clss("article-container"),
+		class_list("article-container"),
 		article_head(item),
 		elem("div", article_content(item))
 	    ]),
@@ -607,9 +495,9 @@ function article(state) {
 	];
     } else {
 	return [
-	    clss("article-viewport"),
+	    class_list("article-viewport"),
 	    elem("div", [
-		clss("article-container"),
+		class_list("article-container"),
 		elem("div", dummy_article())
 	    ])
 	];
@@ -629,7 +517,7 @@ function article_image(item) {
     const hero_class = item.imageUrl ? "article-hero" : "article-antihero";
 
     return elem("div", [
-	clss(hero_class),
+	class_list(hero_class),
 	elem("a", [
 	    attr({href: item.url, target: "_blank", rel: "noopener noreferrer"}),
 	    elem("img", [attr({src: imageUrl, alt: "thumbnail"})])
@@ -639,10 +527,10 @@ function article_image(item) {
 
 function article_title(item) {
     if (dummy(item)) {
-	return [elem("h4", [clss("article-title"), text(item.title)])];
+	return [elem("h4", [class_list("article-title"), text(item.title)])];
     } else {
 	return elem("h4", [
-	    clss("article-title"),
+	    class_list("article-title"),
 	    elem("a", [
 		attr({href: item.url, target: "_blank", rel: "noopener noreferrer"}),
 		text(item.title)
@@ -653,7 +541,7 @@ function article_title(item) {
 
 function article_byline(item) {
     return elem("h5", [
-	clss("article-byline"),
+	class_list("article-byline"),
 	elem("span", text(item.feedTitle)),
 	elem("span", text(" | ")),
 	elem("span", text(item.datePublished.toLocaleString()))
@@ -663,8 +551,8 @@ function article_byline(item) {
 function article_tail(item) {
     if (dummy(item)) {
 	return elem("form", [
-	    clss("comment-form"),
-	    elem("div", [clss("toolbar"), trash_button()])
+	    class_list("comment-form"),
+	    elem("div", [class_list("toolbar"), trash_button()])
 	]);
     }
     return elem("form", [
@@ -673,7 +561,7 @@ function article_tail(item) {
 	    action: "https://roastidio.us/post",
 	    target: "_blank"
 	}),
-	clss("comment-form"),
+	class_list("comment-form"),
 	elem("input", attr({type: "hidden", name: "url", value: item.url})),
 	elem("textarea", [
 	    attr({name: "content"}),
@@ -681,7 +569,7 @@ function article_tail(item) {
 	    hook("input", autoAdjustHeight)
 	]),
 	elem("div", [
-	    clss("toolbar"),
+	    class_list("toolbar"),
 	    trash_button(),
 	    refresh_button(),
 	    roast_button()
@@ -691,7 +579,7 @@ function article_tail(item) {
 
 function trash_button() {
     return elem("button", [
-	clss("button"),
+	class_list("button"),
 	hook("click", Controller.clickTrashEvent),
 	text("🗑 ")
     ]);
@@ -699,19 +587,19 @@ function trash_button() {
 
 function refresh_button() {
     return elem("button", [
-	clss("button"),
+	class_list("button"),
 	hook("click", Controller.clickRefreshEvent),
 	text("📃")
     ]);
 }
 
 function roast_button() {
-    return elem("input", [attr({type: "submit", value: "🔥"}), clss("button")]);
+    return elem("input", [attr({type: "submit", value: "🔥"}), class_list("button")]);
 }
 
 function article_content(item) {
     return [
-	clss("content-html"),
+	class_list("content-html"),
 	fill(item.contentHtml),
 	if_only(!dummy(item), (node) => fixup_links(node, item.url))
     ];
@@ -719,7 +607,7 @@ function article_content(item) {
 
 function dummy_article() {
     return [
-	clss("content-html"),
+	class_list("content-html"),
 	elem("h2", text("No news is bad news")),
 	elem("p", [
 	    text("Airss is a web feed reader that runs entirely in your browser. You can subscribe any feeds by clicking the 🍼 button from above and paste the URL, or you can use of one of the following tricks: ")
@@ -731,7 +619,7 @@ function dummy_article() {
 		attr({
 		    href: "javascript:location.href='{airssPrefix}?url='+encodeURIComponent(window.location.href)"
 		}),
-		clss("button"),
+		class_list("button"),
 		text(" Subscribe it in Airss")
 	    ]),
 	    text(" "),
