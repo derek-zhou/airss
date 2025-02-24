@@ -24,7 +24,7 @@ export function attr(attributes) {
     };
 }
 
-export function class_list() {
+export function classes() {
     return (node) => {
 	for (const one of arguments) {
 	    node.classList.add(one);

@@ -1,6 +1,6 @@
 import * as Controller from "./airss_controller.js";
 import {Assets} from "./assets.js";
-import {replay, hook, elem, text, fill, attr, class_list, graft, if_only} from "./domfun.js";
+import {replay, hook, elem, text, fill, attr, classes, graft, if_only} from "./domfun.js";
 
 export const Subscribe = {
     feedUrl: "feedUrl"
@@ -122,7 +122,7 @@ function body(state) {
     return [
 	graft(DOM.progressBar, progressBar(state)),
 	elem("div", [
-	    class_list("viewport"),
+	    classes("viewport"),
 	    hook("touchstart", Controller.touchStartEvent),
 	    hook("touchmove", Controller.touchMoveEvent),
 	    graft(DOM.alertBox, alert(state)),
@@ -134,14 +134,16 @@ function body(state) {
 }
 
 function progressBar(state) {
-    return state.loading ? class_list("progress-bar") : [];
+    if (!state.loading)
+	return [];
+    return elem("div", classes("progress-bar"));
 }
 
 function footer(state) {
     return [
-	class_list("footer"),
+	classes("footer"),
 	elem("div", [
-	    class_list("left-half"),
+	    classes("left-half"),
 	    elem("a", [
 		attr({
 		    href: "https://roastidio.us/roast",
@@ -151,7 +153,7 @@ function footer(state) {
 	    ]),
 	]),
 	elem("div", [
-	    class_list("right-half"),
+	    classes("right-half"),
 	    elem("a", [
 		attr({
 		    href: "https://github.com/derek-zhou/airss",
@@ -173,39 +175,36 @@ function application(state) {
 function navbar(state) {
     return [
 	elem("div", [
-	    class_list("navbar"),
+	    classes("navbar"),
 	    elem("div", [
 		elem("a", [
 		    attr({href: "index.html"}),
-		    elem("img", [
-			attr({src: Assets.logoImage}),
-			class_list("logo")
-		    ]),
+		    elem("img", [attr({src: Assets.logoImage, class: "logo"})]),
 		]),
 		elem("span", [
-		    class_list("info"),
+		    classes("info"),
 		    text(`${state.cursor+1}/${state.length}`)
 		])
 	    ]),
 	    elem("div", [
-		class_list("toolbar"),
+		classes("toolbar"),
 		elem("button", [
-		    class_list("button"),
+		    classes("button"),
 		    hook("click", Controller.clickConfigEvent),
 		    text("🔧")
 		]),
 		elem("button", [
-		    class_list("button"),
+		    classes("button"),
 		    hook("click", Controller.clickSubscribeEvent),
 		    text("🍼")
 		]),
 		elem("button", [
-		    class_list("button"),
+		    classes("button"),
 		    hook("click", Controller.clickLeftEvent),
 		    text("◀")
 		]),
 		elem("button", [
-		    class_list("button"),
+		    classes("button"),
 		    hook("click", Controller.clickRightEvent),
 		    text("▶")
 		])
@@ -218,7 +217,7 @@ function alert(state) {
     if (state.alert.text == "")
 	return [];
     return elem("p", [
-	class_list("alert", alertClass(state.alert.type)),
+	classes("alert", alertClass(state.alert.type)),
 	hook("click", Controller.clickAlertEvent),
 	text(state.alert.text)
     ]);
@@ -248,16 +247,16 @@ function reload_dialog(state) {
 function subscribe_dialog(state) {
     return custom_form(Controller.submitSubscribeEvent, Controller.resetDialogEvent, [
 	elem("div", [
-	    class_list("field", "long"),
+	    classes("field", "long"),
 	    elem("label", [
 		text("The URL to the feed or the index page:"),
 		elem("input", [
 		    attr({
 			type: "text",
+			class: "long",
 			name: Subscribe.feedUrl,
 			placeholder: "enter the url to subscribe"
-		    }),
-		    class_list("long")
+		    })
 		])
 	    ])
 	])
@@ -267,15 +266,15 @@ function subscribe_dialog(state) {
 function trash_dialog(state) {
     return custom_form(Controller.submitTrashEvent, Controller.resetDialogEvent, [
 	elem("p", [
-	    class_list("line"),
+	    classes("line"),
 	    text("Are you sure you want to delete this item?")
 	]),
 	elem("div", [
-	    class_list("field"),
+	    classes("field"),
 	    elem("label", [
 		text("Unsubscribe "),
 		elem("span", [
-		    class_list("focus"),
+		    classes("focus"),
 		    text(state.currentItem.feedTitle)
 		]),
 		text(" too"),
@@ -294,7 +293,7 @@ function trash_dialog(state) {
 function config_dialog(state) {
     return custom_form(Controller.submitConfigEvent, Controller.resetDialogEvent, [
 	elem("div", [
-	    class_list("field", "long"),
+	    classes("field", "long"),
 	    elem("label", [
 		text("Load more when unread items is below:"),
 		elem("select", [
@@ -304,7 +303,7 @@ function config_dialog(state) {
 	    ])
 	]),
 	elem("div", [
-	    class_list("field", "long"),
+	    classes("field", "long"),
 	    elem("label", [
 		text("Between reloading a feed, wait at least:"),
 		elem("select", [
@@ -314,7 +313,7 @@ function config_dialog(state) {
 	    ])
 	]),
 	elem("div", [
-	    class_list("field", "long"),
+	    classes("field", "long"),
 	    elem("label", [
 		text("Keep read items in the database for:"),
 		elem("select", [
@@ -324,7 +323,7 @@ function config_dialog(state) {
 	    ])
 	]),
 	elem("div", [
-	    class_list("field", "long"),
+	    classes("field", "long"),
 	    elem("label", [
 		text("Keep in the database at most per feed:"),
 		elem("select", [
@@ -334,7 +333,7 @@ function config_dialog(state) {
 	    ])
 	]),
 	elem("div", [
-	    class_list("field", "long"),
+	    classes("field", "long"),
  	    elem("label", [
 		text("Truncate each feed while loading to at most:"),
 		elem("select", [
@@ -344,7 +343,7 @@ function config_dialog(state) {
 	    ])
 	]),
 	elem("div", [
-	    class_list("field", "long"),
+	    classes("field", "long"),
 	    elem("label", [
 		elem("span", [
 		    text("Load feeds with roastidio.us ("),
@@ -364,20 +363,19 @@ function config_dialog(state) {
 	    ])
 	]),
 	elem("div", [
-	    class_list("field", "long"),
+	    classes("field", "long"),
 	    elem("label", [
 		text("Restore feeds from:"),
 		elem("input", [
-		    attr({type: "text", name: Config.restoreHandle}),
-		    class_list("short", "code")
+		    attr({type: "text", name: Config.restoreHandle, class:"short code"})
 		]),
 		savedHandlePrompt(state)
 	    ])
 	]),
 	elem("div", [
-	    class_list("field", "long"),
+	    classes("field", "long"),
 	    elem("label", [
-		class_list("alert", "alert-danger"),
+		classes("alert", "alert-danger"),
 		text("Danger! Type \"clear database\" to delete all data"),
 		elem("input", attr({type: "text", name: Config.clearDatabase}))
 	    ])
@@ -391,7 +389,7 @@ function savedHandlePrompt(state) {
     return [
 	text("Your feeds were saved to: "),
 	elem("span", [
-	    class_list("code"),
+	    classes("code"),
 	    text(state.postHandle)
 	])
     ];
@@ -461,7 +459,7 @@ function custom_form(submit_action, reset_action, inner) {
 	if_only(reset_action, hook("reset", reset_action)),
 	elem("section", inner),
 	elem("div", [
-	    class_list("toolbar"),
+	    classes("toolbar"),
 	    submit_button(),
 	    if_only(reset_action, reset_button())
 	])
@@ -469,11 +467,11 @@ function custom_form(submit_action, reset_action, inner) {
 }
 
 function submit_button() {
-    return elem("input", [attr({type: "submit", value: "👌"}), class_list("button")]);
+    return elem("input", [attr({type: "submit", value: "👌", class: "button"})]);
 }
 
 function reset_button() {
-    return elem("input", [attr({type: "reset", value: "👎"}), class_list("button")]);
+    return elem("input", [attr({type: "reset", value: "👎", class: "button"})]);
 }
 
 function article(state) {
@@ -485,9 +483,9 @@ function article(state) {
 
     if (item) {
 	return [
-	    class_list("article-viewport"),
+	    classes("article-viewport"),
 	    elem("div", [
-		class_list("article-container"),
+		classes("article-container"),
 		article_head(item),
 		elem("div", article_content(item))
 	    ]),
@@ -495,9 +493,9 @@ function article(state) {
 	];
     } else {
 	return [
-	    class_list("article-viewport"),
+	    classes("article-viewport"),
 	    elem("div", [
-		class_list("article-container"),
+		classes("article-container"),
 		elem("div", dummy_article())
 	    ])
 	];
@@ -517,7 +515,7 @@ function article_image(item) {
     const hero_class = item.imageUrl ? "article-hero" : "article-antihero";
 
     return elem("div", [
-	class_list(hero_class),
+	classes(hero_class),
 	elem("a", [
 	    attr({href: item.url, target: "_blank", rel: "noopener noreferrer"}),
 	    elem("img", [attr({src: imageUrl, alt: "thumbnail"})])
@@ -527,10 +525,10 @@ function article_image(item) {
 
 function article_title(item) {
     if (dummy(item)) {
-	return [elem("h4", [class_list("article-title"), text(item.title)])];
+	return [elem("h4", [classes("article-title"), text(item.title)])];
     } else {
 	return elem("h4", [
-	    class_list("article-title"),
+	    classes("article-title"),
 	    elem("a", [
 		attr({href: item.url, target: "_blank", rel: "noopener noreferrer"}),
 		text(item.title)
@@ -541,7 +539,7 @@ function article_title(item) {
 
 function article_byline(item) {
     return elem("h5", [
-	class_list("article-byline"),
+	classes("article-byline"),
 	elem("span", text(item.feedTitle)),
 	elem("span", text(" | ")),
 	elem("span", text(item.datePublished.toLocaleString()))
@@ -551,17 +549,17 @@ function article_byline(item) {
 function article_tail(item) {
     if (dummy(item)) {
 	return elem("form", [
-	    class_list("comment-form"),
-	    elem("div", [class_list("toolbar"), trash_button()])
+	    classes("comment-form"),
+	    elem("div", [classes("toolbar"), trash_button()])
 	]);
     }
     return elem("form", [
 	attr({
 	    method: "post",
 	    action: "https://roastidio.us/post",
-	    target: "_blank"
+	    target: "_blank",
+	    class: "comment-form"
 	}),
-	class_list("comment-form"),
 	elem("input", attr({type: "hidden", name: "url", value: item.url})),
 	elem("textarea", [
 	    attr({name: "content"}),
@@ -569,7 +567,7 @@ function article_tail(item) {
 	    hook("input", autoAdjustHeight)
 	]),
 	elem("div", [
-	    class_list("toolbar"),
+	    classes("toolbar"),
 	    trash_button(),
 	    refresh_button(),
 	    roast_button()
@@ -579,7 +577,7 @@ function article_tail(item) {
 
 function trash_button() {
     return elem("button", [
-	class_list("button"),
+	classes("button"),
 	hook("click", Controller.clickTrashEvent),
 	text("🗑 ")
     ]);
@@ -587,19 +585,19 @@ function trash_button() {
 
 function refresh_button() {
     return elem("button", [
-	class_list("button"),
+	classes("button"),
 	hook("click", Controller.clickRefreshEvent),
 	text("📃")
     ]);
 }
 
 function roast_button() {
-    return elem("input", [attr({type: "submit", value: "🔥"}), class_list("button")]);
+    return elem("input", [attr({type: "submit", value: "🔥", class:"button"})]);
 }
 
 function article_content(item) {
     return [
-	class_list("content-html"),
+	classes("content-html"),
 	fill(item.contentHtml),
 	if_only(!dummy(item), (node) => fixup_links(node, item.url))
     ];
@@ -607,7 +605,7 @@ function article_content(item) {
 
 function dummy_article() {
     return [
-	class_list("content-html"),
+	classes("content-html"),
 	elem("h2", text("No news is bad news")),
 	elem("p", [
 	    text("Airss is a web feed reader that runs entirely in your browser. You can subscribe any feeds by clicking the 🍼 button from above and paste the URL, or you can use of one of the following tricks: ")
@@ -617,9 +615,9 @@ function dummy_article() {
 	    text("Install this bookmarklet "),
 	    elem("a", [
 		attr({
-		    href: "javascript:location.href='{airssPrefix}?url='+encodeURIComponent(window.location.href)"
+		    href: "javascript:location.href='{airssPrefix}?url='+encodeURIComponent(window.location.href)",
+		    class: "button"
 		}),
-		class_list("button"),
 		text(" Subscribe it in Airss")
 	    ]),
 	    text(" "),
