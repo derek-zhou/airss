@@ -153,12 +153,12 @@ export function touchMoveEvent(e) {
 		/* left swipe */
 		e.preventDefault();
 		actionPreamble();
-		Model.backwardItem();
+		Model.forwardItem();
 	    } else {
 		/* right swipe */
 		e.preventDefault();
 		actionPreamble();
-		Model.forwardItem();
+		Model.backwardItem();
 	    }
 	}
     }
