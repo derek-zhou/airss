@@ -447,7 +447,8 @@ function truncate_items_per_feed_options() {
 function build_options(options, default_value) {
     return options.map((each) =>
 	elem("option", [
-	    attr({selected: each.value == default_value, value: each.value}),
+	    attr({value: each.value}),
+	    each.value == default_value ? attr({selected: true}) : [],
 	    text(each.text)
 	])
     );
