@@ -119,7 +119,7 @@ async function allUrlsOfFeed(db, feedId) {
     let itemSet = Feeds.itemsOf(feedId);
     for (let id of itemSet.values()) {
 	let item = await getObject(db, Store, id);
-	if (!isDummyItem(item))
+	if (item && !isDummyItem(item))
 	    list.push(item.url);
     }
     return list;
