@@ -1,6 +1,6 @@
 import * as Controller from "./airss_controller.js";
 import {Assets} from "./assets.js";
-import {replay, hook, elem, text, fill, attr, classes, graft, if_only} from "./domfun.js";
+import {replay, hook, elem, text, fill, attr, cl, graft} from "./domfun.js";
 
 export const Subscribe = {
     feedUrl: "feedUrl"
@@ -122,7 +122,7 @@ function body(state) {
     return [
 	graft(DOM.progressBar, progressBar(state)),
 	elem("div", [
-	    classes("viewport"),
+	    cl("viewport"),
 	    hook("touchstart", Controller.touchStartEvent),
 	    hook("touchmove", Controller.touchMoveEvent),
 	    graft(DOM.alertBox, alert(state)),
@@ -134,16 +134,14 @@ function body(state) {
 }
 
 function progressBar(state) {
-    if (!state.loading)
-	return [];
-    return elem("div", classes("progress-bar"));
+    return state.loading ? cl("progress-bar") : [];
 }
 
 function footer(state) {
     return [
-	classes("footer"),
+	cl("footer"),
 	elem("div", [
-	    classes("left-half"),
+	    cl("left-half"),
 	    elem("a", [
 		attr({
 		    href: "https://roastidio.us/roast",
@@ -153,7 +151,7 @@ function footer(state) {
 	    ]),
 	]),
 	elem("div", [
-	    classes("right-half"),
+	    cl("right-half"),
 	    elem("a", [
 		attr({
 		    href: "https://github.com/derek-zhou/airss",
@@ -175,36 +173,36 @@ function application(state) {
 function navbar(state) {
     return [
 	elem("div", [
-	    classes("navbar"),
+	    cl("navbar"),
 	    elem("div", [
 		elem("a", [
 		    attr({href: "index.html"}),
-		    elem("img", [attr({src: Assets.logoImage, class: "logo"})]),
+		    elem("img", attr({src: Assets.logoImage, class: "logo"})),
 		]),
 		elem("span", [
-		    classes("info"),
+		    cl("info"),
 		    text(`${state.cursor+1}/${state.length}`)
 		])
 	    ]),
 	    elem("div", [
-		classes("toolbar"),
+		cl("toolbar"),
 		elem("button", [
-		    classes("button"),
+		    cl("button"),
 		    hook("click", Controller.clickConfigEvent),
 		    text("🔧")
 		]),
 		elem("button", [
-		    classes("button"),
+		    cl("button"),
 		    hook("click", Controller.clickSubscribeEvent),
 		    text("🍼")
 		]),
 		elem("button", [
-		    classes("button"),
+		    cl("button"),
 		    hook("click", Controller.clickLeftEvent),
 		    text("◀")
 		]),
 		elem("button", [
-		    classes("button"),
+		    cl("button"),
 		    hook("click", Controller.clickRightEvent),
 		    text("▶")
 		])
@@ -217,7 +215,7 @@ function alert(state) {
     if (state.alert.text == "")
 	return [];
     return elem("p", [
-	classes("alert", alertClass(state.alert.type)),
+	cl("alert", alertClass(state.alert.type)),
 	hook("click", Controller.clickAlertEvent),
 	text(state.alert.text)
     ]);
@@ -247,7 +245,7 @@ function reload_dialog(state) {
 function subscribe_dialog(state) {
     return custom_form(Controller.submitSubscribeEvent, Controller.resetDialogEvent, [
 	elem("div", [
-	    classes("field", "long"),
+	    cl("field", "long"),
 	    elem("label", [
 		text("The URL to the feed or the index page:"),
 		elem("input", [
@@ -266,15 +264,15 @@ function subscribe_dialog(state) {
 function trash_dialog(state) {
     return custom_form(Controller.submitTrashEvent, Controller.resetDialogEvent, [
 	elem("p", [
-	    classes("line"),
+	    cl("line"),
 	    text("Are you sure you want to delete this item?")
 	]),
 	elem("div", [
-	    classes("field"),
+	    cl("field"),
 	    elem("label", [
 		text("Unsubscribe "),
 		elem("span", [
-		    classes("focus"),
+		    cl("focus"),
 		    text(state.currentItem.feedTitle)
 		]),
 		text(" too"),
@@ -293,7 +291,7 @@ function trash_dialog(state) {
 function config_dialog(state) {
     return custom_form(Controller.submitConfigEvent, Controller.resetDialogEvent, [
 	elem("div", [
-	    classes("field", "long"),
+	    cl("field", "long"),
 	    elem("label", [
 		text("Load more when unread items is below:"),
 		elem("select", [
@@ -303,7 +301,7 @@ function config_dialog(state) {
 	    ])
 	]),
 	elem("div", [
-	    classes("field", "long"),
+	    cl("field", "long"),
 	    elem("label", [
 		text("Between reloading a feed, wait at least:"),
 		elem("select", [
@@ -313,7 +311,7 @@ function config_dialog(state) {
 	    ])
 	]),
 	elem("div", [
-	    classes("field", "long"),
+	    cl("field", "long"),
 	    elem("label", [
 		text("Keep read items in the database for:"),
 		elem("select", [
@@ -323,7 +321,7 @@ function config_dialog(state) {
 	    ])
 	]),
 	elem("div", [
-	    classes("field", "long"),
+	    cl("field", "long"),
 	    elem("label", [
 		text("Keep in the database at most per feed:"),
 		elem("select", [
@@ -333,7 +331,7 @@ function config_dialog(state) {
 	    ])
 	]),
 	elem("div", [
-	    classes("field", "long"),
+	    cl("field", "long"),
  	    elem("label", [
 		text("Truncate each feed while loading to at most:"),
 		elem("select", [
@@ -343,7 +341,7 @@ function config_dialog(state) {
 	    ])
 	]),
 	elem("div", [
-	    classes("field", "long"),
+	    cl("field", "long"),
 	    elem("label", [
 		elem("span", [
 		    text("Load feeds with roastidio.us ("),
@@ -363,7 +361,7 @@ function config_dialog(state) {
 	    ])
 	]),
 	elem("div", [
-	    classes("field", "long"),
+	    cl("field", "long"),
 	    elem("label", [
 		text("Restore feeds from:"),
 		elem("input", [
@@ -373,9 +371,9 @@ function config_dialog(state) {
 	    ])
 	]),
 	elem("div", [
-	    classes("field", "long"),
+	    cl("field", "long"),
 	    elem("label", [
-		classes("alert", "alert-danger"),
+		cl("alert", "alert-danger"),
 		text("Danger! Type \"clear database\" to delete all data"),
 		elem("input", attr({type: "text", name: Config.clearDatabase}))
 	    ])
@@ -389,7 +387,7 @@ function savedHandlePrompt(state) {
     return [
 	text("Your feeds were saved to: "),
 	elem("span", [
-	    classes("code"),
+	    cl("code"),
 	    text(state.postHandle)
 	])
     ];
@@ -448,7 +446,7 @@ function build_options(options, default_value) {
     return options.map((each) =>
 	elem("option", [
 	    attr({value: each.value}),
-	    if_only(each.value == default_value, attr({selected: true})),
+	    each.value == default_value ? attr({selected: true}) : [],
 	    text(each.text)
 	])
     );
@@ -457,12 +455,12 @@ function build_options(options, default_value) {
 function custom_form(submit_action, reset_action, inner) {
     return elem("form", [
 	hook("submit", submit_action),
-	if_only(reset_action, hook("reset", reset_action)),
+	reset_action ? hook("reset", reset_action) : [],
 	elem("section", inner),
 	elem("div", [
-	    classes("toolbar"),
+	    cl("toolbar"),
 	    submit_button(),
-	    if_only(reset_action, reset_button())
+	    reset_action ? reset_button() : []
 	])
     ]);
 }
@@ -483,13 +481,13 @@ function article(state) {
 	return [];
 
     return [
-	classes("article-viewport"),
+	cl("article-viewport"),
 	elem("div", [
-	    classes("article-container"),
-	    if_only(item, article_head(item)),
+	    cl("article-container"),
+	    item ? article_head(item) : [],
 	    elem("div", article_content(item))
 	]),
-	if_only(item, article_tail(item))
+	item ? article_tail(item) : []
     ];
 }
 
@@ -506,7 +504,7 @@ function article_image(item) {
     const hero_class = item.imageUrl ? "article-hero" : "article-antihero";
 
     return elem("div", [
-	classes(hero_class),
+	cl(hero_class),
 	elem("a", [
 	    attr({href: item.url, target: "_blank", rel: "noopener noreferrer"}),
 	    elem("img", [attr({src: imageUrl, alt: "thumbnail"})])
@@ -515,22 +513,24 @@ function article_image(item) {
 }
 
 function article_title(item) {
+    const title_text = text(item.title)
+
     return elem("h4", [
-	classes("article-title"),
-	dummy(item) ? text(item.title) : title_link(item)
+	cl("article-title"),
+	dummy(item) ? title_text : make_link(title_text, item.url)
     ]);
 }
 
-function title_link(item) {
+function make_link(inner, url) {
     return elem("a", [
-	attr({href: item.url, target: "_blank", rel: "noopener noreferrer"}),
-	text(item.title)
+	attr({href: url, target: "_blank", rel: "noopener noreferrer"}),
+	inner
     ]);
 }
 
 function article_byline(item) {
     return elem("h5", [
-	classes("article-byline"),
+	cl("article-byline"),
 	elem("span", text(item.feedTitle)),
 	elem("span", text(" | ")),
 	elem("span", text(item.datePublished.toLocaleString()))
@@ -540,8 +540,8 @@ function article_byline(item) {
 function article_tail(item) {
     if (dummy(item)) {
 	return elem("form", [
-	    classes("comment-form"),
-	    elem("div", [classes("toolbar"), trash_button()])
+	    cl("comment-form"),
+	    elem("div", [cl("toolbar"), trash_button()])
 	]);
     }
     return elem("form", [
@@ -558,7 +558,7 @@ function article_tail(item) {
 	    hook("input", autoAdjustHeight)
 	]),
 	elem("div", [
-	    classes("toolbar"),
+	    cl("toolbar"),
 	    trash_button(),
 	    refresh_button(),
 	    roast_button()
@@ -568,7 +568,7 @@ function article_tail(item) {
 
 function trash_button() {
     return elem("button", [
-	classes("button"),
+	cl("button"),
 	hook("click", Controller.clickTrashEvent),
 	text("🗑 ")
     ]);
@@ -576,7 +576,7 @@ function trash_button() {
 
 function refresh_button() {
     return elem("button", [
-	classes("button"),
+	cl("button"),
 	hook("click", Controller.clickRefreshEvent),
 	text("📃")
     ]);
@@ -591,15 +591,15 @@ function article_content(item) {
 	return dummy_article();
 
     return [
-	classes("content-html"),
+	cl("content-html"),
 	fill(item.contentHtml),
-	if_only(!dummy(item), (node) => fixup_links(node, item.url))
+	dummy(item) ? [] : (node) => fixup_links(node, item.url)
     ];
 }
 
 function dummy_article() {
     return [
-	classes("content-html"),
+	cl("content-html"),
 	elem("h2", text("No news is bad news")),
 	elem("p", [
 	    text("Airss is a web feed reader that runs entirely in your browser. You can subscribe any feeds by clicking the 🍼 button from above and paste the URL, or you can use of one of the following tricks: ")

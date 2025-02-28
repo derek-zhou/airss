@@ -24,7 +24,7 @@ export function attr(attributes) {
     };
 }
 
-export function classes() {
+export function cl() {
     return (node) => {
 	for (const one of arguments) {
 	    node.classList.add(one);
@@ -46,12 +46,6 @@ export function elem(tag, script) {
     const element = document.createElement(tag);
     play(element, script);
     return append(element);
-}
-
-export function if_only(test, func) {
-    if (test)
-	return func;
-    return [];
 }
 
 function append(element) {
