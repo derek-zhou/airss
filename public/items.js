@@ -31,7 +31,7 @@ function unreadCount() {
 async function updateReadCount(db) {
     if (reading >= 0) {
 	let item = await getObject(db, Store, items[reading]);
-	if (!item.read) {
+	if (item && !item.read) {
 	    item.read = true;
 	    await putObject(db, Store, item);
 	    readCount ++;
@@ -74,6 +74,8 @@ async function deleteCurrentItem(db) {
     if (reading < 0)
 	return false;
     let item = await getObject(db, Store, items[reading]);
+    if (!item)
+	return false;
     if (item.read) {
 	readCount --;
     }
@@ -94,13 +96,13 @@ async function deleteAllItemsOfFeed(db, feedId) {
     for (let i = 0; i < items.length; i++) {
 	let id = items[i];
 	if (itemSet.has(id)) {
-	    let item = await getObject(db, Store, id);
-	    await deleteObject(db, Store, id);
-	    if (item.read) {
-		readCount --;
-	    }
 	    if (!above_reading)
 		reading_shrink ++;
+	    let item = await getObject(db, Store, id);
+	    if (item && item.read) {
+		readCount --;
+	    }
+	    await deleteObject(db, Store, id);
 	} else {
 	    after.push(id);
 	}
