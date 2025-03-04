@@ -57,8 +57,10 @@ function init() {
 function actionPreamble() {
     clearTimeout(idleTimeout);
     idleTimeout = setTimeout(timeoutShutdown, TimeoutPeriod);
-    state.alert.text = "";
-    View.render_alert(state);
+    if (state.alert.text != "") {
+	state.alert.text = "";
+	View.render_alert(state);
+    }
 }
 
 // shutdown the model layer. return a promise that reject
