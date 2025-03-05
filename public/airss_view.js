@@ -1,6 +1,6 @@
 import * as Controller from "./airss_controller.js";
 import {Assets} from "./assets.js";
-import {replay, hook, elem, text, fill, attr, cl, graft} from "./domfun.js";
+import {replay, hook, elem, shadow, text, fill, attr, cl, graft} from "./domfun.js";
 
 export const Subscribe = {
     feedUrl: "feedUrl"
@@ -485,7 +485,7 @@ function article(state) {
 	elem("div", [
 	    cl("article-container"),
 	    item ? article_head(item) : [],
-	    elem("div", article_content(item))
+	    shadow("div", [article_content(item), article_style()])
 	]),
 	item ? article_tail(item) : []
     ];
@@ -586,12 +586,18 @@ function roast_button() {
     return elem("input", [attr({type: "submit", value: "🔥", class:"button"})]);
 }
 
+function article_style() {
+    return [
+	elem("link", attr({rel: "stylesheet", href: "preflight.css"})),
+	elem("link", attr({rel: "stylesheet", href: "article.css"}))
+    ];
+}
+
 function article_content(item) {
     if (!item)
 	return dummy_article();
 
     return [
-	cl("content-html"),
 	fill(item.contentHtml),
 	dummy(item) ? [] : (node) => fixup_links(node, item.url)
     ];
@@ -599,7 +605,6 @@ function article_content(item) {
 
 function dummy_article() {
     return [
-	cl("content-html"),
 	elem("h2", text("No news is bad news")),
 	elem("p", [
 	    text("Airss is a web feed reader that runs entirely in your browser. You can subscribe any feeds by clicking the 🍼 button from above and paste the URL, or you can use of one of the following tricks: ")

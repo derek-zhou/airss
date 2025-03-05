@@ -48,6 +48,14 @@ export function elem(tag, script) {
     return append(element);
 }
 
+export function shadow(tag, script) {
+    const element = document.createElement(tag);
+    // close shadow root because we are not going to mess with it afterward
+    const shadow_root = element.attachShadow({ mode: "closed" });
+    play(shadow_root, script);
+    return append(element);
+}
+
 function append(element) {
     return (node) => {
 	node.append(element);
