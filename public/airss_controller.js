@@ -9,9 +9,12 @@ import * as View from './airss_view.js';
 
 // timeout for the model to shutdown itself for inactivity
 const TimeoutPeriod = 3600 * 1000;
+const PaintDelay = 4;
 
 // watchdog to shutdown the backend when idel long enough
 let idleTimeout = setTimeout(timeoutShutdown, TimeoutPeriod);
+
+let paintTimeout = null;
 
 // screen is fundimental content shown in the window
 export const Screens = {
@@ -36,9 +39,9 @@ function init() {
 	    type: "info"
 	}
     };
-    View.render_all(state);
     window.application_state = state;
     Model.init();
+    dirty();
     // do I have a incoming api call to subscribe a feed
     if (location.search) {
 	let params = new URLSearchParams(location.search.substring(1));
@@ -54,63 +57,68 @@ function init() {
     }
 }
 
+function dirty() {
+    if (!paintTimeout) {
+	paintTimeout = setTimeout(timeoutPaint, PaintDelay);
+    }
+}
+
+function timeoutPaint() {
+    paintTimeout = null;
+    window.scrollTo({top: 0});
+    View.render(state);
+}
+
 function actionPreamble() {
     clearTimeout(idleTimeout);
     idleTimeout = setTimeout(timeoutShutdown, TimeoutPeriod);
-    if (state.alert.text != "") {
-	state.alert.text = "";
-	View.render_alert(state);
-    }
+    state.alert.text = "";
+    dirty();
 }
 
 // shutdown the model layer. return a promise that reject
 // when everything shutdown
 function timeoutShutdown() {
-    clearTimeout(idleTimeout);
     Model.shutdown("info", "Shutdown due to inactivity");
 }
 
 export function itemsLoadedEvent(length, cursor) {
     state.length = length;
     state.cursor = cursor;
-    View.render_application(state);
+    dirty();
 }
 
 export function itemUpdatedEvent(item) {
     state.currentItem = item;
-    View.render_article(state);
-    if (item)
-	window.scrollTo({top: 0});
+    dirty();
 }
 
 export function alertEvent(type, text) {
     state.alert.type = type;
     state.alert.text = text;
-    View.render_alert(state);
-    if (text)
-	window.scrollTo({top: 0});
+    dirty();
 }
 
 export function shutDownEvent(type, text) {
     state.alert.type = type;
     state.alert.text = text;
     state.screen = Screens.shutdown;
-    View.render_all(state);
+    dirty();
 }
 
 export function startLoadingEvent() {
     state.loading = true;
-    View.render_progress_bar(state);
+    dirty();
 }
 
 export function stopLoadingEvent() {
     state.loading = false;
-    View.render_progress_bar(state);
+    dirty();
 }
 
 export function postHandleEvent(text) {
     state.postHandle = text;
-    View.render_application(state);
+    dirty();
 }
 
 document.addEventListener("keydown", (e) => {
@@ -200,7 +208,6 @@ export function clickConfigEvent(e) {
     // piggyback saving here
     Model.saveFeeds();
     state.screen = Screens.config;
-    View.render_all(state);
 }
 
 export function clickSubscribeEvent(e) {
@@ -209,7 +216,6 @@ export function clickSubscribeEvent(e) {
 	return;
     actionPreamble();
     state.screen = Screens.subscribe;
-    View.render_all(state);
 }
 
 export function clickTrashEvent(e) {
@@ -218,7 +224,6 @@ export function clickTrashEvent(e) {
 	return;
     actionPreamble();
     state.screen = Screens.trash;
-    View.render_all(state);
 }
 
 export function submitSubscribeEvent(e) {
@@ -229,7 +234,6 @@ export function submitSubscribeEvent(e) {
     let data = new FormData(e.currentTarget);
     Model.subscribe(data.get(View.Subscribe.feedUrl));
     state.screen = Screens.browse;
-    View.render_all(state);
 }
 
 export function resetDialogEvent(e) {
@@ -238,7 +242,6 @@ export function resetDialogEvent(e) {
 	return;
     actionPreamble();
     state.screen = Screens.browse;
-    View.render_all(state);
 }
 
 export function submitTrashEvent(e) {
@@ -254,7 +257,6 @@ export function submitTrashEvent(e) {
 	    Model.deleteItem();
     }
     state.screen = Screens.browse;
-    View.render_all(state);
 }
 
 export function submitConfigEvent(e) {
@@ -272,7 +274,6 @@ export function submitConfigEvent(e) {
     localStorage.setItem("BOUNCE_LOAD", data.get(View.Config.bounceLoad) || "false");
 
     state.screen = Screens.browse;
-    View.render_all(state);
 
     if (data.get(View.Config.clearDatabase) == "clear database") {
 	Model.clearData();

@@ -21,14 +21,6 @@ export const Config = {
     clearDatabase: "clearDatabase"
 };
 
-// permanent pointers into the DOM for partial replay
-const DOM = {
-    progressBar: document.createElement("div"),
-    alertBox: document.createElement("div"),
-    application: document.createElement("div"),
-    article: document.createElement("div")
-};
-
 /*
  * The view layer of AirSS.
  */
@@ -94,40 +86,20 @@ function alertClass(type) {
 }
 
 // render everything from scratch
-export function render_all(state) {
+export function render(state) {
     replay(document.body, body(state));
-}
-
-// render only the progress bar
-export function render_progress_bar(state) {
-    replay(DOM.progressBar, progressBar(state));
-}
-
-// render only the application container
-export function render_application(state) {
-    replay(DOM.application, application(state));
-}
-
-// render only the article container
-export function render_article(state) {
-    replay(DOM.article, article(state));
-}
-
-// render only the alert container
-export function render_alert(state) {
-    replay(DOM.alertBox, alert(state));
 }
 
 function body(state) {
     return [
-	graft(DOM.progressBar, progressBar(state)),
+	elem("div", progressBar(state)),
 	elem("div", [
 	    cl("viewport"),
 	    hook("touchstart", Controller.touchStartEvent),
 	    hook("touchmove", Controller.touchMoveEvent),
-	    graft(DOM.alertBox, alert(state)),
-	    graft(DOM.application, application(state)),
-	    graft(DOM.article, article(state)),
+	    elem("div", alert(state)),
+	    elem("div", application(state)),
+	    elem("div", article(state)),
 	    elem("div", footer(state))
 	])
     ];
