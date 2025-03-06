@@ -1,10 +1,13 @@
 // assets that I manage
 export var Assets = {
+    preflightCSS: "./preflight.css",
+    articleCSS: "./article.css",
+    dialogCSS: "./dialog.css",
     logoImage: "images/airss_logo.png",
     unknownLinkImage: "images/unknown_link.png"
 };
 
-// fetch erevything at startup and replace real URL with blob URL
+// fetch everything at startup and replace real URL with blob URL
 Object.keys(Assets).forEach((key) => {
     let link = Assets[key];
 

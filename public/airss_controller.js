@@ -4,8 +4,9 @@
  * The model founctions are encapsulated for use by the view layer
  */
 
+import {render} from './airss_view.js';
 import * as Model from './airss_model.js';
-import * as View from './airss_view.js';
+import {Subscribe, Trash, Config} from './dialog.js';
 
 // timeout for the model to shutdown itself for inactivity
 const TimeoutPeriod = 3600 * 1000;
@@ -66,7 +67,7 @@ function dirty() {
 function timeoutPaint() {
     paintTimeout = null;
     window.scrollTo({top: 0});
-    View.render(state);
+    render(state);
 }
 
 function actionPreamble() {
@@ -232,7 +233,7 @@ export function submitSubscribeEvent(e) {
 	return;
     actionPreamble();
     let data = new FormData(e.currentTarget);
-    Model.subscribe(data.get(View.Subscribe.feedUrl));
+    Model.subscribe(data.get(Subscribe.feedUrl));
     state.screen = Screens.browse;
 }
 
@@ -251,7 +252,7 @@ export function submitTrashEvent(e) {
     actionPreamble();
     if (state.currentItem) {
 	let data = new FormData(e.currentTarget);
-	if (data.get(View.Trash.shouldUnsubscribe))
+	if (data.get(Trash.shouldUnsubscribe))
 	    Model.unsubscribe(state.currentItem.feedId);
 	else
 	    Model.deleteItem();
@@ -266,20 +267,20 @@ export function submitConfigEvent(e) {
     actionPreamble();
     let data = new FormData(e.currentTarget);
     // configuration update
-    localStorage.setItem("WATER_MARK", data.get(View.Config.waterMark));
-    localStorage.setItem("MIN_RELOAD_WAIT", data.get(View.Config.minReloadWait));
-    localStorage.setItem("MAX_KEPT_PERIOD", data.get(View.Config.maxKeptPeriod));
-    localStorage.setItem("MAX_ITEMS_PER_FEED", data.get(View.Config.maxItemsPerFeed));
-    localStorage.setItem("TRUNCATE_ITEMS_PER_FEED", data.get(View.Config.truncateItemsPerFeed));
-    localStorage.setItem("BOUNCE_LOAD", data.get(View.Config.bounceLoad) || "false");
+    localStorage.setItem("WATER_MARK", data.get(Config.waterMark));
+    localStorage.setItem("MIN_RELOAD_WAIT", data.get(Config.minReloadWait));
+    localStorage.setItem("MAX_KEPT_PERIOD", data.get(Config.maxKeptPeriod));
+    localStorage.setItem("MAX_ITEMS_PER_FEED", data.get(Config.maxItemsPerFeed));
+    localStorage.setItem("TRUNCATE_ITEMS_PER_FEED", data.get(Config.truncateItemsPerFeed));
+    localStorage.setItem("BOUNCE_LOAD", data.get(Config.bounceLoad) || "false");
 
     state.screen = Screens.browse;
 
-    if (data.get(View.Config.clearDatabase) == "clear database") {
+    if (data.get(Config.clearDatabase) == "clear database") {
 	Model.clearData();
     }
-    if (data.get(View.Config.restoreHandle)) {
-	Model.restoreFeeds(data.get(View.Config.restoreHandle));
+    if (data.get(Config.restoreHandle)) {
+	Model.restoreFeeds(data.get(Config.restoreHandle));
     }
 }
 
