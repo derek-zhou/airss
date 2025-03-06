@@ -198,14 +198,18 @@ function dialog(state) {
     case Controller.Screens.browse:
 	return [];
     case Controller.Screens.trash:
-	return trash_dialog(state);
+	return shadow_dialog(trash_dialog(state));
     case Controller.Screens.config:
-	return config_dialog(state);
+	return shadow_dialog(config_dialog(state));
     case Controller.Screens.subscribe:
-	return subscribe_dialog(state);
+	return shadow_dialog(subscribe_dialog(state));
     default:
-	return reload_dialog(state);
+	return shadow_dialog(reload_dialog(state));
     }
+}
+
+function shadow_dialog(inner) {
+    return shadow("div", [inner, dialog_style()]);
 }
 
 function reload_dialog(state) {
@@ -556,6 +560,13 @@ function refresh_button() {
 
 function roast_button() {
     return elem("input", [attr({type: "submit", value: "🔥", class:"button"})]);
+}
+
+function dialog_style() {
+    return [
+	elem("link", attr({rel: "stylesheet", href: "preflight.css"})),
+	elem("link", attr({rel: "stylesheet", href: "dialog.css"}))
+    ];
 }
 
 function article_style() {

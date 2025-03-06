@@ -123,141 +123,6 @@ div.article-container {
     overflow-x: hidden;
 }
 
-form {
-    display: flex;
-    flex-direction: column;
-    background-color: rgb(249 250 251);
-    padding: 0.5rem;
-}
-form .line {
-    margin-bottom: 0.5rem;
-    display: flex;
-    width: 100%;
-    flex-direction: row;
-}
-form .line input[type=text] {
-    flex-grow: 1;
-}
-form .line input[type=email] {
-    flex-grow: 1;
-}
-form .field {
-    margin-bottom: 0.5rem;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    column-gap: 0.25rem;
-}
-form .long {
-    width: 100%;
-}
-form .center {
-    width: 100%;
-    text-align: center;
-}
-form hr {
-    margin-bottom: 0.5rem;
-    border-color: rgb(229 231 235);
-}
-form .button {
-    display: inline-block;
-    flex: none;
-    appearance: none;
-    border-radius: 0.25rem;
-    border-width: 0px;
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    text-align: center;
-    font-size: 1.125rem;
-    line-height: 1.75rem;
-    font-weight: 700;
-    background-color: rgb(147 51 234);
-    color: rgb(255 255 255);
-}
-form .button[type=reset] {
-    background-color: rgb(219 39 119);
-}
-form .button[type=submit] {
-    background-color: rgb(147 51 234);
-}
-form .toolbar {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    column-gap: 0.25rem;
-    padding-top: 0.5rem;
-}
-form section {
-    border-bottom-width: 1px;
-    padding-top: 0.5rem;
-}
-form section:last-child {
-    border-bottom-width: 0px;
-    padding-bottom: 0px;
-}
-form label {
-    display: flex;
-    column-gap: 0.5rem;
-}
-form label .focus {
-    font-weight: 700;
-    font-style: italic;
-}
-form select {
-    border-radius: 0.25rem;
-    border-width: 1px;
-    border-color: rgb(75 85 99);
-    padding-left: 0.25rem;
-}
-form .code {
-    font-family:
-	ui-monospace,
-	SFMono-Regular,
-	Menlo,
-	Monaco,
-	Consolas,
-	"Liberation Mono",
-	"Courier New",
-	monospace;
-}
-form input[type=number] {
-    width: 4rem;
-    border-radius: 0.25rem;
-    border-width: 1px;
-    border-color: rgb(75 85 99);
-    line-height: 1.625;
-}
-form input[type=text] {
-    width: 12rem;
-    border-radius: 0.25rem;
-    border-width: 1px;
-    border-color: rgb(75 85 99);
-    line-height: 1.625;
-}
-form input[type=text].long {
-    width: 20rem;
-}
-form input[type=text].short {
-    width: 6rem;
-}
-form input[type=email] {
-    width: 20rem;
-    border-radius: 0.25rem;
-    border-width: 1px;
-    border-color: rgb(75 85 99);
-    line-height: 1.625;
-}
-form input[type=password] {
-    width: 10rem;
-    border-radius: 0.25rem;
-    border-width: 1px;
-    border-color: rgb(147 51 234);
-    line-height: 1.625;
-}
 div.article-antihero {
     float: left;
     margin-right: 0.5rem;
@@ -287,13 +152,13 @@ h5.article-byline {
 h5.article-byline span {
     white-space: nowrap;
 }
-form.comment-form {
+form {
     place-self: end;
     background-color: rgb(255 255 255);
     padding: 0px;
     width: 100%;
 }
-form.comment-form textarea {
+form textarea {
       line-height: 1.625;
       border-width: 1px;
       border-radius: 0.25rem;
@@ -303,6 +168,31 @@ form.comment-form textarea {
       height: 5rem;
       padding: 0.25rem;
       width: 100%;
+}
+form .button {
+    display: inline-block;
+    flex: none;
+    appearance: none;
+    border-radius: 0.25rem;
+    border-width: 0px;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    text-align: center;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    font-weight: 700;
+    background-color: rgb(147 51 234);
+    color: rgb(255 255 255);
+}
+form .toolbar {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: 0.25rem;
+    padding-top: 0.5rem;
 }
 
 @media (min-width: 512px) {
@@ -335,13 +225,6 @@ form.comment-form textarea {
 @media (min-width: 1024px) {
     html {
 	font-size: 18px;
-    }
-    form section {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	justify-content: center;
-	column-gap: 1rem;
     }
     div.viewport {
 	max-width: 1024px;
