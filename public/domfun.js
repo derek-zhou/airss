@@ -48,11 +48,22 @@ export function elem(tag, script) {
     return append(element);
 }
 
-export function shadow(tag, script) {
-    const element = document.createElement(tag);
+// div is commonly used for layout
+export function div() {
+    const element = document.createElement("div");
+    for (const one of arguments) {
+	play(element, one);
+    }
+    return append(element);
+}
+
+export function shadow_div() {
+    const element = document.createElement("div");
     // close shadow root because we are not going to mess with it afterward
     const shadow_root = element.attachShadow({ mode: "closed" });
-    play(shadow_root, script);
+    for (const one of arguments) {
+	play(shadow_root, one);
+    }
     return append(element);
 }
 

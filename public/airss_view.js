@@ -1,6 +1,6 @@
 import * as Controller from "./airss_controller.js";
 import {Assets} from "./assets.js";
-import {replay, hook, elem, shadow, text, fill, attr, cl, graft} from "./domfun.js";
+import {replay, hook, elem, text, fill, attr, cl, div, shadow_div} from "./domfun.js";
 
 export const Subscribe = {
     feedUrl: "feedUrl"
@@ -92,16 +92,14 @@ export function render(state) {
 
 function body(state) {
     return [
-	elem("div", progressBar(state)),
-	elem("div", [
-	    cl("viewport"),
+	div(progressBar(state)),
+	div(cl("viewport"),
 	    hook("touchstart", Controller.touchStartEvent),
 	    hook("touchmove", Controller.touchMoveEvent),
-	    elem("div", alert(state)),
-	    elem("div", application(state)),
-	    elem("div", article(state)),
-	    elem("div", footer(state))
-	])
+	    div(alert(state)),
+	    div(application(state)),
+	    div(article(state)),
+	    div(footer(state)))
     ];
 }
 
@@ -112,26 +110,22 @@ function progressBar(state) {
 function footer(state) {
     return [
 	cl("footer"),
-	elem("div", [
-	    cl("left-half"),
+	div(cl("left-half"),
 	    elem("a", [
 		attr({
 		    href: "https://roastidio.us/roast",
 		    referrerpolicy: "no-referrer-when-downgrade"
 		}),
 		text("Roast me at Roastidious")
-	    ]),
-	]),
-	elem("div", [
-	    cl("right-half"),
+	    ])),
+	div(cl("right-half"),
 	    elem("a", [
 		attr({
 		    href: "https://github.com/derek-zhou/airss",
 		    referrerpolicy: "no-referrer-when-downgrade"
 		}),
 		text("Fork me on GitHub")
-	    ]),
-	])
+	    ]))
     ];
 }
 
@@ -144,20 +138,16 @@ function application(state) {
 
 function navbar(state) {
     return [
-	elem("div", [
-	    cl("navbar"),
-	    elem("div", [
-		elem("a", [
+	div(cl("navbar"),
+	    div(elem("a", [
 		    attr({href: "index.html"}),
 		    elem("img", attr({src: Assets.logoImage, class: "logo"})),
 		]),
 		elem("span", [
 		    cl("info"),
 		    text(`${state.cursor+1}/${state.length}`)
-		])
-	    ]),
-	    elem("div", [
-		cl("toolbar"),
+		])),
+	    div(cl("toolbar"),
 		elem("button", [
 		    cl("button"),
 		    hook("click", Controller.clickConfigEvent),
@@ -177,9 +167,7 @@ function navbar(state) {
 		    cl("button"),
 		    hook("click", Controller.clickRightEvent),
 		    text("▶")
-		])
-	    ])
-	])
+		])))
     ];
 }
 
@@ -198,18 +186,14 @@ function dialog(state) {
     case Controller.Screens.browse:
 	return [];
     case Controller.Screens.trash:
-	return shadow_dialog(trash_dialog(state));
+	return trash_dialog(state);
     case Controller.Screens.config:
-	return shadow_dialog(config_dialog(state));
+	return config_dialog(state);
     case Controller.Screens.subscribe:
-	return shadow_dialog(subscribe_dialog(state));
+	return subscribe_dialog(state);
     default:
-	return shadow_dialog(reload_dialog(state));
+	return reload_dialog(state);
     }
-}
-
-function shadow_dialog(inner) {
-    return shadow("div", [inner, dialog_style()]);
 }
 
 function reload_dialog(state) {
@@ -219,22 +203,20 @@ function reload_dialog(state) {
 }
 
 function subscribe_dialog(state) {
-    return custom_form(Controller.submitSubscribeEvent, Controller.resetDialogEvent, [
-	elem("div", [
-	    cl("field", "long"),
+    return custom_form(
+	Controller.submitSubscribeEvent,
+	Controller.resetDialogEvent,
+	div(cl("field", "long"),
 	    elem("label", [
 		text("The URL to the feed or the index page:"),
-		elem("input", [
-		    attr({
-			type: "text",
-			class: "long",
-			name: Subscribe.feedUrl,
-			placeholder: "enter the url to subscribe"
-		    })
-		])
-	    ])
-	])
-    ]);
+		elem("input",
+		     attr({
+			 type: "text",
+			 class: "long",
+			 name: Subscribe.feedUrl,
+			 placeholder: "enter the url to subscribe"
+		     }))
+	    ])));
 }
 
 function trash_dialog(state) {
@@ -243,8 +225,7 @@ function trash_dialog(state) {
 	    cl("line"),
 	    text("Are you sure you want to delete this item?")
 	]),
-	elem("div", [
-	    cl("field"),
+	div(cl("field"),
 	    elem("label", [
 		text("Unsubscribe "),
 		elem("span", [
@@ -259,65 +240,53 @@ function trash_dialog(state) {
 			checked: !dummy(state.currentItem)
 		    })
 		])
-	    ])
-	])
+	    ]))
     ]);
 }
 
 function config_dialog(state) {
     return custom_form(Controller.submitConfigEvent, Controller.resetDialogEvent, [
-	elem("div", [
-	    cl("field", "long"),
+	div(cl("field", "long"),
 	    elem("label", [
 		text("Load more when unread items is below:"),
 		elem("select", [
 		    attr({name: Config.waterMark}),
 		    water_mark_options()
 		])
-	    ])
-	]),
-	elem("div", [
-	    cl("field", "long"),
+	    ])),
+	div(cl("field", "long"),
 	    elem("label", [
 		text("Between reloading a feed, wait at least:"),
 		elem("select", [
 		    attr({name: Config.minReloadWait}),
 		    min_reload_wait_options()
 		])
-	    ])
-	]),
-	elem("div", [
-	    cl("field", "long"),
+	    ])),
+	div(cl("field", "long"),
 	    elem("label", [
 		text("Keep read items in the database for:"),
 		elem("select", [
 		    attr({name: Config.maxKeptPeriod}),
 		    max_kept_period_options()
 		])
-	    ])
-	]),
-	elem("div", [
-	    cl("field", "long"),
+	    ])),
+	div(cl("field", "long"),
 	    elem("label", [
 		text("Keep in the database at most per feed:"),
 		elem("select", [
 		    attr({name: Config.maxItemsPerFeed}),
 		    max_items_per_feed_options()
 		])
-	    ])
-	]),
-	elem("div", [
-	    cl("field", "long"),
+	    ])),
+	div(cl("field", "long"),
  	    elem("label", [
 		text("Truncate each feed while loading to at most:"),
 		elem("select", [
 		    attr({name: Config.truncateItemsPerFeed}),
 		    truncate_items_per_feed_options()
 		])
-	    ])
-	]),
-	elem("div", [
-	    cl("field", "long"),
+	    ])),
+	div(cl("field", "long"),
 	    elem("label", [
 		elem("span", [
 		    text("Load feeds with roastidio.us ("),
@@ -334,26 +303,21 @@ function config_dialog(state) {
 			checked: bounceLoadDefault()
 		    })
 		])
-	    ])
-	]),
-	elem("div", [
-	    cl("field", "long"),
+	    ])),
+	div(cl("field", "long"),
 	    elem("label", [
 		text("Restore feeds from:"),
 		elem("input", [
 		    attr({type: "text", name: Config.restoreHandle, class:"short code"})
 		]),
 		savedHandlePrompt(state)
-	    ])
-	]),
-	elem("div", [
-	    cl("field", "long"),
+	    ])),
+	div(cl("field", "long"),
 	    elem("label", [
 		cl("alert", "alert-danger"),
 		text("Danger! Type \"clear database\" to delete all data"),
 		elem("input", attr({type: "text", name: Config.clearDatabase}))
-	    ])
-	])
+	    ]))
     ]);
 }
 
@@ -429,16 +393,17 @@ function build_options(options, default_value) {
 }
 
 function custom_form(submit_action, reset_action, inner) {
-    return elem("form", [
-	hook("submit", submit_action),
-	reset_action ? hook("reset", reset_action) : [],
-	elem("section", inner),
-	elem("div", [
-	    cl("toolbar"),
-	    submit_button(),
-	    reset_action ? reset_button() : []
-	])
-    ]);
+    return shadow_div(
+	elem("form", [
+	    hook("submit", submit_action),
+	    reset_action ? hook("reset", reset_action) : [],
+	    elem("section", inner),
+	    div(cl("toolbar"),
+		submit_button(),
+		reset_action ? reset_button() : [])
+	]),
+	elem("link", attr({rel: "stylesheet", href: "preflight.css"})),
+	elem("link", attr({rel: "stylesheet", href: "dialog.css"})));
 }
 
 function submit_button() {
@@ -458,11 +423,11 @@ function article(state) {
 
     return [
 	cl("article-viewport"),
-	elem("div", [
-	    cl("article-container"),
+	div(cl("article-container"),
 	    item ? article_head(item) : [],
-	    shadow("div", [article_content(item), article_style()])
-	]),
+	    shadow_div(article_content(item),
+		   elem("link", attr({rel: "stylesheet", href: "preflight.css"})),
+		   elem("link", attr({rel: "stylesheet", href: "article.css"})))),
 	item ? article_tail(item) : []
     ];
 }
@@ -479,13 +444,11 @@ function article_image(item) {
     const imageUrl = item.imageUrl || Assets.unknownLinkImage;
     const hero_class = item.imageUrl ? "article-hero" : "article-antihero";
 
-    return elem("div", [
-	cl(hero_class),
-	elem("a", [
-	    attr({href: item.url, target: "_blank", rel: "noopener noreferrer"}),
-	    elem("img", [attr({src: imageUrl, alt: "thumbnail"})])
-	])
-    ]);
+    return div(cl(hero_class),
+	       elem("a", [
+		   attr({href: item.url, target: "_blank", rel: "noopener noreferrer"}),
+		   elem("img", [attr({src: imageUrl, alt: "thumbnail"})])
+	       ]));
 }
 
 function article_title(item) {
@@ -517,7 +480,7 @@ function article_tail(item) {
     if (dummy(item)) {
 	return elem("form", [
 	    cl("comment-form"),
-	    elem("div", [cl("toolbar"), trash_button()])
+	    div(cl("toolbar"), trash_button())
 	]);
     }
     return elem("form", [
@@ -533,12 +496,10 @@ function article_tail(item) {
 	    hook("keydown", stopPropagation),
 	    hook("input", autoAdjustHeight)
 	]),
-	elem("div", [
-	    cl("toolbar"),
+	div(cl("toolbar"),
 	    trash_button(),
 	    refresh_button(),
-	    roast_button()
-	])
+	    roast_button())
     ]);
 }
 
@@ -564,15 +525,6 @@ function roast_button() {
 
 function dialog_style() {
     return [
-	elem("link", attr({rel: "stylesheet", href: "preflight.css"})),
-	elem("link", attr({rel: "stylesheet", href: "dialog.css"}))
-    ];
-}
-
-function article_style() {
-    return [
-	elem("link", attr({rel: "stylesheet", href: "preflight.css"})),
-	elem("link", attr({rel: "stylesheet", href: "article.css"}))
     ];
 }
 
