@@ -66,13 +66,13 @@ function dirty() {
 
 function timeoutPaint() {
     paintTimeout = null;
-    window.scrollTo({top: 0});
     render(state);
 }
 
 function actionPreamble() {
     clearTimeout(idleTimeout);
     idleTimeout = setTimeout(timeoutShutdown, TimeoutPeriod);
+    window.scrollTo({top: 0});
     state.alert.text = "";
     dirty();
 }
@@ -97,6 +97,7 @@ export function itemUpdatedEvent(item) {
 export function alertEvent(type, text) {
     state.alert.type = type;
     state.alert.text = text;
+    window.scrollTo({top: 0});
     dirty();
 }
 
