@@ -9,6 +9,7 @@ import {replay, hook, elem, text, attr, cl, div} from "./domfun.js";
  */
 
 function stopPropagation(e) {
+    controller.forbid_render();
     e.stopImmediatePropagation();
 }
 
@@ -51,7 +52,6 @@ export function render(state) {
 
 function body(state) {
     return [
-	div(progressBar(state)),
 	div(cl("viewport"),
 	    hook("touchstart", Controller.touchStartEvent),
 	    hook("touchmove", Controller.touchMoveEvent),
@@ -60,10 +60,6 @@ function body(state) {
 	    div(article_container(state)),
 	    div(footer(state)))
     ];
-}
-
-function progressBar(state) {
-    return state.loading ? cl("progress-bar") : [];
 }
 
 function footer(state) {

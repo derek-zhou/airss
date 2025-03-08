@@ -11,15 +11,13 @@ import * as Items from './items.js';
 import * as Loader from './loader.js';
 
 // events I post to the controller
-import {alertEvent, itemsLoadedEvent, shutDownEvent, startLoadingEvent, stopLoadingEvent,
+import {alertEvent, itemsLoadedEvent, shutDownEvent,
 	itemUpdatedEvent, postHandleEvent} from "./airss_controller.js";
 
 // exported client side functions. all return promises or null
-export {init, currentState, shutdown, clearData, info, warn, error,
-	forwardItem, backwardItem, deleteItem, refreshItem,
-	subscribe, unsubscribe, loadingStart, loadingDone, updateItemText,
-	addFeed, deleteFeed, fetchFeed, updateFeed,
-	allFeedUrls, postHandle, saveFeeds, restoreFeeds};
+export {init, currentState, shutdown, clearData, info, warn, error,forwardItem, backwardItem,
+	deleteItem, refreshItem, subscribe, unsubscribe, updateItemText, addFeed, deleteFeed,
+	fetchFeed, updateFeed, allFeedUrls, postHandle, saveFeeds, restoreFeeds};
 
 /*
  * callback side state and entry points
@@ -69,7 +67,6 @@ async function cb_init(prev) {
     let item = await Items.getCurrentItem(db);
     itemsLoadedEvent(Items.length(), Items.readingCursor());
     itemUpdatedEvent(item);
-    stopLoadingEvent();
     await try_load();
 }
 
@@ -92,16 +89,6 @@ async function cb_info(prev, msg) {
 async function cb_warn(prev, msg) {
     await prev;
     alertEvent("warning", msg);
-}
-
-async function cb_loadingStart(prev) {
-    await prev;
-    startLoadingEvent();
-}
-
-async function cb_loadingDone(prev) {
-    await prev;
-    stopLoadingEvent();
 }
 
 async function cb_updateItemText(prev, text, id) {
@@ -430,16 +417,6 @@ function addFeed(feed) {
 // delete a feed by id
 function deleteFeed(id) {
     state = cb_deleteFeed(state, id);
-}
-
-// notify loading started
-function loadingStart() {
-    state = cb_loadingStart(state);
-}
-
-// notify loading is done
-function loadingDone() {
-    state = cb_loadingDone(state);
 }
 
 // notify item updated

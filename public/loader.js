@@ -32,20 +32,16 @@ const XMLFeedNameSet = new Set(['rss.xml', 'rss2.xml', 'atom.xml',
 async function cb_subscribe(prev, url) {
     await prev;
     try {
-	Model.loadingStart();
 	let feed = await sanitize(url);
 	if (!feed)
 	    Model.warn("Unauthorized. Please login to <a href=\""
 		       + BouncerRoot + "\">roastidio.us</a> then reload Airss");
-	Model.loadingDone();
     } catch (e) {
 	if (typeof e === 'string' || (e instanceof TypeError)) {
 	    Model.error("The feed '" + url + "' is not valid");
 	    console.error("The feed '" + url + "' is not valid: " + e);
-	    Model.loadingDone();
 	    return;
  	} else {
-	    Model.loadingDone();
 	    console.log("error");
 	    throw e;
 	}
@@ -55,21 +51,17 @@ async function cb_subscribe(prev, url) {
 async function cb_load(prev, obj) {
     await prev;
     try {
-	Model.loadingStart();
 	let ret = await loadFeed(obj.feed, obj.items);
 	if (ret)
 	    Model.updateFeed(ret.updated, ret.items);
 	else
 	    Model.warn("Unauthorized. Please login to <a href=\""
 		       + BouncerRoot + "\">roastidio.us</a> then reload Airss");
-	Model.loadingDone();
     } catch (e) {
 	if (typeof e === 'string' || (e instanceof TypeError)) {
 	    obj.feed.error = e.toString();
 	    Model.updateFeed(obj.feed, []);
-	    Model.loadingDone();
 	} else {
-	    Model.loadingDone();
 	    throw e;
 	}
     }
@@ -79,20 +71,16 @@ async function cb_reloadUrl(prev, url, id) {
     await prev;
     let bounceLoad = localStorage.getItem("BOUNCE_LOAD") != "false";
     try {
-	Model.loadingStart();
 	let response = await bufferReload(url);
 	if (response.status != 200) {
 	    Model.warn("Reloading of url: " + url + " failed with status: " + response.status);
-	    Model.loadingDone();
 	    return null;
 	}
 	let data = await response.text();
 	let text = bounceLoad ? data : Sanitizer.sanitizeHtml(data);
 	Model.updateItemText(text, id);
-	Model.loadingDone();
     } catch (e) {
 	Model.error("Reloading of url: " + url + " failed");
-	Model.loadingDone();
     }
 }
 
@@ -102,7 +90,6 @@ async function cb_saveFeeds(prev) {
     if (urls.length == 0)
 	return;
     try {
-	Model.loadingStart();
 	let response = await fetch(Stash, {
 	    method: "POST",
 	    headers: {
@@ -114,25 +101,20 @@ async function cb_saveFeeds(prev) {
 	});
 	if (response.status != 200) {
 	    Model.warn("Saving feeds failed with status: " + response.status);
-	    Model.loadingDone();
 	    return;
 	}
 	let data = await response.json();
 	Model.postHandle(data.handle);
-	Model.loadingDone();
     } catch (e) {
 	Model.error("Saving feeds failed");
-	Model.loadingDone();
     }
 }
 
 async function cb_restoreFeeds(prev, handle) {
     await prev;
     try {
-	Model.loadingStart();
 	let response = await fetch(Stash + "/" + handle, {mode: "cors"});
 	if (response.status != 200) {
-	    Model.loadingDone();
 	    Model.warn("warning", "Restoring feeds failed with status: " + response.status);
 	    return;
 	}
@@ -143,10 +125,8 @@ async function cb_restoreFeeds(prev, handle) {
 	    feed.lastLoadTime = 0;
 	    Model.addFeed(feed);
 	}
-	Model.loadingDone();
 	Model.info("Successfully restoring feeds.");
     } catch (e) {
-	Model.loadingDone();
 	Model.error("error", "Restoring feeds failed");
     }
 }

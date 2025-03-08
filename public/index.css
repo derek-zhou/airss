@@ -30,20 +30,6 @@ a:hover {
     color: rgb(185 28 28);
 }
 
-div.progress-bar {
-    position: fixed;
-    width: 100%;
-    left: 0px;
-    top: 0px;
-    z-index: 50;
-    height: 0.25rem;
-    background-color: rgb(67 56 202);
-    transition:
-        width 300ms ease-out,
-        opacity 150ms 150ms ease-in;
-    transform: translate3d(0, 0, 0);
-}
-
 div.viewport {
     position: relative;
     min-height: 100vh;

@@ -16,6 +16,7 @@ const PaintDelay = 4;
 let idleTimeout = setTimeout(timeoutShutdown, TimeoutPeriod);
 
 let paintTimeout = null;
+let can_render = true;
 
 // screen is fundimental content shown in the window
 export const Screens = {
@@ -34,7 +35,6 @@ function init() {
 	screen: Screens.browse,
 	length: 0,
 	cursor: -1,
-	loading: true,
 	alert: {
 	    text: "",
 	    type: "info"
@@ -59,7 +59,7 @@ function init() {
 }
 
 function dirty() {
-    if (!paintTimeout) {
+    if (!paintTimeout && can_render) {
 	paintTimeout = setTimeout(timeoutPaint, PaintDelay);
     }
 }
@@ -74,6 +74,8 @@ function actionPreamble() {
     idleTimeout = setTimeout(timeoutShutdown, TimeoutPeriod);
     window.scrollTo({top: 0});
     state.alert.text = "";
+    // user action restart render
+    can_render = true;
     dirty();
 }
 
@@ -81,6 +83,10 @@ function actionPreamble() {
 // when everything shutdown
 function timeoutShutdown() {
     Model.shutdown("info", "Shutdown due to inactivity");
+}
+
+export function forbid_render() {
+    can_render = false;
 }
 
 export function itemsLoadedEvent(length, cursor) {
@@ -108,16 +114,6 @@ export function shutDownEvent(type, text) {
     dirty();
 }
 
-export function startLoadingEvent() {
-    state.loading = true;
-    dirty();
-}
-
-export function stopLoadingEvent() {
-    state.loading = false;
-    dirty();
-}
-
 export function postHandleEvent(text) {
     state.postHandle = text;
     dirty();
@@ -140,6 +136,9 @@ document.addEventListener("keydown", (e) => {
 	actionPreamble();
 	Model.backwardItem();
 	break;
+    default:
+	// random keydown stop auto-rerender
+	can_render = false;
     }
 });
 
@@ -172,6 +171,9 @@ export function touchMoveEvent(e) {
 		actionPreamble();
 		Model.backwardItem();
 	    }
+	} else {
+	    // vertical swipe stop auto-render
+	    can_render = false;
 	}
     }
     /* reset values */
