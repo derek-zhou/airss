@@ -8,8 +8,8 @@ import {replay, hook, elem, text, attr, cl, div} from "./domfun.js";
  * The view layer of AirSS.
  */
 
-function stopPropagation(e) {
-    controller.forbid_render();
+function commentWriting(e) {
+    Controller.forbid_render();
     e.stopImmediatePropagation();
 }
 
@@ -216,7 +216,7 @@ function article_tail(item) {
 	elem("input", attr({type: "hidden", name: "url", value: item.url})),
 	elem("textarea", [
 	    attr({name: "content"}),
-	    hook("keydown", stopPropagation),
+	    hook("keydown", commentWriting),
 	    hook("input", autoAdjustHeight)
 	]),
 	div(cl("toolbar"),
