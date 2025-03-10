@@ -26,14 +26,6 @@ function dummy(item) {
     return tags.length == 1 && tags[0] == "_error";
 }
 
-function leftDisabled(state) {
-    return state.cursor <= 0 || state.screen != Controller.Screens.browse;
-}
-
-function rightDisabled(state) {
-    return state.cursor >= state.length - 1 || state.screen != Controller.Screens.browse;
-}
-
 function alertClass(type) {
     switch (type) {
     case "error":
@@ -146,7 +138,7 @@ function article_container(state) {
     return [
 	cl("article-viewport"),
 	div(cl("article-container"), article_head(item), article(item)),
-	article_tail(item)
+	article_tail(state)
     ];
 }
 
@@ -196,7 +188,9 @@ function article_byline(item) {
     ]);
 }
 
-function article_tail(item) {
+function article_tail(state) {
+    let item = state.currentItem;
+
     if (!item)
 	return [];
 
@@ -221,7 +215,7 @@ function article_tail(item) {
 	]),
 	div(cl("toolbar"),
 	    trash_button(),
-	    refresh_button(),
+	    refresh_button(state.refreshing),
 	    roast_button())
     ]);
 }
@@ -234,9 +228,10 @@ function trash_button() {
     ]);
 }
 
-function refresh_button() {
+function refresh_button(refreshing) {
     return elem("button", [
 	cl("button"),
+	refreshing ? attr({disabled: true}) : [],
 	hook("click", Controller.clickRefreshEvent),
 	text("📃")
     ]);

@@ -35,6 +35,7 @@ function init() {
 	screen: Screens.browse,
 	length: 0,
 	cursor: -1,
+	refreshing: false,
 	alert: {
 	    text: "",
 	    type: "info"
@@ -97,6 +98,7 @@ export function itemsLoadedEvent(length, cursor) {
 
 export function itemUpdatedEvent(item) {
     state.currentItem = item;
+    state.refreshing = false;
     dirty();
 }
 
@@ -294,6 +296,7 @@ export function clickRefreshEvent(e) {
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
+    state.refreshing = true;
     Model.refreshItem();
 }
 
