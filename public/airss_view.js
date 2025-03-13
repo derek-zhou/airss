@@ -8,8 +8,7 @@ import {replay, hook, elem, text, attr, cl, div} from "./domfun.js";
  * The view layer of AirSS.
  */
 
-function commentWriting(e) {
-    Controller.forbid_render();
+function stopPropagation(e) {
     e.stopImmediatePropagation();
 }
 
@@ -39,19 +38,16 @@ function alertClass(type) {
 
 // render everything from scratch
 export function render(state) {
-    replay(document.body, body(state));
-}
-
-function body(state) {
-    return [
-	div(cl("viewport"),
+    replay(
+	document.body, div(
+	    cl("viewport"),
 	    hook("touchstart", Controller.touchStartEvent),
 	    hook("touchmove", Controller.touchMoveEvent),
 	    div(alert(state)),
 	    div(application(state)),
 	    div(article_container(state)),
 	    div(footer(state)))
-    ];
+    );
 }
 
 function footer(state) {
@@ -210,7 +206,8 @@ function article_tail(state) {
 	elem("input", attr({type: "hidden", name: "url", value: item.url})),
 	elem("textarea", [
 	    attr({name: "content"}),
-	    hook("keydown", commentWriting),
+	    hook("keydown", stopPropagation),
+	    hook("focus", Controller.forbid_render),
 	    hook("input", autoAdjustHeight)
 	]),
 	div(cl("toolbar"),

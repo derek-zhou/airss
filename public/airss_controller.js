@@ -16,7 +16,15 @@ const PaintDelay = 4;
 let idleTimeout = setTimeout(timeoutShutdown, TimeoutPeriod);
 
 let paintTimeout = null;
-let can_render = true;
+
+const RenderState = {
+    clean: 0,
+    paused: 1,
+    dirty: 2,
+    dirty_paused: 3
+};
+
+let renderState = RenderState.clean;
 
 // screen is fundimental content shown in the window
 export const Screens = {
@@ -59,15 +67,58 @@ function init() {
     }
 }
 
-function dirty() {
-    if (!paintTimeout && can_render) {
+export function pause_render() {
+    switch (renderState) {
+    case RenderState.clean:
+	renderState = RenderState.paused;
+	break;
+    case RenderState.dirty:
+	clearTimeout(paintTimeout);
+	renderState = RenderState.dirty_paused;
+	break;
+    default:
+    }
+}
+
+export function resume_render() {
+    switch (renderState) {
+    case RenderState.paused:
+	renderState = RenderState.clean;
+	break;
+    case RenderState.dirty_paused:
 	paintTimeout = setTimeout(timeoutPaint, PaintDelay);
+	renderState = RenderState.dirty;
+	break;
+    default:
+    }
+}
+
+function force_dirty() {
+    switch (renderState) {
+    case RenderState.dirty:
+	break;
+    default:
+	paintTimeout = setTimeout(timeoutPaint, PaintDelay);
+	renderState = RenderState.dirty;
+    }
+}
+
+function dirty() {
+    switch (renderState) {
+    case RenderState.clean:
+	paintTimeout = setTimeout(timeoutPaint, PaintDelay);
+	renderState = RenderState.dirty;
+	break;
+    case RenderState.paused:
+	renderState = RenderState.dirty_paused;
+	break;
+    default:
     }
 }
 
 function timeoutPaint() {
-    paintTimeout = null;
     render(state);
+    renderState = RenderState.clean;
 }
 
 function actionPreamble() {
@@ -75,19 +126,13 @@ function actionPreamble() {
     idleTimeout = setTimeout(timeoutShutdown, TimeoutPeriod);
     window.scrollTo({top: 0});
     state.alert.text = "";
-    // user action restart render
-    can_render = true;
-    dirty();
+    force_dirty();
 }
 
 // shutdown the model layer. return a promise that reject
 // when everything shutdown
 function timeoutShutdown() {
     Model.shutdown("info", "Shutdown due to inactivity");
-}
-
-export function forbid_render() {
-    can_render = false;
 }
 
 export function itemsLoadedEvent(length, cursor) {
@@ -113,9 +158,7 @@ export function shutDownEvent(type, text) {
     state.alert.type = type;
     state.alert.text = text;
     state.screen = Screens.shutdown;
-    // shutdown restart render
-    can_render = true;
-    dirty();
+    force_dirty();
 }
 
 export function postHandleEvent(text) {
@@ -142,7 +185,7 @@ document.addEventListener("keydown", (e) => {
 	break;
     default:
 	// random keydown stop auto-rerender
-	can_render = false;
+	pause_render();
     }
 });
 
@@ -177,7 +220,7 @@ export function touchMoveEvent(e) {
 	    }
 	} else {
 	    // vertical swipe stop auto-render
-	    can_render = false;
+	    pause_render();
 	}
     }
     /* reset values */
