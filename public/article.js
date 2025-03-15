@@ -3,11 +3,16 @@ import {elem, text, fill, attr, shadow_div} from "./domfun.js";
 
 export function article(item) {
     return shadow_div(
-	item ? fill(item.contentHtml) : dummy_article(),
-	item ? (node) => fixup_links(node, item.url) : [],
-	elem("link", attr({rel: "stylesheet", href: Assets.preflightCSS})),
-	elem("link", attr({rel: "stylesheet", href: Assets.articleCSS}))
+	[Assets.preflightCSS, Assets.articleCSS],
+	item ? real_article(item) : dummy_article()
     );
+}
+
+function real_article(item) {
+    return [
+	fill(item.contentHtml),
+	(node) => fixup_links(node, item.url)
+    ];
 }
 
 function fixup_links(container, url) {

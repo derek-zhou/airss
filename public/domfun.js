@@ -57,12 +57,17 @@ export function div() {
     return append(element);
 }
 
-export function shadow_div() {
+export function shadow_div(styles, script) {
     const element = document.createElement("div");
     // close shadow root because we are not going to mess with it afterward
     const shadow_root = element.attachShadow({ mode: "closed" });
-    for (const one of arguments) {
-	play(shadow_root, one);
+    play(shadow_root, script);
+    // add links last but put in front
+    for (const one of styles.reverse()) {
+	const link = document.createElement("link");
+	link.setAttribute("rel", "stylesheet");
+	link.setAttribute("href", one);
+	shadow_root.prepend(link);
     }
     return append(element);
 }

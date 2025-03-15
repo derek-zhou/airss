@@ -234,6 +234,7 @@ function build_options(options, default_value) {
 
 function custom_form(submit_action, reset_action, inner) {
     return shadow_div(
+	[Assets.preflightCSS, Assets.dialogCSS],
 	elem("form", [
 	    hook("submit", submit_action),
 	    reset_action ? hook("reset", reset_action) : [],
@@ -241,9 +242,7 @@ function custom_form(submit_action, reset_action, inner) {
 	    div(cl("toolbar"),
 		submit_button(),
 		reset_action ? reset_button() : [])
-	]),
-	elem("link", attr({rel: "stylesheet", href: Assets.preflightCSS})),
-	elem("link", attr({rel: "stylesheet", href: Assets.dialogCSS}))
+	])
     );
 }
 
