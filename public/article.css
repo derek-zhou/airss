@@ -6,7 +6,7 @@
 	"Times New Roman",
 	Times,
 	serif;
-    margin-bottom: 0.5em;
+    margin-bottom: 0.5rem;
     line-height: 1.375;
     color: rgb(31 41 55);
 }
@@ -18,73 +18,73 @@ a:hover {
     color: rgb(75 85 99);
 }
 h1 {
-    margin-bottom: 1em;
+    margin-bottom: 1rem;
     text-align: center;
-    font-size: 1.5em;
+    font-size: 1.5rem;
     font-weight: 700;
     line-height: 1.625;
 }
 h2 {
-    margin-bottom: 0.75em;
-    font-size: 1.5em;
+    margin-bottom: 0.75rem;
+    font-size: 1.5rem;
     font-weight: 700;
     line-height: 1.625;
 }
 h3 {
-    margin-bottom: 0.5em;
-    font-size: 1.25em;
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     line-height: 1.625;
 }
 h4 {
-    margin-bottom: 0.25em;
-    font-size: 1.125em;
+    margin-bottom: 0.25rem;
+    font-size: 1.125rem;
     font-weight: 700;
     line-height: 1.625;
 }
 h5 {
-    margin-bottom: 0.25em;
+    margin-bottom: 0.25rem;
     font-weight: 700;
     text-transform: uppercase;
     line-height: 1.625;
 }
 h6 {
-    margin-bottom: 0.25em;
+    margin-bottom: 0.25rem;
     font-weight: 700;
     line-height: 1.625;
 }
 p {
-    margin-bottom: 1em;
+    margin-bottom: 1rem;
 }
 ol {
-    margin-bottom: 1em;
+    margin-bottom: 1rem;
     list-style-position: inside;
     list-style-type: decimal;
-    padding-left: 0.5em;
+    padding-left: 0.5rem;
 }
 ul {
-    margin-bottom: 1em;
+    margin-bottom: 1rem;
     list-style-position: inside;
     list-style-type: disc;
-    padding-left: 0.5em;
+    padding-left: 0.5rem;
 }
 figure {
-    margin-bottom: 1em;
+    margin-bottom: 1rem;
 }
 img {
     max-width: 100%;
 }
 textarea {
     width: 100%;
-    border-radius: 0.25em;
+    border-radius: 0.25rem;
     border-width: 1px;
     border-color: rgb(75 85 99);
-    padding: 0.25em;
-    font-size: 0.875em;
-    line-height: 1.25em;
+    padding: 0.25rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
 }
 table {
-    margin-bottom: 1em;
+    margin-bottom: 1rem;
     border-collapse: collapse;
     border-width: 2px;
     border-color: rgb(156 163 175);
@@ -93,7 +93,7 @@ table th,
 table td {
     border-width: 1px;
     border-color: rgb(156 163 175);
-    padding: 0.75em;
+    padding: 0.75rem;
     vertical-align: top;
 }
 table thead th {
@@ -104,17 +104,17 @@ table tr.odd {
     background-color: rgb(249 250 251);
 }
 blockquote {
-    margin-bottom: 1em;
+    margin-bottom: 1rem;
     border-left-width: 4px;
     border-color: rgb(156 163 175);
-    padding: 0.5em;
+    padding: 0.5rem;
 }
 blockquote p {
     margin-bottom: 0px;
 }
 pre {
     white-space: pre-wrap;
-    padding: 0.5em;
+    padding: 0.5rem;
 }
 pre > code {
     display: block;
@@ -123,37 +123,37 @@ pre > code {
 dd,
 dt,
 li {
-    margin-bottom: 0.25em;
+    margin-bottom: 0.25rem;
 }
 
 @media (min-width: 512px) {
     :host {
-	font-size: 1.125em;
+	font-size: 1.125rem;
 	line-height: 1.625;
     }
     h1 {
-	font-size: 1.875em;
-	line-height: 2.25em;
+	font-size: 1.875rem;
+	line-height: 2.25rem;
     }
     h2 {
-	font-size: 1.875em;
-	line-height: 2.25em;
+	font-size: 1.875rem;
+	line-height: 2.25rem;
     }
     h3 {
-	font-size: 1.5em;
-	line-height: 2em;
+	font-size: 1.5rem;
+	line-height: 2rem;
     }
     h4 {
-	font-size: 1.25em;
-	line-height: 1.75em;
+	font-size: 1.25rem;
+	line-height: 1.75rem;
     }
     img {
-	max-width: 28em;
+	max-width: 28rem;
     }
 }
 
 @media (min-width: 768px) {
     img {
-	max-width: 32em;
+	max-width: 32rem;
     }
 }
