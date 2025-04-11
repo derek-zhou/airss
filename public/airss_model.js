@@ -96,7 +96,7 @@ async function cb_clearData(prev) {
     db.close();
     db = null;
     await deleteDB("AirSS");
-    alertEvent("info", "Database deleted");
+    shutDownEvent("info", "Database deleted");
 }
 
 async function cb_refreshItem(prev) {
