@@ -12,12 +12,11 @@ import * as Loader from './loader.js';
 
 // events I post to the controller
 import {alertEvent, itemsLoadedEvent, shutDownEvent,
-	itemUpdatedEvent, postHandleEvent} from "./airss_controller.js";
+	itemUpdatedEvent} from "./airss_controller.js";
 
 // exported client side functions. all return promises or null
-export {init, currentState, shutdown, clearData, info, warn, error,forwardItem, backwardItem,
-	deleteItem, refreshItem, subscribe, unsubscribe, updateItemText, addFeed, deleteFeed,
-	fetchFeed, updateFeed, allFeedUrls, postHandle, saveFeeds, restoreFeeds};
+export {init, currentState, shutdown, clearData, forwardItem, backwardItem, deleteItem, addFeed,
+	refreshItem, unsubscribe, updateItemText, deleteFeed, fetchFeed, updateFeed, allFeedUrls};
 
 /*
  * callback side state and entry points
@@ -81,16 +80,6 @@ async function cb_shutdown(prev, type, msg) {
     shutDownEvent(type, msg);
 }
 
-async function cb_info(prev, msg) {
-    await prev;
-    alertEvent("info", msg);
-}
-
-async function cb_warn(prev, msg) {
-    await prev;
-    alertEvent("warning", msg);
-}
-
 async function cb_updateItemText(prev, text, id) {
     await prev;
     let item = await Items.getItem(db, id);
@@ -102,23 +91,12 @@ async function cb_updateItemText(prev, text, id) {
     }
 }
 
-async function cb_error(prev, msg) {
-    await prev;
-    alertEvent("error", msg);
-}
-
 async function cb_clearData(prev) {
     await prev;
     db.close();
     db = null;
     await deleteDB("AirSS");
     alertEvent("info", "Database deleted");
-}
-
-async function cb_subscribe(prev, url) {
-    await prev;
-    // we have to make sure init is done
-    Loader.subscribe(url);
 }
 
 async function cb_refreshItem(prev) {
@@ -321,21 +299,6 @@ async function cb_allFeedUrls(prev) {
     return Feeds.allFeedUrls(db);
 }
 
-async function cb_postHandle(prev, handle) {
-    await prev;
-    postHandleEvent(handle);
-}
-
-async function cb_saveFeeds(prev) {
-    await prev;
-    Loader.saveFeeds();
-}
-
-async function cb_restoreFeeds(prev, handle) {
-    await prev;
-    Loader.restoreFeeds(handle);
-}
-
 /*
  * Client side state which is a promise
  * any client side function will await and replace the state
@@ -361,24 +324,6 @@ function clearData() {
     state = cb_clearData(state);
 }
 
-// print a info
-function info(msg) {
-    state = cb_info(state, msg);
-    return state;
-}
-
-// print a warning
-function warn(msg) {
-    state = cb_warn(state, msg);
-    return state;
-}
-
-// print a error
-function error(msg) {
-    state = cb_error(state, msg);
-    return state;
-}
-
 // update current item with new text
 function refreshItem() {
     state = cb_refreshItem(state);
@@ -397,11 +342,6 @@ function backwardItem() {
 // delete the item under cursor. 
 function deleteItem() {
     state = cb_deleteItem(state);
-}
-
-// subscribe to a feed url
-function subscribe(url) {
-    state = cb_subscribe(state, url);
 }
 
 // unsubscribe a feed by id
@@ -443,16 +383,4 @@ function shutdown(type, msg) {
 function allFeedUrls() {
     state = cb_allFeedUrls(state);
     return state;
-}
-
-function postHandle(handle) {
-    state = cb_postHandle(state, handle);
-}
-
-function saveFeeds() {
-    state = cb_saveFeeds(state);
-}
-
-function restoreFeeds(handle) {
-    state = cb_restoreFeeds(state, handle);
 }

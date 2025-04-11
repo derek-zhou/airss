@@ -4,8 +4,10 @@
 
 import * as Model from './airss_model.js';
 import * as Sanitizer from './sanitizer.js';
+// events I post to the controller
+import {alertEvent, postHandleEvent} from "./airss_controller.js";
 
-export {subscribe, load, reloadUrl, saveFeeds, restoreFeeds};
+export {subscribe, load, reloadUrl, save, restore};
 
 // whether to load with bouncer
 const BouncerRoot = "https://roastidio.us"
@@ -34,11 +36,11 @@ async function cb_subscribe(prev, url) {
     try {
 	let feed = await sanitize(url);
 	if (!feed)
-	    Model.warn("Unauthorized. Please login to <a href=\""
+	    alertEvent("warning", "Unauthorized. Please login to <a href=\""
 		       + BouncerRoot + "\">roastidio.us</a> then reload Airss");
     } catch (e) {
 	if (typeof e === 'string' || (e instanceof TypeError)) {
-	    Model.error("The feed '" + url + "' is not valid");
+	    alertEvent("error", "The feed '" + url + "' is not valid");
 	    console.error("The feed '" + url + "' is not valid: " + e);
 	    return;
  	} else {
@@ -55,7 +57,7 @@ async function cb_load(prev, obj) {
 	if (ret)
 	    Model.updateFeed(ret.updated, ret.items);
 	else
-	    Model.warn("Unauthorized. Please login to <a href=\""
+	    alertEvent("warning", "Unauthorized. Please login to <a href=\""
 		       + BouncerRoot + "\">roastidio.us</a> then reload Airss");
     } catch (e) {
 	if (typeof e === 'string' || (e instanceof TypeError)) {
@@ -73,18 +75,19 @@ async function cb_reloadUrl(prev, url, id) {
     try {
 	let response = await bufferReload(url);
 	if (response.status != 200) {
-	    Model.warn("Reloading of url: " + url + " failed with status: " + response.status);
+	    alertEvent("warning", "Reloading of url: " + url + " failed with status: "
+		       + response.status);
 	    return null;
 	}
 	let data = await response.text();
 	let text = bounceLoad ? data : Sanitizer.sanitizeHtml(data);
 	Model.updateItemText(text, id);
     } catch (e) {
-	Model.error("Reloading of url: " + url + " failed");
+	alertEvent("error", "Reloading of url: " + url + " failed");
     }
 }
 
-async function cb_saveFeeds(prev) {
+async function cb_save(prev) {
     await prev;
     let urls = await Model.allFeedUrls();
     if (urls.length == 0)
@@ -100,22 +103,22 @@ async function cb_saveFeeds(prev) {
 	    mode: "cors"
 	});
 	if (response.status != 200) {
-	    Model.warn("Saving feeds failed with status: " + response.status);
+	    alertEvent("warning", "Saving feeds failed with status: " + response.status);
 	    return;
 	}
 	let data = await response.json();
-	Model.postHandle(data.handle);
+	postHandleEvent(data.handle);
     } catch (e) {
-	Model.error("Saving feeds failed");
+	alertEvent("error", "Saving feeds failed");
     }
 }
 
-async function cb_restoreFeeds(prev, handle) {
+async function cb_restore(prev, handle) {
     await prev;
     try {
 	let response = await fetch(Stash + "/" + handle, {mode: "cors"});
 	if (response.status != 200) {
-	    Model.warn("warning", "Restoring feeds failed with status: " + response.status);
+	    alertEvent("warning", "Restoring feeds failed with status: " + response.status);
 	    return;
 	}
 	let data = await response.json();
@@ -125,9 +128,9 @@ async function cb_restoreFeeds(prev, handle) {
 	    feed.lastLoadTime = 0;
 	    Model.addFeed(feed);
 	}
-	Model.info("Successfully restoring feeds.");
+	alertEvent("info", "Successfully restoring feeds.");
     } catch (e) {
-	Model.error("error", "Restoring feeds failed");
+	alertEvent("error", "Restoring feeds failed");
     }
 }
 
@@ -579,10 +582,10 @@ function reloadUrl(url, id) {
     state = cb_reloadUrl(state, url, id);
 }
 
-function saveFeeds() {
-    state = cb_saveFeeds(state);
+function save() {
+    state = cb_save(state);
 }
 
-function restoreFeeds(handle) {
-    state = cb_restoreFeeds(state, handle);
+function restore(handle) {
+    state = cb_restore(state, handle);
 }

@@ -6,6 +6,7 @@
 
 import {render} from './airss_view.js';
 import * as Model from './airss_model.js';
+import * as Loader from './loader.js';
 import {Subscribe, Trash, Config} from './dialog.js';
 
 // timeout for the model to shutdown itself for inactivity
@@ -61,9 +62,9 @@ function init() {
 	history.pushState({}, "", url.href);
 	// do I have a refer so I can subscribe?
 	if (params.has("subscribe-referrer") && document.referrer)
-	    Model.subscribe(document.referrer);
+	    Loader.subscribe(document.referrer);
 	else if (str)
-	    Model.subscribe(decodeURIComponent(str));
+	    Loader.subscribe(decodeURIComponent(str));
     }
 }
 
@@ -257,7 +258,7 @@ export function clickConfigEvent(e) {
 	return;
     actionPreamble();
     // piggyback saving here
-    Model.saveFeeds();
+    Loader.save();
     state.screen = Screens.config;
 }
 
@@ -283,7 +284,7 @@ export function submitSubscribeEvent(e) {
 	return;
     actionPreamble();
     let data = new FormData(e.currentTarget);
-    Model.subscribe(data.get(Subscribe.feedUrl));
+    Loader.subscribe(data.get(Subscribe.feedUrl));
     state.screen = Screens.browse;
 }
 
@@ -328,9 +329,8 @@ export function submitConfigEvent(e) {
 
     if (data.get(Config.clearDatabase) == "clear database") {
 	Model.clearData();
-    }
-    if (data.get(Config.restoreHandle)) {
-	Model.restoreFeeds(data.get(Config.restoreHandle));
+    } else if (data.get(Config.restoreHandle)) {
+	Loader.restore(data.get(Config.restoreHandle));
     }
 }
 
