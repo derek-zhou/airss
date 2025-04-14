@@ -1,5 +1,6 @@
 import * as Controller from "./airss_controller.js";
 import {Assets} from "./assets.js";
+import {dummy} from "./airss_view.js";
 import {hook, elem, text, attr, cl, div, shadow_div} from "./domfun.js";
 
 export const Subscribe = {
