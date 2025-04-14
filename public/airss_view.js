@@ -18,7 +18,7 @@ function autoAdjustHeight(e) {
     textarea.style.height = textarea.scrollHeight + offset + 'px';
 }
 
-function dummy(item) {
+export function dummy(item) {
     if (!item)
 	return true;
     const tags = item.tags;
