@@ -38,6 +38,7 @@ function alertClass(type) {
 
 // render everything from scratch
 export function render(state) {
+    document.title = render_title(state);
     replay(
 	document.body, div(
 	    cl("viewport"),
@@ -48,6 +49,14 @@ export function render(state) {
 	    div(article_container(state)),
 	    div(footer(state)))
     );
+}
+
+function render_title(state) {
+    if (state.screen == Controller.Screens.shutdown) {
+	return "Airss Reader (zzz)";
+    } else {
+	return "Airss Reader (" + state.cursor + "/" + state.length  + ")";
+    }
 }
 
 function footer(state) {

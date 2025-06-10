@@ -9,12 +9,7 @@ import * as Model from './airss_model.js';
 import * as Loader from './loader.js';
 import {Subscribe, Trash, Config} from './dialog.js';
 
-// timeout for the model to shutdown itself for inactivity
-const TimeoutPeriod = 3600 * 1000;
 const PaintDelay = 4;
-
-// watchdog to shutdown the backend when idel long enough
-let idleTimeout = setTimeout(timeoutShutdown, TimeoutPeriod);
 
 let paintTimeout = null;
 
@@ -123,17 +118,9 @@ function timeoutPaint() {
 }
 
 function actionPreamble() {
-    clearTimeout(idleTimeout);
-    idleTimeout = setTimeout(timeoutShutdown, TimeoutPeriod);
     window.scrollTo({top: 0});
     state.alert.text = "";
     force_dirty();
-}
-
-// shutdown the model layer. return a promise that reject
-// when everything shutdown
-function timeoutShutdown() {
-    Model.shutdown("info", "Shutdown due to inactivity");
 }
 
 export function itemsLoadedEvent(length, cursor) {
@@ -166,29 +153,6 @@ export function postHandleEvent(text) {
     state.postHandle = text;
     dirty();
 }
-
-document.addEventListener("keydown", (e) => {
-    if (state.screen != Screens.browse)
-	return;
-
-    switch (e.key) {
-    case 'n':
-    case 'N':
-	e.preventDefault();
-	actionPreamble();
-	Model.forwardItem();
-	break;
-    case 'p':
-    case 'P':
-	e.preventDefault();
-	actionPreamble();
-	Model.backwardItem();
-	break;
-    default:
-	// random keydown stop auto-rerender
-	pause_render();
-    }
-});
 
 // for swipes
 let xDown = null;
@@ -349,3 +313,34 @@ export function clickReloadEvent(e) {
 }
 
 init();
+
+document.addEventListener("keydown", (e) => {
+    if (state.screen != Screens.browse)
+	return;
+
+    switch (e.key) {
+    case 'n':
+    case 'N':
+	e.preventDefault();
+	actionPreamble();
+	Model.forwardItem();
+	break;
+    case 'p':
+    case 'P':
+	e.preventDefault();
+	actionPreamble();
+	Model.backwardItem();
+	break;
+    default:
+	// random keydown stop auto-rerender
+	pause_render();
+    }
+});
+
+document.addEventListener("visibilitychange", (e) => {
+    if (document.hidden) {
+	Model.shutdown("info", "Shutdown due to inactivity");
+    } else {
+	init();
+    }
+});
