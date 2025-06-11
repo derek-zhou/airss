@@ -339,8 +339,20 @@ document.addEventListener("keydown", (e) => {
 
 document.addEventListener("visibilitychange", (e) => {
     if (document.hidden) {
-	Model.shutdown("info", "Shutdown due to inactivity");
+	switch (renderState) {
+	case RenderState.clean:
+	case RenderState.dirty:
+	    Model.shutdown("info", "Shutdown due to inactivity");
+	    break;
+	default:
+	}
     } else {
-	init();
+	switch (renderState) {
+	case RenderState.clean:
+	case RenderState.dirty:
+	    init();
+	    break;
+	default:
+	}
     }
 });
