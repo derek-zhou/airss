@@ -13,14 +13,8 @@ const PaintDelay = 4;
 
 let paintTimeout = null;
 
-const RenderState = {
-    clean: 0,
-    paused: 1,
-    dirty: 2,
-    dirty_paused: 3
-};
-
-let renderState = RenderState.clean;
+let renderDirty = false;
+let clientDirty = false;
 
 // screen is fundimental content shown in the window
 export const Screens = {
@@ -64,57 +58,43 @@ function init() {
 }
 
 export function pause_render() {
-    switch (renderState) {
-    case RenderState.clean:
-	renderState = RenderState.paused;
-	break;
-    case RenderState.dirty:
-	clearTimeout(paintTimeout);
-	renderState = RenderState.dirty_paused;
-	break;
-    default:
+    if (!clientDirty) {
+	clientDirty = true;
+	if (renderDirty) {
+	    clearTimeout(paintTimeout);
+	}
     }
 }
 
 export function resume_render() {
-    switch (renderState) {
-    case RenderState.paused:
-	renderState = RenderState.clean;
-	break;
-    case RenderState.dirty_paused:
-	paintTimeout = setTimeout(timeoutPaint, PaintDelay);
-	renderState = RenderState.dirty;
-	break;
-    default:
+    if (clientDirty) {
+	clientDirty = false;
+	if (renderDirty) {
+	    paintTimeout = setTimeout(timeoutPaint, PaintDelay);
+	}
     }
 }
 
 function force_dirty() {
-    switch (renderState) {
-    case RenderState.dirty:
-	break;
-    default:
+    if (!renderDirty || clientDirty) {
+	renderDirty = true;
+	clientDirty = false;
 	paintTimeout = setTimeout(timeoutPaint, PaintDelay);
-	renderState = RenderState.dirty;
     }
 }
 
 function dirty() {
-    switch (renderState) {
-    case RenderState.clean:
-	paintTimeout = setTimeout(timeoutPaint, PaintDelay);
-	renderState = RenderState.dirty;
-	break;
-    case RenderState.paused:
-	renderState = RenderState.dirty_paused;
-	break;
-    default:
+    if (!renderDirty) {
+	renderDirty = true;
+	if (!clientDirty) {
+	    paintTimeout = setTimeout(timeoutPaint, PaintDelay);
+	}
     }
 }
 
 function timeoutPaint() {
     render(state);
-    renderState = RenderState.clean;
+    renderDirty = false;
 }
 
 function actionPreamble() {
@@ -183,9 +163,6 @@ export function touchMoveEvent(e) {
 		actionPreamble();
 		Model.backwardItem();
 	    }
-	} else {
-	    // vertical swipe stop auto-render
-	    pause_render();
 	}
     }
     /* reset values */
@@ -332,27 +309,15 @@ document.addEventListener("keydown", (e) => {
 	Model.backwardItem();
 	break;
     default:
-	// random keydown stop auto-rerender
-	pause_render();
     }
 });
 
 document.addEventListener("visibilitychange", (e) => {
+    if (clientDirty)
+	return;
     if (document.hidden) {
-	switch (renderState) {
-	case RenderState.clean:
-	case RenderState.dirty:
-	    Model.shutdown("info", "Shutdown due to inactivity");
-	    break;
-	default:
-	}
+	Model.shutdown("info", "Shutdown due to inactivity");
     } else {
-	switch (renderState) {
-	case RenderState.clean:
-	case RenderState.dirty:
-	    init();
-	    break;
-	default:
-	}
+	init();
     }
 });
