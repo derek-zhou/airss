@@ -9,13 +9,6 @@ import * as Model from './airss_model.js';
 import * as Loader from './loader.js';
 import {Subscribe, Trash, Config} from './dialog.js';
 
-const PaintDelay = 4;
-
-let paintTimeout = null;
-
-let renderDirty = false;
-let clientDirty = false;
-
 // screen is fundimental content shown in the window
 export const Screens = {
     browse: 1,
@@ -28,7 +21,15 @@ export const Screens = {
 // the application state
 var state;
 
+// the set of elements that contain local state
+var dirtyElements;
+
+// does the screen not refrect the state
+var renderDirty;
+
 function init() {
+    dirtyElements = new Set();
+    renderDirty = false;
     state = {
 	screen: Screens.browse,
 	length: 0,
@@ -39,9 +40,7 @@ function init() {
 	    type: "info"
 	}
     };
-    window.application_state = state;
     Model.init();
-    dirty();
     // do I have a incoming api call to subscribe a feed
     if (location.search) {
 	let params = new URLSearchParams(location.search.substring(1));
@@ -55,83 +54,73 @@ function init() {
 	else if (str)
 	    Loader.subscribe(decodeURIComponent(str));
     }
+    render(state);
 }
 
-export function pause_render() {
-    if (!clientDirty) {
-	clientDirty = true;
-	if (renderDirty) {
-	    clearTimeout(paintTimeout);
-	}
+export function focus_element(e) {
+    dirtyElements.add(e.currentTarget);
+}
+
+export function blur_element(e) {
+    let elem = e.currentTarget;
+    if (element.value == "") {
+	dirtyElements.delete(elem);
+	if (renderDirty)
+	    may_render();
     }
 }
 
-export function resume_render() {
-    if (clientDirty) {
-	clientDirty = false;
-	if (renderDirty) {
-	    paintTimeout = setTimeout(timeoutPaint, PaintDelay);
-	}
-    }
+function elementDirty() {
+    // scroll position is also local state
+    return window.scrollY != 0 || dirtyElements.size > 0;
 }
 
-function force_dirty() {
-    if (!renderDirty || clientDirty) {
+function may_render() {
+    if (elementDirty()) {
+	// postpone render when some element contains local state that would be destroyed
 	renderDirty = true;
-	clientDirty = false;
-	paintTimeout = setTimeout(timeoutPaint, PaintDelay);
+	return;
     }
-}
-
-function dirty() {
-    if (!renderDirty) {
-	renderDirty = true;
-	if (!clientDirty) {
-	    paintTimeout = setTimeout(timeoutPaint, PaintDelay);
-	}
-    }
-}
-
-function timeoutPaint() {
     render(state);
     renderDirty = false;
 }
 
 function actionPreamble() {
-    window.scrollTo({top: 0});
     state.alert.text = "";
-    force_dirty();
+    // destroy local state to pave the way for rendering
+    window.scrollTo({top: 0});
+    dirtyElements.clear();
 }
 
 export function itemsLoadedEvent(length, cursor) {
     state.length = length;
     state.cursor = cursor;
-    dirty();
+    may_render();
 }
 
 export function itemUpdatedEvent(item) {
     state.currentItem = item;
     state.refreshing = false;
-    dirty();
+    may_render();
 }
 
 export function alertEvent(type, text) {
     state.alert.type = type;
     state.alert.text = text;
-    window.scrollTo({top: 0});
-    dirty();
+    may_render();
 }
 
 export function shutDownEvent(type, text) {
     state.alert.type = type;
     state.alert.text = text;
     state.screen = Screens.shutdown;
-    force_dirty();
+    state.screen = Screens.trash;
+    may_render();
 }
 
 export function postHandleEvent(text) {
     state.postHandle = text;
-    dirty();
+    may_render();
 }
 
 // for swipes
@@ -163,7 +152,10 @@ export function touchMoveEvent(e) {
 		actionPreamble();
 		Model.backwardItem();
 	    }
+	} else if (renderDirty) {
+	    may_render();
 	}
+
     }
     /* reset values */
     xDown = null;
@@ -191,6 +183,7 @@ export function clickAlertEvent(e) {
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
+    may_render();
 }
 
 export function clickConfigEvent(e) {
@@ -201,6 +194,7 @@ export function clickConfigEvent(e) {
     // piggyback saving here
     Loader.save();
     state.screen = Screens.config;
+    may_render();
 }
 
 export function clickSubscribeEvent(e) {
@@ -209,6 +203,7 @@ export function clickSubscribeEvent(e) {
 	return;
     actionPreamble();
     state.screen = Screens.subscribe;
+    may_render();
 }
 
 export function clickTrashEvent(e) {
@@ -217,6 +212,7 @@ export function clickTrashEvent(e) {
 	return;
     actionPreamble();
     state.screen = Screens.trash;
+    may_render();
 }
 
 export function submitSubscribeEvent(e) {
@@ -235,6 +231,7 @@ export function resetDialogEvent(e) {
 	return;
     actionPreamble();
     state.screen = Screens.browse;
+    may_render();
 }
 
 export function submitTrashEvent(e) {
@@ -250,6 +247,7 @@ export function submitTrashEvent(e) {
 	    Model.deleteItem();
     }
     state.screen = Screens.browse;
+    may_render();
 }
 
 export function submitConfigEvent(e) {
@@ -273,6 +271,7 @@ export function submitConfigEvent(e) {
     } else if (data.get(Config.restoreHandle)) {
 	Loader.restore(data.get(Config.restoreHandle));
     }
+    may_render();
 }
 
 export function clickRefreshEvent(e) {
@@ -309,11 +308,14 @@ document.addEventListener("keydown", (e) => {
 	Model.backwardItem();
 	break;
     default:
+	if (renderDirty) {
+	    may_render();
+	}
     }
 });
 
 document.addEventListener("visibilitychange", (e) => {
-    if (clientDirty)
+    if (elementDirty())
 	return;
     if (document.hidden) {
 	Model.shutdown("info", "Shutdown due to inactivity");

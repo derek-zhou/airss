@@ -12,11 +12,6 @@ function stopPropagation(e) {
     e.stopImmediatePropagation();
 }
 
-function text_blur(e) {
-    if (e.currentTarget.value == "")
-	Controller.resume_render();
-}
-
 function autoAdjustHeight(e) {
     const textarea = e.currentTarget;
     const offset = textarea.offsetHeight - textarea.clientHeight;
@@ -221,8 +216,8 @@ function article_tail(state) {
 	elem("textarea", [
 	    attr({name: "content"}),
 	    hook("keydown", stopPropagation),
-	    hook("focus", Controller.pause_render),
-	    hook("blur", text_blur),
+	    hook("focus", Controller.focus_element),
+	    hook("blur", Controller.blur_element),
 	    hook("input", autoAdjustHeight)
 	]),
 	div(cl("toolbar"),
