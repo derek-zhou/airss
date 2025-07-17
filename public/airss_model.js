@@ -31,7 +31,7 @@ async function try_load() {
     // the minimal elapsed time before a reload, in hour
     let minReloadWait = parseInt(localStorage.getItem("MIN_RELOAD_WAIT")) || 12;
 
-    if (loadingOutstanding)
+    if (!db || loadingOutstanding)
 	return;
     if (Items.unreadCount() > waterMark)
 	return;
@@ -82,6 +82,8 @@ async function cb_shutdown(prev, type, msg) {
 
 async function cb_updateItemText(prev, text, id) {
     await prev;
+    if (!db)
+	return;
     let item = await Items.getItem(db, id);
     if (item) {
 	item.contentHtml = text;
@@ -93,14 +95,18 @@ async function cb_updateItemText(prev, text, id) {
 
 async function cb_clearData(prev) {
     await prev;
-    db.close();
-    db = null;
-    await deleteDB("AirSS");
+    if (db) {
+	db.close();
+	db = null;
+	await deleteDB("AirSS");
+    }
     shutDownEvent("info", "Database deleted");
 }
 
 async function cb_refreshItem(prev) {
     await prev;
+    if (!db)
+	return;
     let item = await Items.getCurrentItem(db);
     if (item && !Items.isDummyItem(item)) {
 	Loader.reloadUrl(item.url, item.id);
@@ -111,6 +117,8 @@ async function cb_refreshItem(prev) {
 
 async function cb_forwardItem(prev) {
     await prev;
+    if (!db)
+	return;
     let ret = await Items.forward(db);
     if (!ret) {
 	alertEvent("warning", "Already at the end");
@@ -125,6 +133,8 @@ async function cb_forwardItem(prev) {
 
 async function cb_backwardItem(prev) {
     await prev;
+    if (!db)
+	return;
     let ret = await Items.backward(db);
     if (!ret) {
 	alertEvent("warning", "Already at the beginning");
@@ -137,6 +147,8 @@ async function cb_backwardItem(prev) {
 
 async function cb_deleteItem(prev) {
     await prev;
+    if (!db)
+	return;
     await Items.deleteCurrentItem(db);
     itemsLoadedEvent(Items.length(), Items.readingCursor());
     let item = await Items.getCurrentItem(db);
@@ -152,6 +164,8 @@ async function cb_loadMore(prev) {
 
 async function cb_unsubscribe(prev, id) {
     await prev;
+    if (!db)
+	return;
     await Items.deleteAllItemsOfFeed(db, id);
     try {
 	await Feeds.removeFeed(db, id);
@@ -170,6 +184,8 @@ async function cb_unsubscribe(prev, id) {
 
 async function cb_addFeed(prev, feed) {
     await prev;
+    if (!db)
+	return;
     try {
 	let id = await Feeds.addFeed(db, feed);
 	console.info("added feed " + feed.feedUrl + " with id: " + id);
@@ -185,11 +201,15 @@ async function cb_addFeed(prev, feed) {
 
 async function cb_deleteFeed(prev, id) {
     await prev;
+    if (!db)
+	return;
     return Feeds.deleteFeed(db, id);
 }
 
 async function cb_fetchFeed(prev, id) {
     await prev;
+    if (!db)
+	return null;
     return Feeds.get(db, id);
 }
 
@@ -224,6 +244,8 @@ function dummyItem(feed) {
 
 async function cb_updateFeed(prev, feed, items) {
     await prev;
+    if (!db)
+	return;
     // kept in days
     let maxKeptPeriod = parseInt(localStorage.getItem("MAX_KEPT_PERIOD")) || 180;
     let savedCursor = Items.readingCursor();
@@ -296,6 +318,8 @@ async function cb_updateFeed(prev, feed, items) {
 
 async function cb_allFeedUrls(prev) {
     await prev;
+    if (!db)
+	return [];
     return Feeds.allFeedUrls(db);
 }
 
@@ -377,7 +401,6 @@ function fetchFeed(id) {
 
 function shutdown(type, msg) {
     state = cb_shutdown(state, type, msg);
-    return state;
 }
 
 function allFeedUrls() {
