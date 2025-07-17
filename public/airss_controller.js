@@ -25,11 +25,11 @@ var state;
 var dirtyElements;
 
 // does the screen not refrect the state
-var renderDirty;
+var viewObsolete;
 
 function init() {
     dirtyElements = new Set();
-    renderDirty = false;
+    viewObsolete = false;
     state = {
 	screen: Screens.browse,
 	length: 0,
@@ -65,8 +65,7 @@ export function blur_element(e) {
     let elem = e.currentTarget;
     if (element.value == "") {
 	dirtyElements.delete(elem);
-	if (renderDirty)
-	    may_render();
+	may_render();
     }
 }
 
@@ -75,39 +74,44 @@ function elementDirty() {
     return window.scrollY != 0 || dirtyElements.size > 0;
 }
 
+function clearElementState() {
+    window.scrollTo({top: 0});
+    dirtyElements.clear();
+}
+
 function may_render() {
-    if (elementDirty()) {
-	// postpone render when some element contains local state that would be destroyed
-	renderDirty = true;
+    if (!viewObsolete || elementDirty())
 	return;
-    }
     render(state);
-    renderDirty = false;
+    viewObsolete = false;
+}
+
+function try_render() {
+    viewObsolete = true;
+    may_render();
 }
 
 function actionPreamble() {
     state.alert.text = "";
-    // destroy local state to pave the way for rendering
-    window.scrollTo({top: 0});
-    dirtyElements.clear();
+    clearElementState();
 }
 
 export function itemsLoadedEvent(length, cursor) {
     state.length = length;
     state.cursor = cursor;
-    may_render();
+    try_render();
 }
 
 export function itemUpdatedEvent(item) {
     state.currentItem = item;
     state.refreshing = false;
-    may_render();
+    try_render();
 }
 
 export function alertEvent(type, text) {
     state.alert.type = type;
     state.alert.text = text;
-    may_render();
+    try_render();
 }
 
 export function shutDownEvent(type, text) {
@@ -115,12 +119,12 @@ export function shutDownEvent(type, text) {
     state.alert.text = text;
     state.screen = Screens.shutdown;
     state.screen = Screens.trash;
-    may_render();
+    try_render();
 }
 
 export function postHandleEvent(text) {
     state.postHandle = text;
-    may_render();
+    try_render();
 }
 
 // for swipes
@@ -152,7 +156,7 @@ export function touchMoveEvent(e) {
 		actionPreamble();
 		Model.backwardItem();
 	    }
-	} else if (renderDirty) {
+	} else {
 	    may_render();
 	}
 
@@ -183,7 +187,7 @@ export function clickAlertEvent(e) {
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
-    may_render();
+    try_render();
 }
 
 export function clickConfigEvent(e) {
@@ -194,7 +198,7 @@ export function clickConfigEvent(e) {
     // piggyback saving here
     Loader.save();
     state.screen = Screens.config;
-    may_render();
+    try_render();
 }
 
 export function clickSubscribeEvent(e) {
@@ -203,7 +207,7 @@ export function clickSubscribeEvent(e) {
 	return;
     actionPreamble();
     state.screen = Screens.subscribe;
-    may_render();
+    try_render();
 }
 
 export function clickTrashEvent(e) {
@@ -212,7 +216,7 @@ export function clickTrashEvent(e) {
 	return;
     actionPreamble();
     state.screen = Screens.trash;
-    may_render();
+    try_render();
 }
 
 export function submitSubscribeEvent(e) {
@@ -231,7 +235,7 @@ export function resetDialogEvent(e) {
 	return;
     actionPreamble();
     state.screen = Screens.browse;
-    may_render();
+    try_render();
 }
 
 export function submitTrashEvent(e) {
@@ -247,7 +251,7 @@ export function submitTrashEvent(e) {
 	    Model.deleteItem();
     }
     state.screen = Screens.browse;
-    may_render();
+    try_render();
 }
 
 export function submitConfigEvent(e) {
@@ -271,7 +275,7 @@ export function submitConfigEvent(e) {
     } else if (data.get(Config.restoreHandle)) {
 	Loader.restore(data.get(Config.restoreHandle));
     }
-    may_render();
+    try_render();
 }
 
 export function clickRefreshEvent(e) {
@@ -308,9 +312,7 @@ document.addEventListener("keydown", (e) => {
 	Model.backwardItem();
 	break;
     default:
-	if (renderDirty) {
-	    may_render();
-	}
+	may_render();
     }
 });
 
