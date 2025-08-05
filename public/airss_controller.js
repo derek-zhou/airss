@@ -63,7 +63,7 @@ export function focus_element(e) {
 
 export function blur_element(e) {
     let elem = e.currentTarget;
-    if (element.value == "") {
+    if (elem.value == "") {
 	dirtyElements.delete(elem);
 	may_render();
     }
