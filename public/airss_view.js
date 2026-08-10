@@ -1,5 +1,5 @@
 import * as Controller from "./airss_controller.js";
-import {Assets} from "./assets.js";
+import * as Asset from "./assets.js";
 import {article} from "./article.js";
 import {dialog} from "./dialog.js";
 import {replay, hook, elem, text, attr, cl, div} from "./domfun.js";
@@ -37,7 +37,8 @@ function alertClass(type) {
 }
 
 // render everything from scratch
-export function render(state) {
+export async function render(state) {
+    await Asset.loading;
     document.title = render_title(state);
     replay(
 	document.body, div(
@@ -92,8 +93,8 @@ function navbar(state) {
     return [
 	div(cl("navbar"),
 	    div(elem("a", [
-		    attr({href: "index.html"}),
-		    elem("img", attr({src: Assets.logoImage, class: "logo"})),
+		attr({href: "index.html"}),
+		elem("img", attr({src: Asset.at("logoImage"), class: "logo"})),
 		]),
 		elem("span", [
 		    cl("info"),
@@ -158,7 +159,7 @@ function article_head(item) {
 }
 
 function article_image(item) {
-    const imageUrl = item.imageUrl || Assets.unknownLinkImage;
+    const imageUrl = item.imageUrl || Asset.at("unknownLinkImage");
     const hero_class = item.imageUrl ? "article-hero" : "article-antihero";
 
     return div(cl(hero_class),

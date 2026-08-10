@@ -1,5 +1,5 @@
 import * as Controller from "./airss_controller.js";
-import {Assets} from "./assets.js";
+import * as Asset from './assets.js';
 import {dummy} from "./airss_view.js";
 import {hook, elem, text, attr, cl, div, shadow_div} from "./domfun.js";
 
@@ -235,7 +235,7 @@ function build_options(options, default_value) {
 
 function custom_form(submit_action, reset_action, inner) {
     return shadow_div(
-	[Assets.preflightCSS, Assets.dialogCSS],
+	[Asset.at("preflightCSS"), Asset.at("dialogCSS")],
 	elem("form", [
 	    hook("submit", submit_action),
 	    reset_action ? hook("reset", reset_action) : [],

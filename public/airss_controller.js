@@ -118,7 +118,6 @@ export function shutDownEvent(type, text) {
     state.alert.type = type;
     state.alert.text = text;
     state.screen = Screens.shutdown;
-    state.screen = Screens.trash;
     try_render();
 }
 

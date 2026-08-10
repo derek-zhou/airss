@@ -1,20 +1,57 @@
-// assets that I manage
-export var Assets = {
-    preflightCSS: "./preflight.css",
-    articleCSS: "./article.css",
-    dialogCSS: "./dialog.css",
+// assets that I manage so I can go offline.
+// This is better (IMHO) than service worker in my usage
+
+const Images = {
     logoImage: "images/airss_logo.png",
     unknownLinkImage: "images/unknown_link.png"
 };
 
-// fetch everything at startup and replace real URL with blob URL
-Object.keys(Assets).forEach((key) => {
-    let link = Assets[key];
+const Styles = {
+    preflightCSS: "./preflight.css",
+    articleCSS: "./article.css",
+    dialogCSS: "./dialog.css"
+};
 
-    fetch(link)
-	.then((response) => response.blob())
-	.then((myBlob) => {
-	    const objectURL = URL.createObjectURL(myBlob);
-	    Assets[key] = objectURL;
-	});
-});
+var lut = {};
+export var loading = Promise.all([load_images(), load_styles()]);
+
+async function load_images() {
+    return Promise.all(Object.keys(Images).map(load_one_image));
+}
+
+async function load_styles() {
+    return Promise.all(Object.keys(Styles).map(load_one_style));
+}
+
+async function load_one_image(key) {
+    let link = Images[key];
+    let response = await fetch(link);
+
+    if (response.status != 200) {
+	console.error("Image " + link + " failed to load");
+	return;
+    }
+    let data = await response.blob();
+    lut[key] = URL.createObjectURL(data);
+    console.info("Image at " + key + " loaded");
+    return;
+}
+
+async function load_one_style(key) {
+    let link = Styles[key];
+    let response = await fetch(link);
+
+    if (response.status != 200) {
+	console.error("Image " + link + " failed to load");
+	return;
+    }
+    let data = await response.text();
+    let style = new CSSStyleSheet();
+    lut[key] = style;
+    console.info("Style at " + key + " loaded");
+    return style.replace(data);
+}
+
+export function at(key) {
+    return lut[key];
+}

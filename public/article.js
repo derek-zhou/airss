@@ -1,9 +1,9 @@
-import {Assets} from "./assets.js";
+import * as Asset from './assets.js';
 import {elem, text, fill, attr, shadow_div} from "./domfun.js";
 
 export function article(item) {
     return shadow_div(
-	[Assets.preflightCSS, Assets.articleCSS],
+	[Asset.at("preflightCSS"), Asset.at("articleCSS")],
 	item ? real_article(item) : dummy_article()
     );
 }
