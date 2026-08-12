@@ -37,23 +37,6 @@ var dirtyElements = new Set();
 // does the screen not refrect the state
 var viewObsolete = false;
 
-function init() {
-    Model.init();
-    // do I have a incoming api call to subscribe a feed
-    if (location.search) {
-	let params = new URLSearchParams(location.search.substring(1));
-	let str = params.get("url");
-	// clear location so it is cleaner
-	let url = new URL("/", document.location.href);
-	history.pushState({}, "", url.href);
-	// do I have a refer so I can subscribe?
-	if (params.has("subscribe-referrer") && document.referrer)
-	    Loader.subscribe(document.referrer);
-	else if (str)
-	    Loader.subscribe(decodeURIComponent(str));
-    }
-}
-
 export function focus_element(e) {
     dirtyElements.add(e.currentTarget);
 }
@@ -285,10 +268,23 @@ export function clickRefreshEvent(e) {
 
 export function clickReloadEvent(e) {
     e.preventDefault();
-    init();
+    location.reload();
 }
 
-init();
+Model.init();
+// do I have a incoming api call to subscribe a feed
+if (location.search) {
+    let params = new URLSearchParams(location.search.substring(1));
+    let str = params.get("url");
+    // clear location so it is cleaner
+    let url = new URL("/", document.location.href);
+    history.pushState({}, "", url.href);
+    // do I have a refer so I can subscribe?
+    if (params.has("subscribe-referrer") && document.referrer)
+	Loader.subscribe(document.referrer);
+    else if (str)
+	Loader.subscribe(decodeURIComponent(str));
+}
 
 document.addEventListener("keydown", (e) => {
     if (state.screen != Screens.browse)
@@ -321,6 +317,6 @@ document.addEventListener("visibilitychange", (e) => {
 	state.screen = Screens.browse;
 	state.alert.text = "";
 	state.alert.type = "info";
-	init();
+	Model.init();
     }
 });
