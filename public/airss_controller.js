@@ -318,6 +318,9 @@ document.addEventListener("visibilitychange", (e) => {
     if (document.hidden) {
 	Model.shutdown("info", "Shutdown due to inactivity");
     } else {
+	state.screen = Screens.browse;
+	state.alert.text = "";
+	state.alert.type = "info";
 	init();
     }
 });
