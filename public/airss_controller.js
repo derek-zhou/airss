@@ -7,6 +7,7 @@
 import {render} from './airss_view.js';
 import * as Model from './airss_model.js';
 import * as Loader from './loader.js';
+import * as Asset from './assets.js';
 import {Subscribe, Trash, Config} from './dialog.js';
 
 // screen is fundimental content shown in the window
@@ -19,27 +20,24 @@ export const Screens = {
 };
 
 // the application state
-var state;
+var state = {
+    screen: Screens.browse,
+    length: 0,
+    cursor: -1,
+    refreshing: false,
+    alert: {
+	text: "",
+	type: "info"
+    }
+};
 
 // the set of elements that contain local state
-var dirtyElements;
+var dirtyElements = new Set();
 
 // does the screen not refrect the state
-var viewObsolete;
+var viewObsolete = false;
 
 function init() {
-    dirtyElements = new Set();
-    viewObsolete = false;
-    state = {
-	screen: Screens.browse,
-	length: 0,
-	cursor: -1,
-	refreshing: false,
-	alert: {
-	    text: "",
-	    type: "info"
-	}
-    };
     Model.init();
     // do I have a incoming api call to subscribe a feed
     if (location.search) {
@@ -54,7 +52,6 @@ function init() {
 	else if (str)
 	    Loader.subscribe(decodeURIComponent(str));
     }
-    render(state);
 }
 
 export function focus_element(e) {
@@ -80,13 +77,13 @@ function clearElementState() {
 }
 
 function may_render() {
-    if (!viewObsolete || elementDirty())
+    if (!Asset.loaded || !viewObsolete || elementDirty())
 	return;
     render(state);
     viewObsolete = false;
 }
 
-function try_render() {
+export function try_render() {
     viewObsolete = true;
     may_render();
 }

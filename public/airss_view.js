@@ -37,8 +37,7 @@ function alertClass(type) {
 }
 
 // render everything from scratch
-export async function render(state) {
-    await Asset.loading;
+export function render(state) {
     document.title = render_title(state);
     replay(
 	document.body, div(

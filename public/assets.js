@@ -1,5 +1,6 @@
 // assets that I manage so I can go offline.
 // This is better (IMHO) than service worker in my usage
+import {try_render} from './airss_controller.js';
 
 const Images = {
     logoImage: "images/airss_logo.png",
@@ -13,7 +14,13 @@ const Styles = {
 };
 
 var lut = {};
-export var loading = Promise.all([load_images(), load_styles()]);
+export var loaded = false;
+
+Promise.all([load_images(), load_styles()])
+    .then(() => {
+	loaded = true;
+	try_render();
+    });
 
 async function load_images() {
     return Promise.all(Object.keys(Images).map(load_one_image));
