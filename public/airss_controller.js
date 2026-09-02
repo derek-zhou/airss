@@ -174,10 +174,18 @@ export function clickConfigEvent(e) {
     if (state.screen == Screens.shutdown)
 	return;
     actionPreamble();
-    // piggyback saving here
-    Loader.save();
+    state.postHandle = null;
     state.screen = Screens.config;
     try_render();
+}
+
+export function clickSaveEvent(e) {
+    e.preventDefault();
+    if (state.screen == Screens.shutdown)
+	return;
+    actionPreamble();
+    console.info("save button clicked");
+    Loader.save();
 }
 
 export function clickSubscribeEvent(e) {

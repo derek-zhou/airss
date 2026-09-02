@@ -90,8 +90,6 @@ async function cb_reloadUrl(prev, url, id) {
 async function cb_save(prev) {
     await prev;
     let urls = await Model.allFeedUrls();
-    if (urls.length == 0)
-	return;
     try {
 	let response = await fetch(Stash, {
 	    method: "POST",

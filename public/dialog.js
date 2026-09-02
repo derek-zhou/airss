@@ -145,13 +145,13 @@ function config_dialog(state) {
 		    })
 		])
 	    ])),
+	div(cl("field", "long"), savedHandlePrompt(state)),
 	div(cl("field", "long"),
 	    elem("label", [
 		text("Restore feeds from:"),
 		elem("input", [
 		    attr({type: "text", name: Config.restoreHandle, class:"short code"})
-		]),
-		savedHandlePrompt(state)
+		])
 	    ])),
 	div(cl("field", "long"),
 	    elem("label", [
@@ -163,15 +163,24 @@ function config_dialog(state) {
 }
 
 function savedHandlePrompt(state) {
-    if (!state.postHandle)
-	return [];
-    return [
-	text("Your feeds were saved to: "),
-	elem("span", [
-	    cl("code"),
-	    text(state.postHandle)
-	])
-    ];
+    if (!state.postHandle) {
+	return elem("label", [
+	    text("Save your feeds: "),
+	    elem("button", [
+		cl("button", "inline"),
+		hook("click", Controller.clickSaveEvent),
+		text("🗄")
+	    ])
+	]);
+    } else {
+	return elem("label", [
+	    text("Your feeds were saved to: "),
+	    elem("span", [
+		cl("code"),
+		text(state.postHandle)
+	    ])
+	]);
+    }
 }
 
 function bounceLoadDefault() {

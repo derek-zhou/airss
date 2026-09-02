@@ -58,6 +58,12 @@ form .button[type=reset] {
 form .button[type=submit] {
     background-color: rgb(147 51 234);
 }
+form .button.inline {
+    color: rgb(147 51 234);
+    background-color: rgb(249 250 251);
+    padding: 0rem;
+    line-height: 1rem;
+}
 form .toolbar {
     display: flex;
     flex-direction: row;
