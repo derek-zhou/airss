@@ -147,32 +147,24 @@ export function touchMoveEvent(e) {
 
 export function clickLeftEvent(e) {
     e.preventDefault();
-    if (state.screen == Screens.shutdown)
-	return;
     actionPreamble();
     Model.backwardItem();
 }
 
 export function clickRightEvent(e) {
     e.preventDefault();
-    if (state.screen == Screens.shutdown)
-	return;
     actionPreamble();
     Model.forwardItem();
 }
 
 export function clickAlertEvent(e) {
     e.preventDefault();
-    if (state.screen == Screens.shutdown)
-	return;
     actionPreamble();
     try_render();
 }
 
 export function clickConfigEvent(e) {
     e.preventDefault();
-    if (state.screen == Screens.shutdown)
-	return;
     actionPreamble();
     state.postHandle = null;
     state.screen = Screens.config;
@@ -181,8 +173,6 @@ export function clickConfigEvent(e) {
 
 export function clickSaveEvent(e) {
     e.preventDefault();
-    if (state.screen == Screens.shutdown)
-	return;
     actionPreamble();
     console.info("save button clicked");
     Loader.save();
@@ -190,8 +180,6 @@ export function clickSaveEvent(e) {
 
 export function clickSubscribeEvent(e) {
     e.preventDefault();
-    if (state.screen == Screens.shutdown)
-	return;
     actionPreamble();
     state.screen = Screens.subscribe;
     try_render();
@@ -199,8 +187,6 @@ export function clickSubscribeEvent(e) {
 
 export function clickTrashEvent(e) {
     e.preventDefault();
-    if (state.screen == Screens.shutdown)
-	return;
     actionPreamble();
     state.screen = Screens.trash;
     try_render();
@@ -208,8 +194,6 @@ export function clickTrashEvent(e) {
 
 export function submitSubscribeEvent(e) {
     e.preventDefault();
-    if (state.screen == Screens.shutdown)
-	return;
     actionPreamble();
     let data = new FormData(e.currentTarget);
     Loader.subscribe(data.get(Subscribe.feedUrl));
@@ -218,8 +202,6 @@ export function submitSubscribeEvent(e) {
 
 export function resetDialogEvent(e) {
     e.preventDefault();
-    if (state.screen == Screens.shutdown)
-	return;
     actionPreamble();
     state.screen = Screens.browse;
     try_render();
@@ -227,8 +209,6 @@ export function resetDialogEvent(e) {
 
 export function submitTrashEvent(e) {
     e.preventDefault();
-    if (state.screen == Screens.shutdown)
-	return;
     actionPreamble();
     if (state.currentItem) {
 	let data = new FormData(e.currentTarget);
@@ -243,8 +223,6 @@ export function submitTrashEvent(e) {
 
 export function submitConfigEvent(e) {
     e.preventDefault();
-    if (state.screen == Screens.shutdown)
-	return;
     actionPreamble();
     let data = new FormData(e.currentTarget);
     // configuration update
@@ -267,8 +245,6 @@ export function submitConfigEvent(e) {
 
 export function clickRefreshEvent(e) {
     e.preventDefault();
-    if (state.screen == Screens.shutdown)
-	return;
     actionPreamble();
     state.refreshing = true;
     Model.refreshItem();
