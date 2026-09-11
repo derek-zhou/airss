@@ -18,16 +18,18 @@ export function fill(html) {
 
 export function attr(attributes) {
     return (node) => {
+	let n = node.host || node;
 	for (const key in attributes) {
-	    node.setAttribute(key, attributes[key]);
+	    n.setAttribute(key, attributes[key]);
 	}
     };
 }
 
 export function cl() {
     return (node) => {
+	let n = node.host || node;
 	for (const one of arguments) {
-	    node.classList.add(one);
+	    n.classList.add(one);
 	}
     };
 }
