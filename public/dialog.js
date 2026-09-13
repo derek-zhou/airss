@@ -1,7 +1,7 @@
 import * as Controller from "./airss_controller.js";
 import * as Asset from './assets.js';
 import {dummy} from "./airss_view.js";
-import {hook, elem, text, attr, cl, div, shadow_div} from "./domfun.js";
+import {hook, elem, text, attr, cl, div, style} from "./domfun.js";
 
 export const Subscribe = {
     feedUrl: "feedUrl"
@@ -38,148 +38,197 @@ export function dialog(state) {
 }
 
 function reload_dialog(state) {
-    return custom_form(Controller.clickReloadEvent, null, [
+    return custom_form(
+	Controller.clickReloadEvent,
+	null,
 	elem("p", text("AirSS is shut down. Reload?"))
-    ]);
+    );
 }
 
 function subscribe_dialog(state) {
     return custom_form(
 	Controller.submitSubscribeEvent,
 	Controller.resetDialogEvent,
-	div(cl("field", "long"),
-	    elem("label", [
+	div(
+	    cl("field", "long"),
+	    elem(
+		"label",
 		text("The URL to the feed or the index page:"),
-		elem("input",
-		     attr({
+		elem(
+		    "input",
+		    cl("long"),
+		    attr({
 			 type: "text",
-			 class: "long",
 			 name: Subscribe.feedUrl,
 			 placeholder: "enter the url to subscribe"
-		     }))
-	    ])));
+		    })
+		)
+	    )
+	)
+    );
 }
 
 function trash_dialog(state) {
-    return custom_form(Controller.submitTrashEvent, Controller.resetDialogEvent, [
-	elem("p", [
-	    cl("line"),
-	    text("Are you sure you want to delete this item?")
-	]),
-	div(cl("field"),
-	    elem("label", [
+    return custom_form(
+	Controller.submitTrashEvent,
+	Controller.resetDialogEvent,
+	elem("p", cl("line"), text("Are you sure you want to delete this item?")),
+	div(
+	    cl("field"),
+	    elem(
+		"label",
 		text("Unsubscribe "),
-		elem("span", [
+		elem(
+		    "span",
 		    cl("focus"),
 		    text(state.currentItem.feedTitle)
-		]),
+		),
 		text(" too"),
-		elem("input", [
+		elem(
+		    "input",
 		    attr({
 			type: "checkbox",
 			name: Trash.shouldUnsubscribe,
 			checked: !dummy(state.currentItem)
 		    })
-		])
-	    ]))
-    ]);
+		)
+	    )
+	)
+    );
 }
 
 function config_dialog(state) {
-    return custom_form(Controller.submitConfigEvent, Controller.resetDialogEvent, [
-	div(cl("field", "long"),
-	    elem("label", [
-		text("Load more when unread items is below:"),
-		elem("select", [
-		    attr({name: Config.waterMark}),
-		    water_mark_options()
-		])
-	    ])),
-	div(cl("field", "long"),
-	    elem("label", [
-		text("Between reloading a feed, wait at least:"),
-		elem("select", [
-		    attr({name: Config.minReloadWait}),
-		    min_reload_wait_options()
-		])
-	    ])),
-	div(cl("field", "long"),
-	    elem("label", [
-		text("Keep read items in the database for:"),
-		elem("select", [
-		    attr({name: Config.maxKeptPeriod}),
-		    max_kept_period_options()
-		])
-	    ])),
-	div(cl("field", "long"),
-	    elem("label", [
-		text("Keep in the database at most per feed:"),
-		elem("select", [
-		    attr({name: Config.maxItemsPerFeed}),
-		    max_items_per_feed_options()
-		])
-	    ])),
-	div(cl("field", "long"),
- 	    elem("label", [
-		text("Truncate each feed while loading to at most:"),
-		elem("select", [
-		    attr({name: Config.truncateItemsPerFeed}),
-		    truncate_items_per_feed_options()
-		])
-	    ])),
-	div(cl("field", "long"),
-	    elem("label", [
-		elem("span", [
-		    text("Load feeds with roastidio.us ("),
-		    elem("a", [
-			attr({href: "https://github.com/derek-zhou/airss#Proxy"}),
-			text("Why")
-		    ]),
-		    text("):")
-		]),
-		elem("input", [
-		    attr({
-			type: "checkbox",
-			name: Config.bounceLoad,
-			checked: bounceLoadDefault()
-		    })
-		])
-	    ])),
-	div(cl("field", "long"), savedHandlePrompt(state)),
-	div(cl("field", "long"),
-	    elem("label", [
-		text("Restore feeds from:"),
-		elem("input", [
-		    attr({type: "text", name: Config.restoreHandle, class:"short code"})
-		])
-	    ])),
-	div(cl("field", "long"),
-	    elem("label", [
-		cl("alert", "alert-danger"),
-		text("Danger! Type \"clear database\" to delete all data"),
-		elem("input", attr({type: "text", name: Config.clearDatabase}))
-	    ]))
-    ]);
+    return custom_form(
+	Controller.submitConfigEvent,
+	Controller.resetDialogEvent,
+	div(
+	    div(
+		cl("field", "long"),
+		elem(
+		    "label",
+		    text("Load more when unread items is below:"),
+		    elem(
+			"select",
+			attr({name: Config.waterMark}),
+			water_mark_options()
+		    )
+		)
+	    ),
+	    div(
+		cl("field", "long"),
+		elem(
+		    "label",
+		    text("Between reloading a feed, wait at least:"),
+		    elem(
+			"select",
+			attr({name: Config.minReloadWait}),
+			min_reload_wait_options()
+		    )
+		)
+	    ),
+	    div(
+		cl("field", "long"),
+		elem(
+		    "label",
+		    text("Keep read items in the database for:"),
+		    elem(
+			"select",
+			attr({name: Config.maxKeptPeriod}),
+			max_kept_period_options()
+		    )
+		)
+	    ),
+	    div(
+		cl("field", "long"),
+		elem(
+		    "label",
+		    text("Keep in the database at most per feed:"),
+		    elem(
+			"select",
+			attr({name: Config.maxItemsPerFeed}),
+			max_items_per_feed_options()
+		    )
+		)
+	    ),
+	    div(
+		cl("field", "long"),
+ 		elem(
+		    "label",
+		    text("Truncate each feed while loading to at most:"),
+		    elem(
+			"select",
+			attr({name: Config.truncateItemsPerFeed}),
+			truncate_items_per_feed_options()
+		    )
+		)
+	    ),
+	    div(
+		cl("field", "long"),
+		elem(
+		    "label",
+		    elem(
+			"span",
+			text("Load feeds with roastidio.us ("),
+			elem(
+			    "a",
+			    attr({href: "https://github.com/derek-zhou/airss#Proxy"}),
+			    text("Why")
+			),
+			text("):")
+		    ),
+		    elem(
+			"input",
+			attr({
+			    type: "checkbox",
+			    name: Config.bounceLoad,
+			    checked: bounceLoadDefault()
+			})
+		    )
+		)
+	    ),
+	    div(cl("field", "long"), savedHandlePrompt(state)),
+	    div(
+		cl("field", "long"),
+		elem(
+		    "label",
+		    text("Restore feeds from:"),
+		    elem(
+			"input",
+			attr({type: "text", name: Config.restoreHandle, class:"short code"})
+		    )
+		)
+	    ),
+	    div(
+		cl("field", "long"),
+		elem(
+		    "label",
+		    cl("alert", "alert-danger"),
+		    text("Danger! Type \"clear database\" to delete all data"),
+		    elem("input", attr({type: "text", name: Config.clearDatabase}))
+		)
+	    )
+	)
+    );
 }
 
 function savedHandlePrompt(state) {
     if (!state.postHandle) {
-	return elem("label", [
+	return elem(
+	    "label",
 	    text("Save your feeds: "),
-	    elem("button", [
+	    elem(
+		"button",
 		cl("button", "inline"),
 		hook("click", Controller.clickSaveEvent),
 		text("🗄")
-	    ])
-	]);
+	    )
+	);
     } else {
-	return elem("label", [
+	return elem(
+	    "label",
 	    text("Your feeds were saved to: "),
-	    elem("span", [
-		cl("code"),
-		text(state.postHandle)
-	    ])
-	]);
+	    elem("span", cl("code"), text(state.postHandle))
+	);
     }
 }
 
@@ -234,32 +283,37 @@ function truncate_items_per_feed_options() {
 
 function build_options(options, default_value) {
     return options.map((each) =>
-	elem("option", [
+	elem(
+	    "option",
 	    attr({value: each.value}),
 	    each.value == default_value ? attr({selected: true}) : [],
 	    text(each.text)
-	])
+	)
     );
 }
 
 function custom_form(submit_action, reset_action, inner) {
-    return shadow_div(
-	[Asset.at("preflightCSS"), Asset.at("dialogCSS")],
-	elem("form", [
+    return div(
+	style(Asset.at("preflightCSS")),
+	style(Asset.at("dialogCSS")),
+	elem(
+	    "form",
 	    hook("submit", submit_action),
 	    reset_action ? hook("reset", reset_action) : [],
 	    elem("section", inner),
-	    div(cl("toolbar"),
+	    div(
+		cl("toolbar"),
 		submit_button(),
-		reset_action ? reset_button() : [])
-	])
+		reset_action ? reset_button() : []
+	    )
+	)
     );
 }
 
 function submit_button() {
-    return elem("input", [attr({type: "submit", value: "👌", class: "button"})]);
+    return elem("input", attr({type: "submit", value: "👌", class: "button"}));
 }
 
 function reset_button() {
-    return elem("input", [attr({type: "reset", value: "👎", class: "button"})]);
+    return elem("input", attr({type: "reset", value: "👎", class: "button"}));
 }

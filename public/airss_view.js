@@ -40,14 +40,14 @@ function alertClass(type) {
 export function render(state) {
     document.title = render_title(state);
     replay(
-	document.body, div(
-	    cl("viewport"),
-	    hook("touchstart", Controller.touchStartEvent),
-	    hook("touchmove", Controller.touchMoveEvent),
-	    div(alert(state)),
-	    div(application(state)),
-	    div(article_container(state)),
-	    div(footer(state)))
+	document.body,
+	hook("touchstart", Controller.touchStartEvent),
+	hook("touchmove", Controller.touchMoveEvent),
+	alert(state),
+	navbar(state),
+	dialog(state),
+	article_container(state),
+	footer(state)
     );
 }
 
@@ -60,77 +60,87 @@ function render_title(state) {
 }
 
 function footer(state) {
-    return [
+    return div(
 	cl("footer"),
-	div(cl("left-half"),
-	    elem("a", [
+	div(
+	    cl("left-half"),
+	    elem(
+		"a",
 		attr({
 		    href: "https://roastidio.us/roast",
 		    referrerpolicy: "no-referrer-when-downgrade"
 		}),
 		text("Roast me at Roastidious")
-	    ])),
-	div(cl("right-half"),
-	    elem("a", [
+	    )
+	),
+	div(
+	    cl("right-half"),
+	    elem(
+		"a",
 		attr({
 		    href: "https://github.com/derek-zhou/airss",
 		    referrerpolicy: "no-referrer-when-downgrade"
 		}),
 		text("Fork me on GitHub")
-	    ]))
-    ];
-}
-
-function application(state) {
-    return [
-	navbar(state),
-	dialog(state)
-    ];
+	    )
+	)
+    );
 }
 
 function navbar(state) {
-    return [
-	div(cl("navbar"),
-	    div(elem("a", [
+    return div(
+	cl("navbar"),
+	div(
+	    elem(
+		"a",
 		attr({href: "index.html"}),
-		elem("img", attr({src: Asset.at("logoImage"), class: "logo"})),
-		]),
-		elem("span", [
-		    cl("info"),
-		    text(`${state.cursor+1}/${state.length}`)
-		])),
-	    div(cl("toolbar"),
-		elem("button", [
-		    cl("button"),
-		    hook("click", Controller.clickConfigEvent),
-		    text("🔧")
-		]),
-		elem("button", [
-		    cl("button"),
-		    hook("click", Controller.clickSubscribeEvent),
-		    text("🍼")
-		]),
-		elem("button", [
-		    cl("button"),
-		    hook("click", Controller.clickLeftEvent),
-		    text("◀")
-		]),
-		elem("button", [
-		    cl("button"),
-		    hook("click", Controller.clickRightEvent),
-		    text("▶")
-		])))
-    ];
+		elem("img", cl("logo"), attr({src: Asset.at("logoImage")})),
+	    ),
+	    elem(
+		"span",
+		cl("info"),
+		text(`${state.cursor+1}/${state.length}`)
+	    )
+	),
+	div(
+	    cl("toolbar"),
+	    elem(
+		"button",
+		cl("button"),
+		hook("click", Controller.clickConfigEvent),
+		text("🔧")
+	    ),
+	    elem(
+		"button",
+		cl("button"),
+		hook("click", Controller.clickSubscribeEvent),
+		text("🍼")
+	    ),
+	    elem(
+		"button",
+		cl("button"),
+		hook("click", Controller.clickLeftEvent),
+		text("◀")
+	    ),
+	    elem(
+		"button",
+		cl("button"),
+		hook("click", Controller.clickRightEvent),
+		text("▶")
+	    )
+	)
+    );
 }
 
 function alert(state) {
     if (state.alert.text == "")
 	return [];
-    return elem("p", [
+    return elem(
+	"p",
 	cl("alert", alertClass(state.alert.type)),
 	hook("click", Controller.clickAlertEvent),
 	text(state.alert.text)
-    ]);
+    );
 }
 
 function article_container(state) {
@@ -140,11 +150,11 @@ function article_container(state) {
     if (item === undefined || hidden)
 	return [];
 
-    return [
+    return div(
 	cl("article-viewport"),
 	div(cl("article-container"), article_head(item), article(item)),
 	article_tail(state)
-    ];
+    );
 }
 
 function article_head(item) {
@@ -161,36 +171,42 @@ function article_image(item) {
     const imageUrl = item.imageUrl || Asset.at("unknownLinkImage");
     const hero_class = item.imageUrl ? "article-hero" : "article-antihero";
 
-    return div(cl(hero_class),
-	       elem("a", [
-		   attr({href: item.url, target: "_blank", rel: "noopener noreferrer"}),
-		   elem("img", [attr({src: imageUrl, alt: "thumbnail"})])
-	       ]));
+    return div(
+	cl(hero_class),
+	elem(
+	    "a",
+	    attr({href: item.url, target: "_blank", rel: "noopener noreferrer"}),
+	    elem("img", attr({src: imageUrl, alt: "thumbnail"}))
+	)
+    );
 }
 
 function article_title(item) {
     const title_text = text(item.title)
 
-    return elem("h4", [
+    return elem(
+	"h4",
 	cl("article-title"),
 	dummy(item) ? title_text : make_link(title_text, item.url)
-    ]);
+    );
 }
 
 function make_link(inner, url) {
-    return elem("a", [
+    return elem(
+	"a",
 	attr({href: url, target: "_blank", rel: "noopener noreferrer"}),
 	inner
-    ]);
+    );
 }
 
 function article_byline(item) {
-    return elem("h5", [
+    return elem(
+	"h5",
 	cl("article-byline"),
 	elem("span", text(item.feedTitle)),
 	elem("span", text(" | ")),
 	elem("span", text(item.datePublished.toLocaleString()))
-    ]);
+    );
 }
 
 function article_tail(state) {
@@ -200,12 +216,14 @@ function article_tail(state) {
 	return [];
 
     if (dummy(item)) {
-	return elem("form", [
+	return elem(
+	    "form",
 	    cl("comment-form"),
 	    div(cl("toolbar"), trash_button())
-	]);
+	);
     }
-    return elem("form", [
+    return elem(
+	"form",
 	attr({
 	    method: "post",
 	    action: "https://roastidio.us/post",
@@ -213,37 +231,42 @@ function article_tail(state) {
 	    class: "comment-form"
 	}),
 	elem("input", attr({type: "hidden", name: "url", value: item.url})),
-	elem("textarea", [
+	elem(
+	    "textarea",
 	    attr({name: "content"}),
 	    hook("keydown", stopPropagation),
 	    hook("focus", Controller.focus_element),
 	    hook("blur", Controller.blur_element),
 	    hook("input", autoAdjustHeight)
-	]),
-	div(cl("toolbar"),
+	),
+	div(
+	    cl("toolbar"),
 	    trash_button(),
 	    refresh_button(state.refreshing),
-	    roast_button())
-    ]);
+	    roast_button()
+	)
+    );
 }
 
 function trash_button() {
-    return elem("button", [
+    return elem(
+	"button",
 	cl("button"),
 	hook("click", Controller.clickTrashEvent),
 	text("🗑 ")
-    ]);
+    );
 }
 
 function refresh_button(refreshing) {
-    return elem("button", [
+    return elem(
+	"button",
 	cl("button"),
 	refreshing ? attr({disabled: true}) : [],
 	hook("click", Controller.clickRefreshEvent),
 	text("📃")
-    ]);
+    );
 }
 
 function roast_button() {
-    return elem("input", [attr({type: "submit", value: "🔥", class:"button"})]);
+    return elem("input", attr({type: "submit", value: "🔥", class:"button"}));
 }

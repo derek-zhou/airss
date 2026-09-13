@@ -1,9 +1,10 @@
 import * as Asset from './assets.js';
-import {elem, text, fill, attr, shadow_div} from "./domfun.js";
+import {elem, text, fill, attr, cl, div, style} from "./domfun.js";
 
 export function article(item) {
-    return shadow_div(
-	[Asset.at("preflightCSS"), Asset.at("articleCSS")],
+    return div(
+	style(Asset.at("preflightCSS")),
+	style(Asset.at("articleCSS")),
 	item ? real_article(item) : dummy_article()
     );
 }
@@ -11,7 +12,7 @@ export function article(item) {
 function real_article(item) {
     return [
 	fill(item.contentHtml),
-	(node) => fixup_links(node, item.url)
+	(node) => fixup_links(node.shadowRoot, item.url)
     ];
 }
 
@@ -42,56 +43,78 @@ function fixup_links(container, url) {
 function dummy_article() {
     return [
 	elem("h2", text("No news is bad news")),
-	elem("p", [
-	    text("Airss is a web feed reader that runs entirely in your browser. You can subscribe any feeds by clicking the 🍼 button from above and paste the URL, or you can use of one of the following tricks: ")
-	]),
+	elem(
+	    "p",
+	    text(
+		"Airss is a web feed reader that runs entirely in your browser. You can subscribe any feeds by clicking the 🍼 button from above and paste the URL, or you can use of one of the following tricks: "
+	    )
+	),
 	elem("h3", text("Desktop browser users")),
-	elem("p", [
+	elem(
+	    "p",
 	    text("Install this bookmarklet "),
-	    elem("a", [
+	    elem(
+		"a",
+		cl("button"),
 		attr({
-		    href: "javascript:location.href='{airssPrefix}?url='+encodeURIComponent(window.location.href)",
-		    class: "button"
-		}),
+		    href: "javascript:location.href='{airssPrefix}?url='+encodeURIComponent(window.location.href)"}),
 		text(" Subscribe it in Airss")
-	    ]),
+	    ),
 	    text(" "),
 	    elem("b", text("by dragging it to your bookmarks")),
-	    text(". Whenever you encounter something interesting on the web, be it a blog, a news website or whatever, you can click this bookmarklet to subscribe. Chances are they support RSS feeds so you will always stay updated.")
-	]),
+	    text(
+		". Whenever you encounter something interesting on the web, be it a blog, a news website or whatever, you can click this bookmarklet to subscribe. Chances are they support RSS feeds so you will always stay updated."
+	    )
+	),
 	elem("h3", text("Mobile browser users")),
-	elem("p", [
+	elem(
+	    "p",
 	    text("Android users can install this APP: "),
-	    elem("a", [
+	    elem(
+		"a",
 		attr({href: "https://f-droid.org/en/packages/net.daverix.urlforward/"}),
 		text("URL Forwarder")
-	    ]),
+	    ),
 	    text(" (Thank you, David Laurell!) then add a filter as:")
-	]),
+	),
 	elem("pre", text("https://airss.roastidio.us/?url=@url")),
-	elem("p", [
-	    text("Then you can share links to the APP and select the menu to subscribe, if it support RSS feeds.")
-	]),
-	elem("p", [
-	    text("iOS Safari users can use the bookmarklet method as mentioned earlier by syncing the bookmarklet from your Mac.")
-	]),
+	elem(
+	    "p",
+	    text(
+		"Then you can share links to the APP and select the menu to subscribe, if it support RSS feeds."
+	    )
+	),
+	elem(
+	    "p",
+	    text(
+		"iOS Safari users can use the bookmarklet method as mentioned earlier by syncing the bookmarklet from your Mac."
+	    )
+	),
 	elem("h2", text("To my fellow bloggers")),
-	elem("p", [
+	elem(
+	    "p",
 	    text("Please make sure you have your feed "),
-	    elem("a", [
+	    elem(
+		"a",
 		attr({href: "https://www.rssboard.org/rss-autodiscovery"}),
 		text("auto-discoverable")
-	    ]),
+	    ),
 	    text(" from your homepage. And if you can, please enable "),
-	    elem("a", [
+	    elem(
+		"a",
 		attr({href: "https://enable-cors.org/"}),
 		text("permissive CORS")
-	    ]),
-	    text(" on your blog to reach out to a broader audience. Lastly, if you really like Airss, you can put a link on your homepage:")
-	]),
-	elem("pre", [
-	    text("<a href=\"https://airss.roastidio.us/?subscribe-referrer\" referrerpolicy=\"no-referrer-when-downgrade\">Follow me with Airss!</a>")
-	]),
+	    ),
+	    text(
+		" on your blog to reach out to a broader audience. Lastly, if you really like Airss, you can put a link on your homepage:"
+	    )
+	),
+	elem(
+	    "pre",
+	    text(
+		"<a href=\"https://airss.roastidio.us/?subscribe-referrer\" referrerpolicy=\"no-referrer-when-downgrade\">Follow me with Airss!</a>"
+	    )
+	),
 	elem("p", text("So your readers can have an even easier time to follow you."))
     ];
 }

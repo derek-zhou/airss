@@ -1,7 +1,11 @@
 // a functional way to manipulate DOM
-export function replay(subject, script) {
+export function replay() {
+    const subject = arguments[0];
     clear(subject);
-    play(subject, script);
+    for (const one of arguments) {
+	if (one !== subject)
+	    play(subject, one);
+    }
 }
 
 export function hook(type, handler) {
@@ -12,26 +16,36 @@ export function hook(type, handler) {
 
 export function fill(html) {
     return (node) => {
-	node.innerHTML = html;
+	let n = node.shadowRoot || node;
+	n.innerHTML = html;
     };
 }
 
 export function attr(attributes) {
     return (node) => {
-	let n = node.host || node;
 	for (const key in attributes) {
-	    n.setAttribute(key, attributes[key]);
+	    node.setAttribute(key, attributes[key]);
 	}
     };
 }
 
 export function cl() {
     return (node) => {
-	let n = node.host || node;
 	for (const one of arguments) {
-	    n.classList.add(one);
+	    node.classList.add(one);
 	}
     };
+}
+
+// style call must be beform any node appending call because it will create shadowRoot on demand
+export function style(sheet) {
+    return (node) => {
+	let shadow_root = node.shadowRoot;
+	if (!shadow_root) {
+	    shadow_root = node.attachShadow({ mode: "open" });
+	}
+	shadow_root.adoptedStyleSheets.push(sheet);
+    }
 }
 
 export function text(t) {
@@ -39,14 +53,13 @@ export function text(t) {
     return append(element);
 }
 
-export function graft(element, script) {
-    replay(element, script);
-    return append(element);
-}
-
-export function elem(tag, script) {
+export function elem() {
+    const tag = arguments[0];
     const element = document.createElement(tag);
-    play(element, script);
+    for (const one of arguments) {
+	if (one !== tag)
+	    play(element, one);
+    }
     return append(element);
 }
 
@@ -59,18 +72,10 @@ export function div() {
     return append(element);
 }
 
-export function shadow_div(styles, script) {
-    const element = document.createElement("div");
-    // close shadow root because we are not going to mess with it afterward
-    const shadow_root = element.attachShadow({ mode: "closed" });
-    shadow_root.adoptedStyleSheets = styles;
-    play(shadow_root, script);
-    return append(element);
-}
-
 function append(element) {
     return (node) => {
-	node.append(element);
+	let n = node.shadowRoot || node;
+	n.append(element);
     };
 }
 
