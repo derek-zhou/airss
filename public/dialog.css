@@ -81,7 +81,7 @@ form .button {
     text-align: center;
     font-size: 1.125rem;
     line-height: 1.75rem;
-    font-weight: 700;
+    font-weight: bold;
     background-color: royalblue;
     color: white;
 }
@@ -119,7 +119,7 @@ form label {
     column-gap: 0.5rem;
 }
 form label .focus {
-    font-weight: 700;
+    font-weight: bold;
     font-style: italic;
 }
 form select {

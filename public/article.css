@@ -42,36 +42,36 @@ h1 {
     margin-bottom: 1rem;
     text-align: center;
     font-size: 1.5rem;
-    font-weight: 700;
+    font-weight: bold;
     line-height: 1.625;
 }
 h2 {
     margin-bottom: 0.75rem;
     font-size: 1.5rem;
-    font-weight: 700;
+    font-weight: bold;
     line-height: 1.625;
 }
 h3 {
     margin-bottom: 0.5rem;
     font-size: 1.25rem;
-    font-weight: 700;
+    font-weight: bold;
     line-height: 1.625;
 }
 h4 {
     margin-bottom: 0.25rem;
     font-size: 1.125rem;
-    font-weight: 700;
+    font-weight: bold;
     line-height: 1.625;
 }
 h5 {
     margin-bottom: 0.25rem;
-    font-weight: 700;
+    font-weight: bold;
     text-transform: uppercase;
     line-height: 1.625;
 }
 h6 {
     margin-bottom: 0.25rem;
-    font-weight: 700;
+    font-weight: bold;
     line-height: 1.625;
 }
 p {

@@ -41,7 +41,8 @@ html {
     opacity: 0.5;
 }
 .alert {
-    margin-bottom: 0px;
+    margin-top: 0rem;
+    margin-bottom: 0rem;
     border-radius: 0.25rem;
     padding: 0.5rem;
     background-color: khaki;
@@ -117,7 +118,7 @@ div.navbar div.toolbar button {
     background-color: transparent;
     color: orchid;
     appearance: none;
-    font-weight: 700;
+    font-weight: bold;
     font-size: 1.125rem;
     line-height: 1.75rem;
     text-align: center;
@@ -149,7 +150,7 @@ div.article-hero img {
     max-height: 12rem;
 }
 h4.article-title {
-    font-weight: 700;
+    font-weight: bold;
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
     font-size: 1.125rem;
@@ -160,6 +161,7 @@ h5.article-byline {
     margin-top: 0rem;
     margin-bottom: 1rem;
     font-size: 0.875rem;
+    font-weight: normal;
     line-height: 1.375;
     color: darkgray;
 }
@@ -196,7 +198,7 @@ form .button {
     text-align: center;
     font-size: 1.125rem;
     line-height: 1.75rem;
-    font-weight: 700;
+    font-weight: bold;
     background-color: royalblue;
     color: white;
 }
