@@ -294,7 +294,6 @@ function build_options(options, default_value) {
 
 function custom_form(submit_action, reset_action, inner) {
     return div(
-	style(Asset.at("preflightCSS")),
 	style(Asset.at("dialogCSS")),
 	elem(
 	    "form",

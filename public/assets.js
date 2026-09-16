@@ -8,7 +8,6 @@ const Images = {
 };
 
 const Styles = {
-    preflightCSS: "./preflight.css",
     articleCSS: "./article.css",
     dialogCSS: "./dialog.css"
 };

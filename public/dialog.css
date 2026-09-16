@@ -1,7 +1,40 @@
+*,
+::before,
+::after {
+    box-sizing: border-box;
+    border-width: 0;
+    border-style: solid;
+}
+button,
+input,
+optgroup,
+select,
+textarea {
+    font-family: inherit;
+    font-size: 100%;
+    line-height: inherit;
+}
+a {
+    color: royalblue;
+    text-decoration: inherit;
+}
+a:focus,
+a:hover {
+    color: steelblue;
+}
+button {
+    margin: 0rem;
+    padding: 0rem;
+    cursor: pointer;
+}
+:host {
+    line-height: 1.5;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
 form {
     display: flex;
     flex-direction: column;
-    background-color: rgb(249 250 251);
+    background-color: ghostwhite;
     padding: 0.5rem;
 }
 form .line {
@@ -33,7 +66,7 @@ form .center {
 }
 form hr {
     margin-bottom: 0.5rem;
-    border-color: rgb(229 231 235);
+    border-color: gainsboro;
 }
 form .button {
     display: inline-block;
@@ -49,18 +82,18 @@ form .button {
     font-size: 1.125rem;
     line-height: 1.75rem;
     font-weight: 700;
-    background-color: rgb(147 51 234);
-    color: rgb(255 255 255);
+    background-color: orchid;
+    color: white;
 }
 form .button[type=reset] {
-    background-color: rgb(219 39 119);
+    background-color: crimson;
 }
 form .button[type=submit] {
-    background-color: rgb(147 51 234);
+    background-color: darkorchid;
 }
 form .button.inline {
-    color: rgb(147 51 234);
-    background-color: rgb(249 250 251);
+    color: orchid;
+    background-color: transparent;
     padding: 0rem;
     line-height: 1rem;
 }
@@ -75,6 +108,7 @@ form .toolbar {
 form section {
     border-bottom-width: 1px;
     padding-top: 0.5rem;
+    border-color: gainsboro;
 }
 form section:last-child {
     border-bottom-width: 0px;
@@ -91,7 +125,7 @@ form label .focus {
 form select {
     border-radius: 0.25rem;
     border-width: 1px;
-    border-color: rgb(75 85 99);
+    border-color: lightslategray;
     padding-left: 0.25rem;
 }
 form .code {
@@ -109,14 +143,14 @@ form input[type=number] {
     width: 4rem;
     border-radius: 0.25rem;
     border-width: 1px;
-    border-color: rgb(75 85 99);
+    border-color: lightslategray;
     line-height: 1.625;
 }
 form input[type=text] {
     width: 12rem;
     border-radius: 0.25rem;
     border-width: 1px;
-    border-color: rgb(75 85 99);
+    border-color: lightslategray;
     line-height: 1.625;
 }
 form input[type=text].long {
@@ -129,14 +163,14 @@ form input[type=email] {
     width: 20rem;
     border-radius: 0.25rem;
     border-width: 1px;
-    border-color: rgb(75 85 99);
+    border-color: lightslategray;
     line-height: 1.625;
 }
 form input[type=password] {
     width: 10rem;
     border-radius: 0.25rem;
     border-width: 1px;
-    border-color: rgb(147 51 234);
+    border-color: lightslategray;
     line-height: 1.625;
 }
 

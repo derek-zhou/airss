@@ -3,7 +3,6 @@ import {elem, text, fill, attr, cl, div, style} from "./domfun.js";
 
 export function article(item) {
     return div(
-	style(Asset.at("preflightCSS")),
 	style(Asset.at("articleCSS")),
 	item ? real_article(item) : dummy_article()
     );

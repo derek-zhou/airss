@@ -1,3 +1,32 @@
+*,
+::before,
+::after {
+    box-sizing: border-box;
+    border-width: 0;
+    border-style: solid;
+}
+button,
+input,
+optgroup,
+select,
+textarea {
+    font-family: inherit;
+    font-size: 100%;
+    line-height: inherit;
+}
+a {
+    color: royalblue;
+    text-decoration: inherit;
+}
+a:focus,
+a:hover {
+    color: steelblue;
+}
+button {
+    margin: 0rem;
+    padding: 0rem;
+    cursor: pointer;
+}
 :host {
     font-family:
 	ui-serif,
@@ -8,14 +37,6 @@
 	serif;
     margin-bottom: 0.5rem;
     line-height: 1.375;
-    color: rgb(31 41 55);
-}
-a {
-    color: rgb(37 99 235);
-}
-a:focus,
-a:hover {
-    color: rgb(75 85 99);
 }
 h1 {
     margin-bottom: 1rem;
@@ -78,7 +99,7 @@ textarea {
     width: 100%;
     border-radius: 0.25rem;
     border-width: 1px;
-    border-color: rgb(75 85 99);
+    border-color: lightslategray;
     padding: 0.25rem;
     font-size: 0.875rem;
     line-height: 1.25rem;
@@ -87,12 +108,12 @@ table {
     margin-bottom: 1rem;
     border-collapse: collapse;
     border-width: 2px;
-    border-color: rgb(156 163 175);
+    border-color: lightslategray;
 }
 table th,
 table td {
     border-width: 1px;
-    border-color: rgb(156 163 175);
+    border-color: lightslategray;
     padding: 0.75rem;
     vertical-align: top;
 }
@@ -101,12 +122,12 @@ table thead th {
     vertical-align: bottom;
 }
 table tr.odd {
-    background-color: rgb(249 250 251);
+    background-color: white;
 }
 blockquote {
     margin-bottom: 1rem;
     border-left-width: 4px;
-    border-color: rgb(156 163 175);
+    border-color: lightslategray;
     padding: 0.5rem;
 }
 blockquote p {
@@ -118,7 +139,7 @@ pre {
 }
 pre > code {
     display: block;
-    background-color: rgb(249 250 251);
+    background-color: gainsboro;
 }
 dd,
 dt,

@@ -251,7 +251,7 @@ function article_tail(state) {
 function trash_button() {
     return elem(
 	"button",
-	cl("button"),
+	cl("button", "danger"),
 	hook("click", Controller.clickTrashEvent),
 	text("🗑 ")
     );

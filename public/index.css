@@ -1,13 +1,39 @@
+*,
+::before,
+::after {
+    box-sizing: border-box;
+    border-width: 0;
+    border-style: solid;
+}
+button,
+input,
+optgroup,
+select,
+textarea {
+    font-family: inherit;
+    font-size: 100%;
+    line-height: inherit;
+}
 a {
-    color: rgb(37 99 235);
+    color: royalblue;
+    text-decoration: inherit;
 }
 a:focus,
 a:hover {
-    color: rgb(75 85 99);
+    color: steelblue;
+}
+button {
+    margin: 0rem;
+    padding: 0rem;
+    cursor: pointer;
+}
+html {
+    line-height: 1.5;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 .button:focus,
 .button:hover {
-    color: rgb(75 85 99);
+    color: steelblue;
 }
 .button[disabled] {
     pointer-events: none;
@@ -18,25 +44,24 @@ a:hover {
     margin-bottom: 0px;
     border-radius: 0.25rem;
     padding: 0.5rem;
-    background-color: rgb(254 240 138);
+    background-color: khaki;
 }
 .alert-info {
-    color: rgb(29 78 216);
+    color: royalblue;
 }
 .alert-warning {
-    color: rgb(126 34 206);
+    color: orchid;
 }
 .alert-danger {
-    color: rgb(185 28 28);
+    color: crimson;
 }
-
 body {
     position: relative;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    margin: 0rem;
 }
-
 div.article-viewport {
     display: flex;
     flex-direction: column;
@@ -47,7 +72,7 @@ div.footer {
     display: flex;
     font-size: 0.875rem;
     line-height: 1.25rem;
-    color: rgb(55 65 81);
+    color: teal;
     padding: 0.5rem;
     text-align: center;
 }
@@ -65,7 +90,7 @@ div.right-half {
 div.navbar {
     display: flex;
     padding: 0.5rem;
-    background-color: rgb(243 244 246);
+    background-color: whitesmoke;
 }
 
 div.navbar img.logo {
@@ -74,7 +99,7 @@ div.navbar img.logo {
 }
 
 div.navbar span.info {
-    color: rgb(75 85 99);
+    color: darkslategray;
     vertical-align: bottom;
     white-space: nowrap;
 }
@@ -89,7 +114,8 @@ div.navbar div.toolbar button {
     padding-top: 0.25rem;
     padding-bottom: 0.25rem;
     border-radius: 0.25rem;
-    color: rgb(147 51 234);
+    background-color: transparent;
+    color: orchid;
     appearance: none;
     font-weight: 700;
     font-size: 1.125rem;
@@ -102,7 +128,7 @@ div.navbar div.toolbar button {
 
 div.article-container {
     display: flow-root;
-    background-color: rgb(255 255 255);
+    background-color: white;
     padding: 0.5rem;
     width: 100%;
     flex-grow: 1;
@@ -133,14 +159,14 @@ h4.article-title {
 h5.article-byline {
     font-size: 0.875rem;
     line-height: 1.375;
-    color: rgb(156 163 175);
+    color: darkgray;
 }
 h5.article-byline span {
     white-space: nowrap;
 }
 form {
     place-self: end;
-    background-color: rgb(255 255 255);
+    background-color: white;
     padding: 0px;
     width: 100%;
 }
@@ -150,7 +176,7 @@ form textarea {
       border-radius: 0.25rem;
       resize: none;
       box-sizing: border-box;
-      border-color: rgb(75 85 99);
+      border-color: darkslategray;
       height: 5rem;
       padding: 0.25rem;
       width: 100%;
@@ -169,8 +195,17 @@ form .button {
     font-size: 1.125rem;
     line-height: 1.75rem;
     font-weight: 700;
-    background-color: rgb(147 51 234);
-    color: rgb(255 255 255);
+    background-color: orchid;
+    color: white;
+}
+form .button[type=reset] {
+    background-color: crimson;
+}
+form .button.danger {
+    background-color: crimson;
+}
+form .button[type=submit] {
+    background-color: darkorchid;
 }
 form .toolbar {
     display: flex;
