@@ -157,6 +157,8 @@ h4.article-title {
     width: 100%;
 }
 h5.article-byline {
+    margin-top: 0rem;
+    margin-bottom: 1rem;
     font-size: 0.875rem;
     line-height: 1.375;
     color: darkgray;
@@ -195,7 +197,7 @@ form .button {
     font-size: 1.125rem;
     line-height: 1.75rem;
     font-weight: 700;
-    background-color: orchid;
+    background-color: royalblue;
     color: white;
 }
 form .button[type=reset] {
