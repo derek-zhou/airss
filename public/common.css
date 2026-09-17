@@ -1,0 +1,39 @@
+*,
+::before,
+::after {
+    box-sizing: border-box;
+    border-width: 0;
+    border-style: solid;
+}
+button,
+input,
+optgroup,
+select,
+textarea {
+    font-family: inherit;
+    font-size: 100%;
+    line-height: inherit;
+}
+a {
+    color: blue;
+    text-decoration: inherit;
+}
+a:focus,
+a:hover {
+    color: royalblue;
+}
+button {
+    margin: 0rem;
+    padding: 0rem;
+    cursor: pointer;
+    background-color: transparent;
+}
+.button:focus,
+.button:hover {
+    color: royalblue;
+}
+.button[disabled] {
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.5;
+}
