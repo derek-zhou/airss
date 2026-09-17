@@ -331,7 +331,7 @@ function article_tail(state) {
 		cl("toolbar"),
 		elem(
 		    "button",
-		    cl("button", "convenient",
+		    cl("button", "convenient"),
 		    real_item && !state.refreshing ? [] : attr({disabled: true}),
 		    hook("click", Controller.clickRefreshEvent),
 		    text("📃")
