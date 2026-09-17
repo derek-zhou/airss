@@ -317,7 +317,7 @@ function article_tail(state) {
 	    }),
 	    div(
 		cl("form-body"),
-		elem("input", attr({type: "hidden", name: "url", value: item.url})),
+		elem("input", attr({type: "hidden", name: "url", value: url})),
 		elem(
 		    "textarea",
 		    attr({name: "content"}),
