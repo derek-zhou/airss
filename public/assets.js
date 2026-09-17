@@ -8,6 +8,7 @@ const Images = {
 };
 
 const Styles = {
+    commonCSS: "./common.css",
     articleCSS: "./article.css",
     dialogCSS: "./dialog.css"
 };

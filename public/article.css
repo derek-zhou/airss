@@ -1,32 +1,3 @@
-*,
-::before,
-::after {
-    box-sizing: border-box;
-    border-width: 0;
-    border-style: solid;
-}
-button,
-input,
-optgroup,
-select,
-textarea {
-    font-family: inherit;
-    font-size: 100%;
-    line-height: inherit;
-}
-a {
-    color: royalblue;
-    text-decoration: inherit;
-}
-a:focus,
-a:hover {
-    color: steelblue;
-}
-button {
-    margin: 0rem;
-    padding: 0rem;
-    cursor: pointer;
-}
 :host {
     font-family:
 	ui-serif,
@@ -35,10 +6,14 @@ button {
 	"Times New Roman",
 	Times,
 	serif;
-    margin-bottom: 0.5rem;
+    visibility: visible;
     line-height: 1.375;
 }
+.highlighted-fragment {
+    background-color: gainsboro;
+}
 h1 {
+    margin-top: 2rem;
     margin-bottom: 1rem;
     text-align: center;
     font-size: 1.5rem;
@@ -46,30 +21,35 @@ h1 {
     line-height: 1.625;
 }
 h2 {
+    margin-top: 1.5rem;
     margin-bottom: 0.75rem;
     font-size: 1.5rem;
     font-weight: bold;
     line-height: 1.625;
 }
 h3 {
+    margin-top: 1rem;
     margin-bottom: 0.5rem;
     font-size: 1.25rem;
     font-weight: bold;
     line-height: 1.625;
 }
 h4 {
+    margin-top: 0.5rem;
     margin-bottom: 0.25rem;
     font-size: 1.125rem;
     font-weight: bold;
     line-height: 1.625;
 }
 h5 {
+    margin-top: 0.5rem;
     margin-bottom: 0.25rem;
     font-weight: bold;
     text-transform: uppercase;
     line-height: 1.625;
 }
 h6 {
+    margin-top: 0.5rem;
     margin-bottom: 0.25rem;
     font-weight: bold;
     line-height: 1.625;
@@ -105,15 +85,6 @@ figure figcaption {
 img {
     max-width: 100%;
 }
-textarea {
-    width: 100%;
-    border-radius: 0.25rem;
-    border-width: 1px;
-    border-color: lightslategray;
-    padding: 0.25rem;
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-}
 table {
     margin-top: 0rem;
     margin-bottom: 1rem;
@@ -135,7 +106,7 @@ table thead th {
     vertical-align: bottom;
 }
 table tr.odd {
-    background-color: white;
+    background-color: gainsboro;
 }
 blockquote {
     margin-top: 0rem;
@@ -150,51 +121,95 @@ blockquote p {
     margin-bottom: 0rem;
 }
 pre {
-    margin-top: 0rem;
-    margin-bottom: 1rem;
-    margin-left: 0.5rem;
-    margin-right: 0rem;
     white-space: pre-wrap;
     padding: 0.5rem;
 }
 pre > code {
     display: block;
-    background-color: gainsboro;
 }
-dd,
-dt,
-li {
-    margin-bottom: 0.25rem;
+.card {
+    display: flow-root;
 }
-
+.card .thumbnail {
+    display: flex;
+    justify-content: center;
+}
+.card .thumbnail img {
+    max-height: 20rem;
+    width: auto;
+    max-width: 100%;
+}
+.card .title {
+    margin-bottom: 0.5rem;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    font-weight: bold;
+    line-height: 1.25;
+}
+.card .url {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    padding-top: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    line-height: 1.25;
+}
+.card .site {
+    white-space: nowrap;
+    color: darkgray;
+}
+a.attachment {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    padding-top: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    line-height: 1.25;
+}
 @media (min-width: 512px) {
+ @media (min-width: 512px) {
     :host {
 	font-size: 1.125rem;
 	line-height: 1.625;
     }
-    h1 {
-	font-size: 1.875rem;
+     h1 {
+ 	font-size: 1.875rem;
 	line-height: 2.25rem;
-    }
-    h2 {
-	font-size: 1.875rem;
+     }
+     h2 {
+ 	font-size: 1.875rem;
 	line-height: 2.25rem;
-    }
-    h3 {
-	font-size: 1.5rem;
+     }
+     h3 {
+ 	font-size: 1.5rem;
 	line-height: 2rem;
-    }
-    h4 {
-	font-size: 1.25rem;
+     }
+     h4 {
+ 	font-size: 1.25rem;
 	line-height: 1.75rem;
-    }
-    img {
-	max-width: 28rem;
-    }
+     }
+     img {
+ 	max-width: 28rem;
 }
 
 @media (min-width: 768px) {
     img {
 	max-width: 32rem;
+    }
+    .card .thumbnail {
+	float: right;
+    }
+    .card .thumbnail {
+	margin-left: 0.5rem;
+    }
+    .card .headline {
+	margin-top: 0.5rem;
+	margin-bottom: 0.25rem;
+	clear: both;
+    }
+    .card .url {
+	clear: both;
     }
 }

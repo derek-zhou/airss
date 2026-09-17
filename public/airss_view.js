@@ -8,16 +8,6 @@ import {replay, hook, elem, text, attr, cl, div} from "./domfun.js";
  * The view layer of AirSS.
  */
 
-function stopPropagation(e) {
-    e.stopImmediatePropagation();
-}
-
-function autoAdjustHeight(e) {
-    const textarea = e.currentTarget;
-    const offset = textarea.offsetHeight - textarea.clientHeight;
-    textarea.style.height = textarea.scrollHeight + offset + 'px';
-}
-
 export function dummy(item) {
     if (!item)
 	return true;
@@ -45,8 +35,8 @@ export function render(state) {
 	hook("touchmove", Controller.touchMoveEvent),
 	alert(state),
 	navbar(state),
-	dialog(state),
 	article_container(state),
+	dialog(state),
 	footer(state)
     );
 }
@@ -149,12 +139,8 @@ function article_container(state) {
 
     if (item === undefined || hidden)
 	return [];
-
-    return div(
-	cl("article-viewport"),
-	div(cl("article-container"), article_head(item), article(item)),
-	article_tail(state)
-    );
+    else
+	return div(cl("article-container"), article_head(item), article(item));
 }
 
 function article_head(item) {
@@ -207,66 +193,4 @@ function article_byline(item) {
 	elem("span", text(" | ")),
 	elem("span", text(item.datePublished.toLocaleString()))
     );
-}
-
-function article_tail(state) {
-    let item = state.currentItem;
-
-    if (!item)
-	return [];
-
-    if (dummy(item)) {
-	return elem(
-	    "form",
-	    cl("comment-form"),
-	    div(cl("toolbar"), trash_button())
-	);
-    }
-    return elem(
-	"form",
-	attr({
-	    method: "post",
-	    action: "https://roastidio.us/post",
-	    target: "_blank",
-	    class: "comment-form"
-	}),
-	elem("input", attr({type: "hidden", name: "url", value: item.url})),
-	elem(
-	    "textarea",
-	    attr({name: "content"}),
-	    hook("keydown", stopPropagation),
-	    hook("focus", Controller.focus_element),
-	    hook("blur", Controller.blur_element),
-	    hook("input", autoAdjustHeight)
-	),
-	div(
-	    cl("toolbar"),
-	    trash_button(),
-	    refresh_button(state.refreshing),
-	    roast_button()
-	)
-    );
-}
-
-function trash_button() {
-    return elem(
-	"button",
-	cl("button", "danger"),
-	hook("click", Controller.clickTrashEvent),
-	text("🗑 ")
-    );
-}
-
-function refresh_button(refreshing) {
-    return elem(
-	"button",
-	cl("button"),
-	refreshing ? attr({disabled: true}) : [],
-	hook("click", Controller.clickRefreshEvent),
-	text("📃")
-    );
-}
-
-function roast_button() {
-    return elem("input", attr({type: "submit", value: "🔥", class:"button"}));
 }
