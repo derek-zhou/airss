@@ -317,6 +317,7 @@ function article_tail(state) {
 	    }),
 	    div(
 		cl("form-body"),
+		elem("h2", text("Write a comment on roastidio.us about this article")),
 		elem("input", attr({type: "hidden", name: "url", value: url})),
 		elem(
 		    "textarea",

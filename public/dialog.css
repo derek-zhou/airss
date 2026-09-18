@@ -3,12 +3,11 @@
     font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 h2 {
-    margin-left: 2rem;
     margin-top: 1rem;
-    margin-bottom: 0.75rem;
-    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
     font-weight: bold;
-    line-height: 1.625;
+    line-height: 1.5;
     text-align: center;
 }
 form {
