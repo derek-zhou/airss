@@ -346,7 +346,7 @@ function article_tail(state) {
 		elem(
 		    "button",
 		    cl("button", "danger"),
-		    real_item ? [] : attr({disabled: true}),
+		    item ? [] : attr({disabled: true}),
 		    hook("click", Controller.clickTrashEvent),
 		    text("🗑 ")
 		),
