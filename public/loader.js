@@ -399,7 +399,7 @@ function processItems(rawItems, feed, parseFunc, sanitize) {
 		item.feedTitle = feed.title;
 		item.feedId = feed.id;
 		item.title = Sanitizer.sanitizeText(item.title);
-		item.contentHtml = sanitize ? Sanitizer.sanitizeHtml(item.contentHtml) : item.contentHtml;
+		item.contentHtml = Sanitizer.sanitizeHtml(item.contentHtml);
 		items = [...items, item];
 	    }
 	}
