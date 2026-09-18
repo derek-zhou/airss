@@ -3,12 +3,25 @@
     font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 h2 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    line-height: 1.625;
+}
+h3 {
     margin-top: 1rem;
     margin-bottom: 0.5rem;
     font-size: 1.25rem;
     font-weight: bold;
-    line-height: 1.5;
-    text-align: center;
+    line-height: 1.625;
+}
+h4 {
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
+    font-size: 1.125rem;
+    font-weight: bold;
+    line-height: 1.625;
 }
 form {
     display: flex;
@@ -28,6 +41,10 @@ div.line {
     gap: 0.5rem;
     flex-direction: row;
     justify-content: center;
+}
+label.danger {
+    color: crimson;
+    font-weight: bold;
 }
 div.line span.value {
     font-style: italic;

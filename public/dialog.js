@@ -182,7 +182,7 @@ function config_dialog(state) {
 		cl("line"),
 		elem(
 		    "label",
-		    cl("alert", "alert-danger"),
+		    cl("danger"),
 		    text("Danger! Type \"clear database\" to delete all data")
 		),
 		elem("input", attr({type: "text", name: Config.clearDatabase}))
@@ -317,7 +317,7 @@ function article_tail(state) {
 	    }),
 	    div(
 		cl("form-body"),
-		elem("h2", text("Write a comment on roastidio.us about this article")),
+		elem("h4", text("Write a comment on roastidio.us about this article")),
 		elem("input", attr({type: "hidden", name: "url", value: url})),
 		elem(
 		    "textarea",
