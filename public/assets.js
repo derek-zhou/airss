@@ -9,6 +9,7 @@ const Images = {
 
 const Styles = {
     commonCSS: "./common.css",
+    appCSS: "./app.css",
     articleCSS: "./article.css",
     dialogCSS: "./dialog.css"
 };

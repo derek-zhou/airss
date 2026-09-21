@@ -82,11 +82,19 @@ function append(element) {
 function clear(node) {
     removeAllChildren(node);
     removeAllAttributes(node);
+    removeAllStyles(node);
+}
+
+function removeAllStyles(node) {
+    let shadow = node.shadowRoot;
+    if (shadow)
+	shadow.adoptedStyleSheets = [];
 }
 
 function removeAllChildren(node) {
     const junk = [];
-    for (const child of node.childNodes) {
+    let n = node.shadowRoot || node;
+    for (const child of n.childNodes) {
 	junk.push(child);
     }
     for (const elem of junk) {

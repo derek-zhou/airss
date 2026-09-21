@@ -2,7 +2,7 @@ import * as Controller from "./airss_controller.js";
 import * as Asset from "./assets.js";
 import {article} from "./article.js";
 import {dialog} from "./dialog.js";
-import {replay, hook, elem, text, attr, cl, div} from "./domfun.js";
+import {replay, hook, elem, text, attr, cl, style, div} from "./domfun.js";
 
 /*
  * The view layer of AirSS.
@@ -31,6 +31,8 @@ export function render(state) {
     document.title = render_title(state);
     replay(
 	document.body,
+	style(Asset.at("commonCSS")),
+	style(Asset.at("appCSS")),
 	hook("touchstart", Controller.touchStartEvent),
 	hook("touchmove", Controller.touchMoveEvent),
 	alert(state),
