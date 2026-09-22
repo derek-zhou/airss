@@ -158,12 +158,13 @@ function isCurrentItem(item) {
     return item.id == items[reading];
 }
 
-async function load(db) {
+async function load(db, last_id) {
     let cursor = await openCursor(db, Store, IDBKeyRange.lowerBound(0), "prev");
     let perFeedCounter = new Map();
     let buffer = [];
     let unread = 0;
     let counter = 0;
+    let pointer = -1;
     let expired = [];
     let now = new Date();
     let maxKeptPeriod = parseInt(localStorage.getItem("MAX_KEPT_PERIOD")) || 180;
@@ -179,6 +180,8 @@ async function load(db) {
 	    thisCount < maxKeptItems) {
 	    buffer.push(cursor.key);
 	    counter ++;
+	    if (cursor.key === last_id)
+		pointer = counter;
 	    perFeedCounter.set(feedId, thisCount + 1);
 	    Feeds.addItem(feedId, cursor.value.id);
 	    // items from the beginning up to a point are read
@@ -198,7 +201,9 @@ async function load(db) {
 	await deleteObject(db, Store, id);
     }
     items = buffer.reverse();
-    if (unread == 0) {
+    if (pointer > 0) {
+	reading = counter - pointer;
+    } else if (unread == 0) {
 	reading = counter - 1;
     } else {
 	reading = counter - unread;

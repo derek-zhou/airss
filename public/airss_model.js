@@ -55,14 +55,14 @@ async function cb_maybeLoad(prev) {
 }
 
 // the init callback
-async function cb_init(prev) {
+async function cb_init(prev, last_id) {
     await prev;
     db = await openDB("AirSS", 1, (db) => {
  	Feeds.upgrade(db);
 	Items.upgrade(db);
     });
     let feedIds = await Feeds.load(db);
-    let itemIds = await Items.load(db);
+    let itemIds = await Items.load(db, last_id);
     let item = await Items.getCurrentItem(db);
     itemsLoadedEvent(Items.length(), Items.readingCursor());
     itemUpdatedEvent(item);
@@ -329,8 +329,8 @@ async function cb_allFeedUrls(prev) {
  */
 let state = null;
 
-function init() {
-    state = cb_init(state);
+function init(last_id) {
+    state = cb_init(state, last_id);
 }
 
 // load feeds if necessary

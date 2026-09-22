@@ -22,9 +22,11 @@ export const Screens = {
 // the application state
 var state = {
     screen: Screens.browse,
+    currentItem: null,
     length: 0,
     cursor: -1,
     refreshing: false,
+    postHandle: null,
     alert: {
 	text: "",
 	type: "info"
@@ -255,7 +257,7 @@ export function clickReloadEvent(e) {
     location.reload();
 }
 
-Model.init();
+Model.init(null);
 // do I have a incoming api call to subscribe a feed
 if (location.search) {
     let params = new URLSearchParams(location.search.substring(1));
@@ -301,6 +303,6 @@ document.addEventListener("visibilitychange", (e) => {
 	state.screen = Screens.browse;
 	state.alert.text = "";
 	state.alert.type = "info";
-	Model.init();
+	Model.init(state.currentItem && state.currentItem.id);
     }
 });
