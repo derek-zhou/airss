@@ -22,6 +22,7 @@ export const Screens = {
 // the application state
 var state = {
     screen: Screens.browse,
+    commenting: false,
     currentItem: null,
     length: 0,
     cursor: -1,
@@ -33,36 +34,11 @@ var state = {
     }
 };
 
-// the set of elements that contain local state
-var dirtyElements = new Set();
-
 // does the screen not refrect the state
 var viewObsolete = false;
 
-export function focus_element(e) {
-    dirtyElements.add(e.currentTarget);
-}
-
-export function blur_element(e) {
-    let elem = e.currentTarget;
-    if (elem.value == "") {
-	dirtyElements.delete(elem);
-	may_render();
-    }
-}
-
-function elementDirty() {
-    // scroll position is also local state
-    return window.scrollY != 0 || dirtyElements.size > 0;
-}
-
-function clearElementState() {
-    window.scrollTo({top: 0});
-    dirtyElements.clear();
-}
-
 function may_render() {
-    if (!Asset.loaded || !viewObsolete || elementDirty())
+    if (!Asset.loaded || !viewObsolete)
 	return;
     render(state);
     viewObsolete = false;
@@ -73,21 +49,31 @@ export function try_render() {
     may_render();
 }
 
+function at_rest(state) {
+    return state.screen == Screens.browse && !state.commenting && window.scrollY == 0;
+}
+
+function unsolicited_render() {
+    viewObsolete = true;
+    if (at_rest(state))
+	may_render();
+}
+
 function actionPreamble() {
     state.alert.text = "";
-    clearElementState();
+    window.scrollTo({top: 0});
 }
 
 export function itemsLoadedEvent(length, cursor) {
     state.length = length;
     state.cursor = cursor;
-    try_render();
+    unsolicited_render();
 }
 
 export function itemUpdatedEvent(item) {
     state.currentItem = item;
     state.refreshing = false;
-    try_render();
+    unsolicited_render();
 }
 
 export function alertEvent(type, text) {
@@ -147,16 +133,43 @@ export function touchMoveEvent(e) {
     yDown = null;
 }
 
+export function keyDownEvent(e) {
+    switch (e.key) {
+    case 'n':
+    case 'N':
+	e.preventDefault();
+	actionPreamble();
+	Model.forwardItem();
+	break;
+    case 'p':
+    case 'P':
+	e.preventDefault();
+	actionPreamble();
+	Model.backwardItem();
+	break;
+    default:
+	may_render();
+    }
+}
+
 export function clickLeftEvent(e) {
     e.preventDefault();
     actionPreamble();
+    state.commenting = false;
     Model.backwardItem();
 }
 
 export function clickRightEvent(e) {
     e.preventDefault();
     actionPreamble();
+    state.commenting = false;
     Model.forwardItem();
+}
+
+export function clickCommentEvent(e) {
+    e.preventDefault();
+    state.commenting = true;
+    try_render();
 }
 
 export function clickAlertEvent(e) {
@@ -200,12 +213,13 @@ export function submitSubscribeEvent(e) {
     let data = new FormData(e.currentTarget);
     Loader.subscribe(data.get(Subscribe.feedUrl));
     state.screen = Screens.browse;
+    state.commenting = false;
 }
 
 export function resetDialogEvent(e) {
     e.preventDefault();
-    actionPreamble();
     state.screen = Screens.browse;
+    state.commenting = false;
     try_render();
 }
 
@@ -220,6 +234,7 @@ export function submitTrashEvent(e) {
 	    Model.deleteItem();
     }
     state.screen = Screens.browse;
+    state.commenting = false;
     try_render();
 }
 
@@ -236,6 +251,7 @@ export function submitConfigEvent(e) {
     localStorage.setItem("BOUNCE_LOAD", data.get(Config.bounceLoad) || "false");
 
     state.screen = Screens.browse;
+    state.commenting = false;
 
     if (data.get(Config.clearDatabase) == "clear database") {
 	Model.clearData();
@@ -272,35 +288,12 @@ if (location.search) {
 	Loader.subscribe(decodeURIComponent(str));
 }
 
-document.addEventListener("keydown", (e) => {
-    if (state.screen != Screens.browse)
-	return;
-
-    switch (e.key) {
-    case 'n':
-    case 'N':
-	e.preventDefault();
-	actionPreamble();
-	Model.forwardItem();
-	break;
-    case 'p':
-    case 'P':
-	e.preventDefault();
-	actionPreamble();
-	Model.backwardItem();
-	break;
-    default:
-	may_render();
-    }
-});
-
 document.addEventListener("visibilitychange", (e) => {
-    if (elementDirty())
-	return;
-    if (document.hidden) {
+    if (document.hidden && at_rest(state)) {
 	Model.shutdown("info", "Shutdown due to inactivity");
     } else {
 	state.screen = Screens.browse;
+	state.commenting = false;
 	state.alert.text = "";
 	state.alert.type = "info";
 	Model.init(state.currentItem && state.currentItem.id);

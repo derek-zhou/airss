@@ -304,30 +304,40 @@ function article_tail(state) {
     let item = state.currentItem;
     let url = item ? item.url : null;
     let real_item = item && !dummy(item);
-    
-    return div(
-	style(Asset.at("commonCSS")),
-	style(Asset.at("dialogCSS")),
-	elem(
-	    "form",
-	    attr({
-		method: "post",
-		action: "https://roastidio.us/post",
-		target: "_blank"
-	    }),
-	    div(
-		cl("form-body"),
-		elem("h4", text("Write a comment on roastidio.us about this article")),
-		elem("input", attr({type: "hidden", name: "url", value: url})),
-		elem(
-		    "textarea",
-		    attr({name: "content"}),
-		    hook("keydown", stopPropagation),
-		    hook("focus", Controller.focus_element),
-		    hook("blur", Controller.blur_element),
-		    hook("input", autoAdjustHeight)
+
+    if (state.commenting) {
+	return div(
+	    style(Asset.at("commonCSS")),
+	    style(Asset.at("dialogCSS")),
+	    elem(
+		"form",
+		attr({
+		    method: "post",
+		    action: "https://roastidio.us/post",
+		    target: "_blank"
+		}),
+		hook("reset", Controller.resetDialogEvent),
+		div(
+		    cl("form-body"),
+		    elem("h4", text("Write a comment on roastidio.us about this article")),
+		    elem("input", attr({type: "hidden", name: "url", value: url})),
+		    elem(
+			"textarea",
+			attr({name: "content"}),
+			hook("input", autoAdjustHeight)
+		    )
+		),
+		div(
+		    cl("toolbar"),
+		    submit_button(),
+		    reset_button()
 		)
-	    ),
+	    )
+	);
+    } else {
+	return div(
+	    style(Asset.at("commonCSS")),
+	    style(Asset.at("dialogCSS")),
 	    div(
 		cl("toolbar"),
 		elem(
@@ -338,10 +348,11 @@ function article_tail(state) {
 		    text("📃")
 		),
 		elem(
-		    "input",
+		    "button",
 		    cl("button"),
-		    real_item ? [] : attr({disabled: true}),
-		    attr({type: "submit", value: "👌"})
+		    item ? [] : attr({disabled: true}),
+		    hook("click", Controller.clickCommentEvent),
+		    text("📝")
 		),
 		elem(
 		    "button",
@@ -349,14 +360,10 @@ function article_tail(state) {
 		    item ? [] : attr({disabled: true}),
 		    hook("click", Controller.clickTrashEvent),
 		    text("🗑 ")
-		),
+		)
 	    )
-	)
-    );
-}
-
-function stopPropagation(e) {
-    e.stopImmediatePropagation();
+	);
+    }
 }
 
 function autoAdjustHeight(e) {
