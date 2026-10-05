@@ -1,13 +1,4 @@
 // a functional way to manipulate DOM
-export function replay() {
-    const subject = arguments[0];
-    clear(subject);
-    for (const one of arguments) {
-	if (one !== subject)
-	    play(subject, one);
-    }
-}
-
 export function hook(type, handler) {
     return (node) => {
 	node.addEventListener(type, handler);
@@ -79,39 +70,6 @@ function append(element) {
     };
 }
 
-function clear(node) {
-    removeAllChildren(node);
-    removeAllAttributes(node);
-    removeAllStyles(node);
-}
-
-function removeAllStyles(node) {
-    let shadow = node.shadowRoot;
-    if (shadow)
-	shadow.adoptedStyleSheets = [];
-}
-
-function removeAllChildren(node) {
-    const junk = [];
-    let n = node.shadowRoot || node;
-    for (const child of n.childNodes) {
-	junk.push(child);
-    }
-    for (const elem of junk) {
-	elem.remove();
-    }
-}
-
-function removeAllAttributes(node) {
-    const junk = [];
-    for (const attr of node.attributes) {
-	junk.push(attr.name);
-    }
-    for (const name of junk) {
-	node.removeAttribute(name);
-    }
-}
-
 function play(subject, script) {
     if (Array.isArray(script)) {
 	for (const f of script) {
@@ -121,3 +79,13 @@ function play(subject, script) {
 	script(subject);
     }
 }
+
+// unlike elem or div, body return the element itself, not a script to add it
+export function body() {
+    const element = document.createElement("body");
+    for (const one of arguments) {
+	play(element, one);
+    }
+    return element;
+}
+

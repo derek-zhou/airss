@@ -2,7 +2,7 @@ import * as Controller from "./airss_controller.js";
 import * as Asset from "./assets.js";
 import {article} from "./article.js";
 import {dialog} from "./dialog.js";
-import {replay, hook, elem, text, attr, cl, style, div} from "./domfun.js";
+import {body, hook, elem, text, attr, cl, style, div} from "./domfun.js";
 
 /*
  * The view layer of AirSS.
@@ -29,8 +29,7 @@ function alertClass(type) {
 // render everything from scratch
 export function render(state) {
     document.title = render_title(state);
-    replay(
-	document.body,
+    document.body = body(
 	style(Asset.at("commonCSS")),
 	style(Asset.at("appCSS")),
 	body_hooks(state),
